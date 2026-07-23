@@ -1,0 +1,55 @@
+@import 'tailwindcss';
+
+/* Design tokens extracted from the GQWallet Figma wireframe (no invented values). */
+@theme {
+  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+
+  --color-page: #f5f5f5;
+  --color-surface: #ffffff;
+  --color-line: #d1d1d1;
+  --color-ink: #1a1a1a;
+  --color-muted: #808080;
+
+  --color-brand: #3333b2;
+  --color-brand-soft: #9999e5;
+  --color-brand-bg: #f2f2ff;
+  --color-brand-border: #b2b2e5;
+
+  --color-income: #338033;
+  --color-expense: #b24d1a;
+
+  --color-alert-bg: #fff3ed;
+  --color-alert-border: #e59966;
+  --color-alert-ink: #b24d1a;
+
+  /* Fixed category palette — one per Category VO value (see @/shared/domain/categories). */
+  --color-cat-food: #b24d1a;
+  --color-cat-transport: #3333b2;
+  --color-cat-entertainment: #338033;
+  --color-cat-services: #994db2;
+  --color-cat-health: #cc801a;
+  --color-cat-other: #808080;
+
+  /* Card identifier palette — the color the user picks per credit card (FR-004). */
+  --color-card-blue: #3366cc;
+  --color-card-red: #cc3333;
+  --color-card-green: #338033;
+  --color-card-purple: #994db2;
+  --color-card-gold: #cc801a;
+
+  --radius-card: 12px;
+  --radius-btn: 8px;
+}
+
+html,
+body,
+#app {
+  height: 100%;
+}
+
+body {
+  background-color: var(--color-page);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
