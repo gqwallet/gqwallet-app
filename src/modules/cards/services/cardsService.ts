@@ -1,6 +1,7 @@
 import { httpClient } from '@/shared/http/httpClient';
 import { transactionsService } from '@/modules/transactions/services/transactionsService';
 import type { Card, RegisterCardPayload, UpdateCardPayload } from '../types/Card';
+import type { NextBilling } from '../types/NextBilling';
 import type { Transaction } from '@/modules/transactions/types/Transaction';
 
 const BASE = '/cards';
@@ -30,11 +31,12 @@ export const cardsService = {
     await httpClient.delete(`${BASE}/${cardId}`);
   },
 
-  // FR-017: total for the card's next billing cycle (expenses + seguro desgravamen, if
-  // configured) — computed server-side, never re-derived here from linked transactions.
-  async getAmountDue(cardId: string): Promise<number> {
-    const { data } = await httpClient.get<{ amount: number }>(`${BASE}/${cardId}/amount-due`);
-    return data.amount;
+  // FR-017: the card's next-billing projection (cycle window, expenses, seguro desgravamen
+  // and total) — a singleton sub-resource computed server-side, never re-derived here from
+  // linked transactions.
+  async getNextBilling(cardId: string): Promise<NextBilling> {
+    const { data } = await httpClient.get<NextBilling>(`${BASE}/${cardId}/next-billing`);
+    return data;
   },
 
   // Outbound read into transactions (qs-vue-frontend module-boundary rule): the backend
