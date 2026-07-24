@@ -12,13 +12,16 @@ const auth = useAuthStore();
 const drawerOpen = ref(false);
 const title = computed(() => (route.meta.title as string) ?? 'GQWallet');
 
-const navItems = [
+// Métricas leads the list, ahead of Dashboard, and only renders for ROLE_ADMINISTRATOR
+// (FR-013) — auth.isAdmin comes from ProfileResource.roles, hydrated on sign-in.
+const navItems = computed(() => [
+  ...(auth.isAdmin ? [{ to: '/metrics', label: 'Métricas' }] : []),
   { to: '/dashboard', label: 'Dashboard' },
   { to: '/cards', label: 'Tarjetas' },
   { to: '/finances', label: 'Finanzas Personales' },
   { to: '/calendar', label: 'Calendario' },
   { to: '/profile', label: 'Configuración' },
-];
+]);
 
 async function onSignOut() {
   await auth.signOut();

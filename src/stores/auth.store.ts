@@ -12,6 +12,7 @@ export const useAuthStore = defineStore('auth', () => {
   const email = ref<string | null>(null);
   const firstName = ref<string | null>(null);
   const lastName = ref<string | null>(null);
+  const roles = ref<string[]>([]);
   const authenticated = ref<boolean | null>(null); // null = not yet checked
 
   // Full name as-is: the drawer clips it with CSS ellipsis (same as email) only when it
@@ -21,12 +22,17 @@ export const useAuthStore = defineStore('auth', () => {
     return fullName || 'Usuario';
   });
 
+  // Gates the "Métricas" nav item only — never a real authorization boundary. The
+  // backend enforces ROLE_ADMINISTRATOR on /api/v1/metrics regardless of this flag.
+  const isAdmin = computed(() => roles.value.includes('ADMINISTRATOR'));
+
   // profiles/me always resolves (the backend self-heals an empty Profile on UserRegistered),
   // so this is safe to call right after sign-in even before onboarding fills the name in.
   async function loadProfile() {
     const profile = await profilesService.getMe();
     firstName.value = profile.firstName;
     lastName.value = profile.lastName;
+    roles.value = profile.roles;
   }
 
   async function signUp(payload: SignUpPayload) {
@@ -45,6 +51,7 @@ export const useAuthStore = defineStore('auth', () => {
     email.value = null;
     firstName.value = null;
     lastName.value = null;
+    roles.value = [];
     authenticated.value = false;
   }
 
@@ -60,5 +67,5 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  return { email, firstName, lastName, displayName, authenticated, signUp, signIn, signOut, hydrate };
+  return { email, firstName, lastName, roles, displayName, isAdmin, authenticated, signUp, signIn, signOut, hydrate };
 });

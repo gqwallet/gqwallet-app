@@ -5,6 +5,7 @@ export interface Profile {
   lastName: string | null;
   monthlyIncome: number | null;
   lifeCushion: number | null;
+  roles: string[];
 }
 
 // Mirror of UpdateProfileResource: personal data always, financial settings optional

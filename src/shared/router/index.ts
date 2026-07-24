@@ -18,6 +18,7 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/shared/components/AppShell.vue'),
     meta: { requiresAuth: true },
     children: [
+      { path: 'metrics', name: 'metrics', component: () => import('@/modules/metrics/views/MetricsView.vue'), meta: { title: 'Métricas', requiresAdmin: true } },
       { path: 'dashboard', name: 'dashboard', component: () => import('@/modules/overview/views/DashboardView.vue'), meta: { title: 'Dashboard' } },
       { path: 'cards', name: 'cards', component: () => import('@/modules/cards/views/CardsListView.vue'), meta: { title: 'Tarjetas' } },
       { path: 'cards/new', name: 'card-new', component: () => import('@/modules/cards/views/AddCardView.vue'), meta: { title: 'Nueva tarjeta' } },
@@ -47,6 +48,12 @@ router.beforeEach(async (to) => {
 
   if (to.meta.requiresAuth && !auth.authenticated) {
     return { name: 'sign-in' };
+  }
+  // Defense in depth, not the authorization boundary: the backend already returns 403
+  // on /api/v1/metrics for non-admins. This only avoids a broken page if someone
+  // pastes the URL directly.
+  if (to.meta.requiresAdmin && !auth.isAdmin) {
+    return { name: 'dashboard' };
   }
   if (to.meta.public && auth.authenticated) {
     return { name: 'dashboard' };
