@@ -9,8 +9,9 @@ withDefaults(
     min?: string;
     max?: string;
     maxlength?: number;
+    required?: boolean;
   }>(),
-  { type: 'text', placeholder: '', step: undefined, min: undefined, max: undefined, maxlength: undefined },
+  { type: 'text', placeholder: '', step: undefined, min: undefined, max: undefined, maxlength: undefined, required: false },
 );
 
 const emit = defineEmits<{ 'update:modelValue': [value: string] }>();
@@ -31,6 +32,7 @@ function onInput(event: Event) {
       :min="min"
       :max="max"
       :maxlength="maxlength"
+      :required="required"
       class="h-11 w-full rounded-btn border border-line bg-surface px-3 text-[14px] text-ink outline-none placeholder:text-muted focus:border-ink lg:h-12 lg:text-[15px]"
       @input="onInput"
     />

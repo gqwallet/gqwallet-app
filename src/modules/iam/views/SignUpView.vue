@@ -13,10 +13,11 @@ const confirm = ref('');
 const { loading, error, signUp } = useAuthActions();
 
 const mismatch = computed(() => confirm.value.length > 0 && confirm.value !== password.value);
+const nameBlank = computed(() => fullName.value.trim().length === 0);
 
 function submit() {
-  if (mismatch.value) return;
-  signUp(fullName.value, email.value, password.value);
+  if (mismatch.value || nameBlank.value) return;
+  signUp(fullName.value.trim(), email.value, password.value);
 }
 </script>
 
@@ -31,12 +32,13 @@ function submit() {
     <h1 class="mb-6 text-[19px] font-bold text-ink">Crear cuenta</h1>
 
     <form class="space-y-4" @submit.prevent="submit">
-      <AppTextField v-model="fullName" label="Nombre completo" placeholder="Gonzalo Quedena" />
-      <AppTextField v-model="email" label="Correo electrónico" type="email" placeholder="tu@correo.com" />
-      <AppTextField v-model="password" label="Contraseña" type="password" placeholder="Mínimo 8 caracteres" />
-      <AppTextField v-model="confirm" label="Confirmar contraseña" type="password" placeholder="••••••••" />
+      <AppTextField v-model="fullName" label="Nombre completo" placeholder="John Doe" required />
+      <AppTextField v-model="email" label="Correo electrónico" type="email" placeholder="tu@correo.com" required />
+      <AppTextField v-model="password" label="Contraseña" type="password" placeholder="Mínimo 8 caracteres" required />
+      <AppTextField v-model="confirm" label="Confirmar contraseña" type="password" placeholder="••••••••" required />
 
       <p v-if="mismatch" class="text-[12px] text-expense">Las contraseñas no coinciden</p>
+      <p v-else-if="nameBlank && fullName.length > 0" class="text-[12px] text-expense">Ingresa tu nombre completo</p>
       <p v-else-if="error" class="text-[12px] text-expense">{{ error }}</p>
 
       <AppButton type="submit" :disabled="loading">{{ loading ? 'Creando…' : 'Registrarme' }}</AppButton>
