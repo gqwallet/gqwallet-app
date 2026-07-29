@@ -24,10 +24,14 @@ async function submit() {
   saving.value = true;
   error.value = null;
   try {
-    // The PUT requires the existing name (backend @NotBlank), so it is carried through.
+    // The PUT requires the existing name (backend @NotBlank). Sign-up now enforces a
+    // required, non-blank full name, so firstName/lastName should always be present by
+    // this step — no silent placeholder fallback. If they're missing (e.g. an account
+    // created before that requirement existed), let the request fail loudly below
+    // instead of persisting a fake name.
     await saveProfile({
-      firstName: profile.value?.firstName ?? 'Usuario',
-      lastName: profile.value?.lastName ?? 'GQWallet',
+      firstName: profile.value!.firstName!,
+      lastName: profile.value!.lastName!,
       monthlyIncome: Number(monthlyIncome.value),
       lifeCushion: Number(lifeCushion.value),
     });
