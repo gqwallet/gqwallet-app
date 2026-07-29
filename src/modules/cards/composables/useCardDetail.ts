@@ -13,8 +13,13 @@ export function useCardDetail(cardId: string) {
   const loading = ref(false);
   const error = ref<string | null>(null);
 
+  // FR-018: a payment linked to the card reduces what was charged to it, so summing every
+  // linked row indiscriminately would inflate the total instead of drawing it down.
   const linkedTotal = computed(() =>
-    linkedTransactions.value.reduce((sum, t) => sum + t.amount, 0),
+    linkedTransactions.value.reduce((sum, t) => {
+      if (t.type === 'CARD_PAYMENT') return sum - t.amount;
+      return sum + t.amount;
+    }, 0),
   );
 
   // FR-017: the total to pay is a server-computed figure — exposed straight from the
