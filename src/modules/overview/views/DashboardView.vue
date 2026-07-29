@@ -41,10 +41,11 @@ onMounted(fetch);
         <p class="shrink-0 text-[11px] text-muted">Próximos pagos</p>
         <div class="mt-3 min-h-0 flex-1 space-y-2.5 overflow-y-auto pr-1">
           <div v-for="c in dashboard.upcomingCards" :key="c.cardId" class="flex items-center gap-3 rounded-lg bg-page p-3">
-            <span class="h-9 w-1.5 shrink-0 rounded-full" :style="{ backgroundColor: c.color }"></span>
+            <span class="w-1.5 shrink-0 self-stretch rounded-full" :style="{ backgroundColor: c.color }"></span>
             <div>
               <p class="text-[13px] font-bold text-ink">{{ c.name }}</p>
               <p class="text-[11px] text-muted">Vence: {{ formatDateOnly(c.paymentDueDate) }} · {{ daysUntil(c.paymentDueDate) }} días</p>
+              <p class="text-[11px] text-muted">Por pagar: {{ formatMoney(c.amountDue) }}</p>
             </div>
           </div>
         </div>
@@ -98,10 +99,11 @@ onMounted(fetch);
           <p class="shrink-0 text-[11px] text-muted">Próximos pagos</p>
           <div class="mt-3 min-h-0 flex-1 space-y-2.5 overflow-y-auto pr-1">
             <div v-for="c in dashboard.upcomingCards" :key="c.cardId" class="flex items-center gap-3 rounded-lg bg-page p-3">
-              <span class="h-9 w-1.5 shrink-0 rounded-full" :style="{ backgroundColor: c.color }"></span>
+              <span class="w-1.5 shrink-0 self-stretch rounded-full" :style="{ backgroundColor: c.color }"></span>
               <div>
                 <p class="text-[13px] font-bold text-ink">{{ c.name }}</p>
                 <p class="text-[11px] text-muted">Vence: {{ formatDateOnly(c.paymentDueDate) }} · {{ daysUntil(c.paymentDueDate) }} días</p>
+                <p class="text-[11px] text-muted">Por pagar: {{ formatMoney(c.amountDue) }}</p>
               </div>
             </div>
           </div>

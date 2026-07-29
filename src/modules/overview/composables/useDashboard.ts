@@ -15,6 +15,12 @@ export function useDashboard() {
 
   const nextPayment = computed(() => dashboard.value?.upcomingCards[0] ?? null);
 
+  // FR-018: what the holder still owes across every card, kept separate from `balance`
+  // (their cash) because card spending is debt until the statement is settled.
+  const totalCardDebt = computed(() =>
+    (dashboard.value?.upcomingCards ?? []).reduce((sum, card) => sum + card.amountDue, 0),
+  );
+
   async function fetch() {
     loading.value = true;
     error.value = null;
@@ -27,6 +33,10 @@ export function useDashboard() {
       dashboard.value = dash;
       monthlyIncome.value = income;
       totalIncome.value = transactions.filter((t) => t.type === 'INCOME').reduce((s, t) => s + t.amount, 0);
+      // "Gastos" is everything consumed in the period, whatever the payment method — so it
+      // includes card spending and excludes CARD_PAYMENT, which is settling a debt already
+      // counted here, not new consumption. Consequence: income − expense deliberately does
+      // not reconcile with `balance` (FR-018).
       totalExpense.value = transactions.filter((t) => t.type === 'EXPENSE').reduce((s, t) => s + t.amount, 0);
     } catch {
       error.value = 'No se pudo cargar el panel';
@@ -35,5 +45,15 @@ export function useDashboard() {
     }
   }
 
-  return { dashboard, monthlyIncome, totalIncome, totalExpense, nextPayment, loading, error, fetch };
+  return {
+    dashboard,
+    monthlyIncome,
+    totalIncome,
+    totalExpense,
+    nextPayment,
+    totalCardDebt,
+    loading,
+    error,
+    fetch,
+  };
 }
