@@ -26,6 +26,8 @@ export function useAuthActions() {
 
   // The backend sign-up only takes email + password; the full name (mockup field) is
   // saved to the profile right after the auto sign-in, so nothing is invented client-side.
+  // The view enforces fullName as required + non-blank before calling this, so the split
+  // below always has a firstName.
   async function signUp(fullName: string, email: string, password: string) {
     loading.value = true;
     error.value = null;
@@ -33,9 +35,11 @@ export function useAuthActions() {
       await auth.signUp({ email, password });
       await auth.signIn({ email, password });
       const [firstName, ...rest] = fullName.trim().split(' ');
-      if (firstName) {
-        await authService.saveDisplayName(firstName, rest.join(' ') || firstName);
-      }
+      await authService.saveDisplayName(firstName, rest.join(' ') || firstName);
+      // signIn() above already ran loadProfile() before the name was saved, so the
+      // store's firstName/lastName are stale (null) at this point — resync now,
+      // otherwise the sidebar shows "Usuario" until the next login.
+      await auth.loadProfile();
       router.push({ name: 'onboarding' });
     } catch {
       error.value = 'No se pudo crear la cuenta. ¿El correo ya está registrado?';

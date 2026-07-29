@@ -67,5 +67,5 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  return { email, firstName, lastName, roles, displayName, isAdmin, authenticated, signUp, signIn, signOut, hydrate };
+  return { email, firstName, lastName, roles, displayName, isAdmin, authenticated, loadProfile, signUp, signIn, signOut, hydrate };
 });
