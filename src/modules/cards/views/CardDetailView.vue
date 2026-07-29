@@ -77,7 +77,7 @@ function goToNewTransaction() {
             <dd class="font-medium text-ink">{{ card.insurancePercentage }}%</dd>
           </div>
           <div class="flex justify-between border-t border-line py-2">
-            <dt class="text-muted">Monto a pagar</dt>
+            <dt class="text-muted">Monto a pagar{{ card.insurancePercentage != null ? ' (aproximado)' : '' }}</dt>
             <dd class="font-medium text-ink">{{ amountDue != null ? formatMoney(amountDue) : '—' }}</dd>
           </div>
         </dl>
@@ -150,7 +150,7 @@ function goToNewTransaction() {
               <dd class="font-bold text-ink">{{ card.insurancePercentage }}%</dd>
             </div>
             <div class="flex justify-between border-t border-line py-2.5">
-              <dt class="text-muted">Monto a pagar</dt>
+              <dt class="text-muted">Monto a pagar{{ card.insurancePercentage != null ? ' (aproximado)' : '' }}</dt>
               <dd class="font-bold text-ink">{{ amountDue != null ? formatMoney(amountDue) : '—' }}</dd>
             </div>
           </dl>
