@@ -17,6 +17,10 @@ const { card, linkedTransactions, linkedTotal, nextBilling, amountDue, loading, 
 
 const available = computed(() => (card.value ? card.value.creditLine - linkedTotal.value : 0));
 
+// A payment can only be registered against an outstanding balance (backend rule, FR-019) —
+// disabling here avoids sending someone into a form that can only fail.
+const hasOutstandingBalance = computed(() => (amountDue.value ?? 0) > 0);
+
 // FR-018: the due date of the cycle currently accruing, from the server projection. The
 // card's own paymentDueDate is the raw registration-time date and goes stale immediately —
 // showing it made an active card read as "Vencido" with a due date months in the past.
@@ -122,7 +126,9 @@ function linkedTitle(transaction: Transaction): string {
 
       <div class="mt-4 space-y-2">
         <AppButton @click="goToNewTransaction">+ Registrar gasto con esta tarjeta</AppButton>
-        <AppButton variant="outline" @click="goToPayCard">Registrar pago de esta tarjeta</AppButton>
+        <AppButton variant="outline" :disabled="!hasOutstandingBalance" @click="goToPayCard">
+          {{ hasOutstandingBalance ? 'Registrar pago de esta tarjeta' : 'Sin saldo pendiente' }}
+        </AppButton>
       </div>
     </div>
 
@@ -212,10 +218,11 @@ function linkedTitle(transaction: Transaction): string {
             + Registrar gasto con esta tarjeta
           </button>
           <button
-            class="mt-2 h-11 w-full rounded-btn border border-line bg-surface text-[13px] font-bold text-ink"
+            class="mt-2 h-11 w-full rounded-btn border border-line bg-surface text-[13px] font-bold text-ink disabled:cursor-not-allowed disabled:opacity-50"
+            :disabled="!hasOutstandingBalance"
             @click="goToPayCard"
           >
-            Registrar pago de esta tarjeta
+            {{ hasOutstandingBalance ? 'Registrar pago de esta tarjeta' : 'Sin saldo pendiente' }}
           </button>
         </div>
       </div>
