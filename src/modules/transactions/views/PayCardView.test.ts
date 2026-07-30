@@ -94,14 +94,27 @@ describe('PayCardView', () => {
     });
   });
 
-  it('refuses a payment of zero rather than sending it', async () => {
+  it('disables the submit button when the current cycle has nothing outstanding', async () => {
     mockCard(0);
+
+    render(PayCardView);
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: 'Confirmar pago' })).toBeDisabled();
+    });
+    expect(screen.getByText(/No tienes saldo pendiente en este ciclo/)).toBeInTheDocument();
+    expect(payCard).not.toHaveBeenCalled();
+  });
+
+  it('surfaces the backend message when the payment is rejected on submit', async () => {
+    mockCard(289.98);
+    payCard.mockRejectedValue({ response: { data: 'Payment exceeds the outstanding balance of 289.98' } });
     const user = userEvent.setup();
 
     render(PayCardView);
+    await waitFor(() => expect(screen.getByLabelText('Monto a pagar (S/.)')).toHaveValue(289.98));
     await user.click(screen.getByRole('button', { name: 'Confirmar pago' }));
 
-    expect(payCard).not.toHaveBeenCalled();
-    expect(screen.getByText('Ingresa un monto mayor a cero.')).toBeInTheDocument();
+    expect(await screen.findByText('Payment exceeds the outstanding balance of 289.98')).toBeInTheDocument();
   });
 });
