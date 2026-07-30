@@ -35,6 +35,17 @@ const selectedCycle = computed(
   () => cycles.value.find((c) => c.closingDate === cycleClosingDate.value) ?? null,
 );
 
+// The server is the real enforcer (a specific cycle can only be priced there — see
+// TransactionCommandServiceImpl.assertWithinOutstandingBalance). This is only a UX guard for
+// the default case, where we already have the current cycle's amount due preloaded; it says
+// nothing about the next cycle, whose debt (if any) isn't known until it accrues expenses.
+const isCurrentCycleSelected = computed(
+  () => !!nextBilling.value && cycleClosingDate.value === nextBilling.value.billingDate,
+);
+const nothingOwedOnSelectedCycle = computed(
+  () => isCurrentCycleSelected.value && (amountDue.value ?? 0) <= 0,
+);
+
 async function save() {
   if (!cycleClosingDate.value) {
     error.value = 'Selecciona el ciclo que estás pagando.';
@@ -42,6 +53,10 @@ async function save() {
   }
   if (!(Number(amount.value) > 0)) {
     error.value = 'Ingresa un monto mayor a cero.';
+    return;
+  }
+  if (nothingOwedOnSelectedCycle.value) {
+    error.value = 'No tienes saldo pendiente en este ciclo.';
     return;
   }
   saving.value = true;
@@ -53,8 +68,14 @@ async function save() {
       description: description.value.trim() || null,
     });
     router.push({ name: 'card-detail', params: { id: cardId } });
-  } catch {
-    error.value = 'No se pudo registrar el pago. Revisa el monto y el ciclo.';
+  } catch (err) {
+    // Surfaces the backend's own message (e.g. "payment exceeds the outstanding balance
+    // of ...") — the only source of truth for a cycle we can't price on the client, like
+    // the next one, which has no preloaded amount due to validate against locally.
+    const backendMessage = (err as { response?: { data?: unknown } })?.response?.data;
+    error.value = typeof backendMessage === 'string' && backendMessage
+      ? backendMessage
+      : 'No se pudo registrar el pago. Revisa el monto y el ciclo.';
   } finally {
     saving.value = false;
   }
@@ -76,7 +97,14 @@ async function save() {
     </div>
 
     <form class="space-y-4 lg:space-y-5" @submit.prevent="save">
-      <AppTextField v-model="amount" label="Monto a pagar (S/.)" type="number" step="0.01" placeholder="0.00" />
+      <AppTextField
+        v-model="amount"
+        label="Monto a pagar (S/.)"
+        type="number"
+        step="0.01"
+        placeholder="0.00"
+        :max="isCurrentCycleSelected && amountDue != null ? String(amountDue) : undefined"
+      />
 
       <label v-if="cycles.length > 0" class="block">
         <span class="mb-1 block text-[11px] font-medium text-muted lg:text-[12px]">¿Qué ciclo estás pagando?</span>
@@ -96,9 +124,12 @@ async function save() {
 
       <AppTextField v-model="description" label="Descripción (opcional)" placeholder="Pago desde cuenta de ahorros" :maxlength="120" />
 
-      <p v-if="error" class="text-[12px] text-expense lg:text-[13px]">{{ error }}</p>
+      <p v-if="nothingOwedOnSelectedCycle" class="text-[12px] text-muted lg:text-[13px]">
+        No tienes saldo pendiente en este ciclo — no hay nada que pagar.
+      </p>
+      <p v-else-if="error" class="text-[12px] text-expense lg:text-[13px]">{{ error }}</p>
 
-      <AppButton type="submit" :disabled="saving">{{ saving ? 'Registrando…' : 'Confirmar pago' }}</AppButton>
+      <AppButton type="submit" :disabled="saving || nothingOwedOnSelectedCycle">{{ saving ? 'Registrando…' : 'Confirmar pago' }}</AppButton>
       <AppButton variant="outline" @click="router.back()">Cancelar</AppButton>
     </form>
   </div>
