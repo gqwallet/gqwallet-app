@@ -24,10 +24,12 @@ export const CATEGORY_PRESENTATION: Record<CategoryCode, CategoryPresentation> =
   OTHER: { code: 'OTHER', label: 'Otros', colorVar: 'var(--color-cat-other)' },
 };
 
-export function categoryLabel(code: CategoryCode): string {
-  return CATEGORY_PRESENTATION[code]?.label ?? code;
+// A card payment carries no category (FR-018), so both accessors tolerate null and fall
+// back to the neutral presentation rather than the caller having to guard every call site.
+export function categoryLabel(code: CategoryCode | null): string {
+  return code ? (CATEGORY_PRESENTATION[code]?.label ?? code) : 'Sin categoría';
 }
 
-export function categoryColor(code: CategoryCode): string {
-  return CATEGORY_PRESENTATION[code]?.colorVar ?? 'var(--color-cat-other)';
+export function categoryColor(code: CategoryCode | null): string {
+  return code ? (CATEGORY_PRESENTATION[code]?.colorVar ?? 'var(--color-cat-other)') : 'var(--color-cat-other)';
 }

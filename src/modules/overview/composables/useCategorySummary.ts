@@ -23,7 +23,11 @@ export function useCategorySummary() {
     error.value = null;
     try {
       const transactions = await overviewService.listTransactions();
-      const expenses = transactions.filter((t) => t.type === 'EXPENSE');
+      // Only EXPENSE rows carry a category (a card payment settles a debt, it is not a
+      // spending bucket), so the null guard both satisfies the type and states the rule.
+      const expenses = transactions.filter(
+        (t): t is typeof t & { category: CategoryCode } => t.type === 'EXPENSE' && t.category !== null,
+      );
       const grandTotal = expenses.reduce((s, t) => s + t.amount, 0);
       const byCategory = new Map<CategoryCode, number>();
       for (const t of expenses) byCategory.set(t.category, (byCategory.get(t.category) ?? 0) + t.amount);

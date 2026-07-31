@@ -23,6 +23,9 @@ const routes: RouteRecordRaw[] = [
       { path: 'cards', name: 'cards', component: () => import('@/modules/cards/views/CardsListView.vue'), meta: { title: 'Tarjetas' } },
       { path: 'cards/new', name: 'card-new', component: () => import('@/modules/cards/views/AddCardView.vue'), meta: { title: 'Nueva tarjeta' } },
       { path: 'cards/:id/edit', name: 'card-edit', component: () => import('@/modules/cards/views/EditCardView.vue'), meta: { title: 'Editar tarjeta' } },
+      // FR-018: the view lives in `transactions` (a payment IS a transaction) but the route
+      // sits under cards, mirroring the backend's POST /cards/{id}/payments.
+      { path: 'cards/:id/pay', name: 'card-pay', component: () => import('@/modules/transactions/views/PayCardView.vue'), meta: { title: 'Pagar tarjeta' } },
       { path: 'cards/:id', name: 'card-detail', component: () => import('@/modules/cards/views/CardDetailView.vue'), meta: { title: 'Detalle de tarjeta' } },
       { path: 'transactions/new', name: 'transaction-new', component: () => import('@/modules/transactions/views/NewTransactionView.vue'), meta: { title: 'Nuevo movimiento' } },
       { path: 'transactions', name: 'history', component: () => import('@/modules/transactions/views/HistoryView.vue'), meta: { title: 'Historial' } },

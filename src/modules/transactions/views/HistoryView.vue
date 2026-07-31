@@ -4,18 +4,19 @@ import { useRouter } from 'vue-router';
 import { useTransactions } from '../composables/useTransactions';
 import { categoryColor, categoryLabel } from '@/shared/domain/categories';
 import { formatMoney } from '@/shared/util/money';
-import type { TransactionType } from '../types/Transaction';
+import type { Transaction, TransactionType } from '../types/Transaction';
 import AppFab from '@/shared/components/AppFab.vue';
 
 const router = useRouter();
 const { transactions, loading, error, fetchTransactions } = useTransactions();
 
-type Filter = 'ALL' | 'INCOME' | 'EXPENSE';
+type Filter = 'ALL' | TransactionType;
 const filter = ref<Filter>('ALL');
 const filters: { key: Filter; label: string }[] = [
   { key: 'ALL', label: 'Todos' },
   { key: 'INCOME', label: 'Ingresos' },
   { key: 'EXPENSE', label: 'Gastos' },
+  { key: 'CARD_PAYMENT', label: 'Pagos' },
 ];
 
 const visible = computed(() =>
@@ -24,8 +25,27 @@ const visible = computed(() =>
 
 onMounted(fetchTransactions);
 
+const TYPE_LABELS: Record<TransactionType, string> = {
+  INCOME: 'Ingreso',
+  EXPENSE: 'Gasto',
+  CARD_PAYMENT: 'Pago de tarjeta',
+};
+
 function typeLabel(type: TransactionType): string {
-  return type === 'INCOME' ? 'Ingreso' : 'Gasto';
+  return TYPE_LABELS[type];
+}
+
+// A card payment is a real cash outflow, so it carries the same minus sign as an expense —
+// but it is not consumption, so it gets the neutral ink colour instead of the expense red.
+function amountClass(type: TransactionType): string {
+  if (type === 'INCOME') return 'text-income';
+  return type === 'CARD_PAYMENT' ? 'text-ink' : 'text-expense';
+}
+
+// The row title is the category, which a payment does not have — name the card action
+// instead of falling back to a meaningless "Sin categoría".
+function rowTitle(transaction: Transaction): string {
+  return transaction.type === 'CARD_PAYMENT' ? 'Pago de tarjeta' : categoryLabel(transaction.category);
 }
 function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString('es-PE', { day: '2-digit', month: 'short' });
@@ -60,10 +80,10 @@ function formatDate(iso: string): string {
       >
         <span class="size-2 rounded" :style="{ backgroundColor: categoryColor(t.category) }"></span>
         <div class="min-w-0 flex-1">
-          <p class="text-[13px] font-bold text-ink lg:text-[15px]">{{ categoryLabel(t.category) }}</p>
+          <p class="text-[13px] font-bold text-ink lg:text-[15px]">{{ rowTitle(t) }}</p>
           <p class="text-[11px] text-muted lg:text-[12px]">{{ formatDate(t.registeredAt) }} · {{ typeLabel(t.type) }}</p>
         </div>
-        <span class="text-[13px] font-bold lg:text-[15px]" :class="t.type === 'INCOME' ? 'text-income' : 'text-expense'">
+        <span class="text-[13px] font-bold lg:text-[15px]" :class="amountClass(t.type)">
           {{ t.type === 'INCOME' ? '+' : '-' }} {{ formatMoney(t.amount) }}
         </span>
       </div>

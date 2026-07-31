@@ -11,7 +11,11 @@ const { transactions, fetchTransactions } = useTransactions();
 
 const counts = computed(() => {
   const map: Record<string, number> = {};
-  for (const t of transactions.value) map[t.category] = (map[t.category] ?? 0) + 1;
+  // Card payments carry no category (FR-018), so they simply do not belong to any bucket.
+  for (const t of transactions.value) {
+    if (t.category === null) continue;
+    map[t.category] = (map[t.category] ?? 0) + 1;
+  }
   return map;
 });
 

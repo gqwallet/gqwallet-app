@@ -1,6 +1,10 @@
 import { ref } from 'vue';
 import { transactionsService } from '../services/transactionsService';
-import type { RegisterTransactionPayload, Transaction } from '../types/Transaction';
+import type {
+  RegisterCardPaymentPayload,
+  RegisterTransactionPayload,
+  Transaction,
+} from '../types/Transaction';
 
 export function useTransactions() {
   const transactions = ref<Transaction[]>([]);
@@ -25,9 +29,23 @@ export function useTransactions() {
     return created;
   }
 
+  async function payCard(cardId: string, payload: RegisterCardPaymentPayload) {
+    const created = await transactionsService.payCard(cardId, payload);
+    transactions.value.unshift(created);
+    return created;
+  }
+
   async function getAvailableCredit(cardId: string) {
     return transactionsService.getAvailableCredit(cardId);
   }
 
-  return { transactions, loading, error, fetchTransactions, registerTransaction, getAvailableCredit };
+  return {
+    transactions,
+    loading,
+    error,
+    fetchTransactions,
+    registerTransaction,
+    payCard,
+    getAvailableCredit,
+  };
 }

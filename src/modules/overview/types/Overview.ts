@@ -3,8 +3,11 @@
 export interface UpcomingCard {
   cardId: string;
   name: string;
+  // FR-018: the due date OF the cycle amountDue prices — the two always describe the same
+  // cycle, so they can be shown side by side without misleading.
   paymentDueDate: string;
   color: string;
+  amountDue: number;
 }
 
 export interface Dashboard {

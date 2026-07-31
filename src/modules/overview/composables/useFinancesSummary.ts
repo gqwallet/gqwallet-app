@@ -12,8 +12,13 @@ export function useFinancesSummary() {
   const totalIncome = computed(() =>
     transactions.value.filter((t) => t.type === 'INCOME').reduce((s, t) => s + t.amount, 0),
   );
+  // Same rule as useDashboard: card spending counts as expense, settling a statement
+  // (CARD_PAYMENT) does not — it would double-count consumption already tallied here.
   const totalExpense = computed(() =>
     transactions.value.filter((t) => t.type === 'EXPENSE').reduce((s, t) => s + t.amount, 0),
+  );
+  const totalCardPayments = computed(() =>
+    transactions.value.filter((t) => t.type === 'CARD_PAYMENT').reduce((s, t) => s + t.amount, 0),
   );
 
   async function fetch() {
@@ -28,5 +33,5 @@ export function useFinancesSummary() {
     }
   }
 
-  return { totalIncome, totalExpense, loading, error, fetch };
+  return { totalIncome, totalExpense, totalCardPayments, loading, error, fetch };
 }

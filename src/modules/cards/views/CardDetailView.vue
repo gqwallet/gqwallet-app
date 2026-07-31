@@ -5,26 +5,32 @@ import { useCardDetail } from '../composables/useCardDetail';
 import CreditCardVisual from '../components/CreditCardVisual.vue';
 import AppButton from '@/shared/components/AppButton.vue';
 import { formatMoney } from '@/shared/util/money';
-import { formatDateOnly, formatInstant } from '@/shared/util/dates';
+import { daysUntil, formatDateOnly, formatInstant } from '@/shared/util/dates';
 import { dayOfMonth } from '@/shared/util/billingCycle';
 import { categoryLabel } from '@/shared/domain/categories';
+import type { Transaction } from '@/modules/transactions/types/Transaction';
 
 const route = useRoute();
 const router = useRouter();
 const cardId = route.params.id as string;
-const { card, linkedTransactions, linkedTotal, amountDue, loading, error, fetch, removeCard } = useCardDetail(cardId);
+const { card, linkedTransactions, linkedTotal, nextBilling, amountDue, loading, error, fetch, removeCard } = useCardDetail(cardId);
 
 const available = computed(() => (card.value ? card.value.creditLine - linkedTotal.value : 0));
+
+// A payment can only be registered against an outstanding balance (backend rule, FR-019) —
+// disabling here avoids sending someone into a form that can only fail.
+const hasOutstandingBalance = computed(() => (amountDue.value ?? 0) > 0);
+
+// FR-018: the due date of the cycle currently accruing, from the server projection. The
+// card's own paymentDueDate is the raw registration-time date and goes stale immediately —
+// showing it made an active card read as "Vencido" with a due date months in the past.
+const currentDueDate = computed(() => nextBilling.value?.paymentDueDate ?? null);
 
 // Desktop-only field (Figma node 139:41) — not shown on mobile, so it's fine to derive here
 // rather than promoting it to the composable.
 const daysRemaining = computed(() => {
-  if (!card.value) return 0;
-  const due = new Date(card.value.paymentDueDate);
-  due.setHours(0, 0, 0, 0);
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  return Math.round((due.getTime() - today.getTime()) / 86_400_000);
+  if (!currentDueDate.value) return 0;
+  return daysUntil(currentDueDate.value);
 });
 
 onMounted(fetch);
@@ -41,6 +47,15 @@ function goToEdit() {
 
 function goToNewTransaction() {
   router.push({ name: 'transaction-new', query: { cardId } });
+}
+
+function goToPayCard() {
+  router.push({ name: 'card-pay', params: { id: cardId } });
+}
+
+// A payment linked to the card has no category — name the action instead.
+function linkedTitle(transaction: Transaction): string {
+  return transaction.type === 'CARD_PAYMENT' ? 'Pago de tarjeta' : categoryLabel(transaction.category);
 }
 </script>
 
@@ -70,7 +85,7 @@ function goToNewTransaction() {
           </div>
           <div class="flex justify-between border-t border-line py-2">
             <dt class="text-muted">Fecha límite</dt>
-            <dd class="font-medium text-ink">{{ formatDateOnly(card.paymentDueDate) }}</dd>
+            <dd class="font-medium text-ink">{{ currentDueDate ? formatDateOnly(currentDueDate) : '—' }}</dd>
           </div>
           <div v-if="card.insurancePercentage != null" class="flex justify-between border-t border-line py-2">
             <dt class="text-muted">Seguro desgravamen</dt>
@@ -100,15 +115,20 @@ function goToNewTransaction() {
             :key="t.id"
             class="flex items-center justify-between border-t border-line py-2 text-[13px]"
           >
-            <span class="text-ink">{{ categoryLabel(t.category) }}</span>
+            <span class="text-ink">{{ linkedTitle(t) }}</span>
             <span class="text-muted">{{ formatInstant(t.registeredAt) }}</span>
-            <span class="font-bold text-expense">- {{ formatMoney(t.amount) }}</span>
+            <span class="font-bold" :class="t.type === 'CARD_PAYMENT' ? 'text-income' : 'text-expense'">
+              {{ t.type === 'CARD_PAYMENT' ? '+' : '-' }} {{ formatMoney(t.amount) }}
+            </span>
           </div>
         </div>
       </div>
 
-      <div class="mt-4">
+      <div class="mt-4 space-y-2">
         <AppButton @click="goToNewTransaction">+ Registrar gasto con esta tarjeta</AppButton>
+        <AppButton variant="outline" :disabled="!hasOutstandingBalance" @click="goToPayCard">
+          {{ hasOutstandingBalance ? 'Registrar pago de esta tarjeta' : 'Sin saldo pendiente' }}
+        </AppButton>
       </div>
     </div>
 
@@ -139,7 +159,7 @@ function goToNewTransaction() {
             </div>
             <div class="flex justify-between border-t border-line py-2.5">
               <dt class="text-muted">Fecha límite</dt>
-              <dd class="font-bold text-ink">{{ formatDateOnly(card.paymentDueDate) }}</dd>
+              <dd class="font-bold text-ink">{{ currentDueDate ? formatDateOnly(currentDueDate) : '—' }}</dd>
             </div>
             <div class="flex justify-between border-t border-line py-2.5">
               <dt class="text-muted">Días restantes</dt>
@@ -182,9 +202,11 @@ function goToNewTransaction() {
               :key="t.id"
               class="grid grid-cols-[1fr_auto_auto] items-center gap-x-4 border-t border-line py-2.5 text-[13px]"
             >
-              <span class="text-ink">{{ categoryLabel(t.category) }}</span>
+              <span class="text-ink">{{ linkedTitle(t) }}</span>
               <span class="text-muted">{{ formatInstant(t.registeredAt) }}</span>
-              <span class="text-right font-bold text-expense">- {{ formatMoney(t.amount) }}</span>
+              <span class="text-right font-bold" :class="t.type === 'CARD_PAYMENT' ? 'text-income' : 'text-expense'">
+                {{ t.type === 'CARD_PAYMENT' ? '+' : '-' }} {{ formatMoney(t.amount) }}
+              </span>
             </div>
           </template>
           <p v-else class="border-t border-line pt-3 text-[13px] text-muted">Sin gastos vinculados todavía.</p>
@@ -194,6 +216,13 @@ function goToNewTransaction() {
             @click="goToNewTransaction"
           >
             + Registrar gasto con esta tarjeta
+          </button>
+          <button
+            class="mt-2 h-11 w-full rounded-btn border border-line bg-surface text-[13px] font-bold text-ink disabled:cursor-not-allowed disabled:opacity-50"
+            :disabled="!hasOutstandingBalance"
+            @click="goToPayCard"
+          >
+            {{ hasOutstandingBalance ? 'Registrar pago de esta tarjeta' : 'Sin saldo pendiente' }}
           </button>
         </div>
       </div>
