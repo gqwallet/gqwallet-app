@@ -1,7 +1,7 @@
 import { httpClient } from '@/shared/http/httpClient';
 import { transactionsService } from '@/modules/transactions/services/transactionsService';
 import type { Card, RegisterCardPayload, UpdateCardPayload } from '../types/Card';
-import type { BillingCycleOption, NextBilling } from '../types/NextBilling';
+import type { BillingCycleOption, NextBilling, PaymentCycleOption } from '../types/NextBilling';
 import type { Transaction } from '@/modules/transactions/types/Transaction';
 
 const BASE = '/cards';
@@ -43,6 +43,14 @@ export const cardsService = {
   // server-side from the card's cut-off day, never guessed from the raw billingDate here.
   async listBillingCycles(cardId: string): Promise<BillingCycleOption[]> {
     const { data } = await httpClient.get<BillingCycleOption[]>(`${BASE}/${cardId}/billing-cycles`);
+    return data;
+  },
+
+  // FR-019: the cycles this card offers for a payment, each already priced against its own
+  // window — distinct from listBillingCycles (FR-018), which carries no amount. Never derive
+  // a cycle's amountDue from the other cycle's figure on the client.
+  async listPaymentCycles(cardId: string): Promise<PaymentCycleOption[]> {
+    const { data } = await httpClient.get<PaymentCycleOption[]>(`${BASE}/${cardId}/payment-cycles`);
     return data;
   },
 

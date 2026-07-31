@@ -4,40 +4,36 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ref } from 'vue';
 import PayCardView from './PayCardView.vue';
 import { useTransactions } from '../composables/useTransactions';
-import { useBillingCycleOptions } from '../composables/useBillingCycleOptions';
+import { usePaymentCycleOptions } from '../composables/usePaymentCycleOptions';
 import { useCardDetail } from '@/modules/cards/composables/useCardDetail';
 
 vi.mock('../composables/useTransactions');
-vi.mock('../composables/useBillingCycleOptions');
+vi.mock('../composables/usePaymentCycleOptions');
 vi.mock('@/modules/cards/composables/useCardDetail');
 vi.mock('vue-router', () => ({
   useRouter: () => ({ push: vi.fn(), back: vi.fn() }),
   useRoute: () => ({ params: { id: 'card-1' } }),
 }));
 
-const CYCLES = [
-  { closingDate: '2026-08-28', paymentDueDate: '2026-09-05' },
-  { closingDate: '2026-09-28', paymentDueDate: '2026-10-05' },
-];
-
 let payCard: ReturnType<typeof vi.fn>;
 
-function mockCard(amountDue: number) {
+function mockCycles(cycles: { closingDate: string; paymentDueDate: string; amountDue: number }[]) {
+  vi.mocked(usePaymentCycleOptions).mockReturnValue({
+    cycles: ref(cycles),
+    loading: ref(false),
+    error: ref(null),
+    fetchCycles: vi.fn(),
+    clearCycles: vi.fn(),
+  } as never);
+}
+
+function mockCard() {
   vi.mocked(useCardDetail).mockReturnValue({
     card: ref({ id: 'card-1', name: 'Visa', color: '#3366cc' }),
     linkedTransactions: ref([]),
     linkedTotal: ref(0),
-    nextBilling: ref({
-      cycleStart: '2026-07-28',
-      billingDate: '2026-08-28',
-      paymentDueDate: '2026-09-05',
-      expenses: amountDue,
-      payments: 0,
-      insurancePercentage: null,
-      insuranceCharge: 0,
-      amountDue,
-    }),
-    amountDue: ref(amountDue),
+    nextBilling: ref(null),
+    amountDue: ref(null),
     loading: ref(false),
     error: ref(null),
     fetch: vi.fn(),
@@ -50,17 +46,14 @@ describe('PayCardView', () => {
     vi.resetAllMocks();
     payCard = vi.fn().mockResolvedValue({});
     vi.mocked(useTransactions).mockReturnValue({ payCard } as never);
-    vi.mocked(useBillingCycleOptions).mockReturnValue({
-      cycles: ref(CYCLES),
-      loading: ref(false),
-      error: ref(null),
-      fetchCycles: vi.fn(),
-      clearCycles: vi.fn(),
-    } as never);
+    mockCard();
   });
 
   it('prefills the outstanding amount and the cycle the card is accruing', async () => {
-    mockCard(400);
+    mockCycles([
+      { closingDate: '2026-08-28', paymentDueDate: '2026-09-05', amountDue: 400 },
+      { closingDate: '2026-09-28', paymentDueDate: '2026-10-05', amountDue: 0 },
+    ]);
 
     render(PayCardView);
 
@@ -71,7 +64,10 @@ describe('PayCardView', () => {
   });
 
   it('offers only the two cycles the card allows', async () => {
-    mockCard(400);
+    mockCycles([
+      { closingDate: '2026-08-28', paymentDueDate: '2026-09-05', amountDue: 400 },
+      { closingDate: '2026-09-28', paymentDueDate: '2026-10-05', amountDue: 0 },
+    ]);
 
     render(PayCardView);
 
@@ -79,8 +75,25 @@ describe('PayCardView', () => {
     expect(select.querySelectorAll('option')).toHaveLength(3);
   });
 
+  it('disables the option for a cycle with nothing outstanding, so it cannot be selected', async () => {
+    mockCycles([
+      { closingDate: '2026-08-28', paymentDueDate: '2026-09-05', amountDue: 400 },
+      { closingDate: '2026-09-28', paymentDueDate: '2026-10-05', amountDue: 0 },
+    ]);
+
+    render(PayCardView);
+
+    const select = await screen.findByRole('combobox', { name: /¿Qué ciclo estás pagando\?/ });
+    const options = select.querySelectorAll('option');
+    expect(options[1]).not.toBeDisabled(); // "Selecciona un ciclo" placeholder is index 0
+    expect(options[2]).toBeDisabled(); // the empty next cycle
+  });
+
   it('submits the amount and the chosen cycle', async () => {
-    mockCard(400);
+    mockCycles([
+      { closingDate: '2026-08-28', paymentDueDate: '2026-09-05', amountDue: 400 },
+      { closingDate: '2026-09-28', paymentDueDate: '2026-10-05', amountDue: 0 },
+    ]);
     const user = userEvent.setup();
 
     render(PayCardView);
@@ -94,8 +107,28 @@ describe('PayCardView', () => {
     });
   });
 
-  it('disables the submit button when the current cycle has nothing outstanding', async () => {
-    mockCard(0);
+  it('refreshes the amount when switching to a differently priced cycle', async () => {
+    mockCycles([
+      { closingDate: '2026-08-28', paymentDueDate: '2026-09-05', amountDue: 400 },
+      { closingDate: '2026-09-28', paymentDueDate: '2026-10-05', amountDue: 120 },
+    ]);
+    const user = userEvent.setup();
+
+    render(PayCardView);
+    await waitFor(() => expect(screen.getByLabelText('Monto a pagar (S/.)')).toHaveValue(400));
+
+    await user.selectOptions(
+      screen.getByRole('combobox', { name: /¿Qué ciclo estás pagando\?/ }),
+      '2026-09-28',
+    );
+
+    await waitFor(() => {
+      expect(screen.getByLabelText('Monto a pagar (S/.)')).toHaveValue(120);
+    });
+  });
+
+  it('disables the submit button when the selected cycle has nothing outstanding', async () => {
+    mockCycles([{ closingDate: '2026-08-28', paymentDueDate: '2026-09-05', amountDue: 0 }]);
 
     render(PayCardView);
 
@@ -107,7 +140,7 @@ describe('PayCardView', () => {
   });
 
   it('surfaces the backend message when the payment is rejected on submit', async () => {
-    mockCard(289.98);
+    mockCycles([{ closingDate: '2026-08-28', paymentDueDate: '2026-09-05', amountDue: 289.98 }]);
     payCard.mockRejectedValue({ response: { data: 'Payment exceeds the outstanding balance of 289.98' } });
     const user = userEvent.setup();
 

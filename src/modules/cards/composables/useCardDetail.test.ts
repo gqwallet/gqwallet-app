@@ -35,6 +35,7 @@ describe('useCardDetail', () => {
       insuranceCharge: 0,
       amountDue: 0,
     });
+    vi.mocked(cardsService.listPaymentCycles).mockResolvedValue([]);
   });
 
   it('draws the linked total down when a payment is linked, instead of inflating it', async () => {
@@ -59,6 +60,35 @@ describe('useCardDetail', () => {
 
     // The rows would suggest 400 owed; the server says the cycle is settled.
     expect(amountDue.value).toBe(0);
+  });
+
+  // FR-019/FR-021: the current cycle can be fully settled while a later one still owes —
+  // the "pay" action must stay available for that later cycle instead of reading amountDue
+  // (which only ever reflects the currently-open cycle) in isolation.
+  it('reports an outstanding balance from a later cycle even when the current one is settled', async () => {
+    vi.mocked(cardsService.listLinkedTransactions).mockResolvedValue([]);
+    vi.mocked(cardsService.listPaymentCycles).mockResolvedValue([
+      { closingDate: '2026-08-28', paymentDueDate: '2026-09-05', amountDue: 0 },
+      { closingDate: '2026-09-28', paymentDueDate: '2026-10-05', amountDue: 100.34 },
+    ]);
+
+    const { hasOutstandingBalance, fetch } = useCardDetail(CARD_ID);
+    await fetch();
+
+    expect(hasOutstandingBalance.value).toBe(true);
+  });
+
+  it('reports no outstanding balance when every selectable cycle is settled', async () => {
+    vi.mocked(cardsService.listLinkedTransactions).mockResolvedValue([]);
+    vi.mocked(cardsService.listPaymentCycles).mockResolvedValue([
+      { closingDate: '2026-08-28', paymentDueDate: '2026-09-05', amountDue: 0 },
+      { closingDate: '2026-09-28', paymentDueDate: '2026-10-05', amountDue: 0 },
+    ]);
+
+    const { hasOutstandingBalance, fetch } = useCardDetail(CARD_ID);
+    await fetch();
+
+    expect(hasOutstandingBalance.value).toBe(false);
   });
 
   it('exposes an error message when the card cannot be loaded', async () => {
