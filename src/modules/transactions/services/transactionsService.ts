@@ -2,7 +2,12 @@ import { httpClient } from '@/shared/http/httpClient';
 import { cardsService } from '@/modules/cards/services/cardsService';
 import type { CategoryCode } from '@/shared/domain/categories';
 import type { Card } from '@/modules/cards/types/Card';
-import type { RegisterTransactionPayload, Transaction } from '../types/Transaction';
+import type { BillingCycleOption } from '@/modules/cards/types/NextBilling';
+import type {
+  RegisterCardPaymentPayload,
+  RegisterTransactionPayload,
+  Transaction,
+} from '../types/Transaction';
 
 const BASE = '/transactions';
 
@@ -14,6 +19,14 @@ export const transactionsService = {
 
   async register(payload: RegisterTransactionPayload): Promise<Transaction> {
     const { data } = await httpClient.post<Transaction>(BASE, payload);
+    return data;
+  },
+
+  // FR-018: settling a statement is a non-CRUD action, so the backend models it as the
+  // creation of a card sub-resource. The row it creates is still a Transaction, which is why
+  // it lives in this service rather than in cardsService.
+  async payCard(cardId: string, payload: RegisterCardPaymentPayload): Promise<Transaction> {
+    const { data } = await httpClient.post<Transaction>(`/cards/${cardId}/payments`, payload);
     return data;
   },
 
@@ -30,16 +43,25 @@ export const transactionsService = {
     return cardsService.list();
   },
 
+  // Same outbound rule: the cycle select in the transaction form needs the card's cycles.
+  async listBillingCycles(cardId: string): Promise<BillingCycleOption[]> {
+    return cardsService.listBillingCycles(cardId);
+  },
+
   // UX-only preventive check: the backend is the real enforcer of the credit limit
   // (it re-validates on submit regardless), this just avoids a doomed round trip.
+  // FR-018: payments free the line back up, so they are netted off — mirrors the backend's
+  // own arithmetic, which would otherwise report a card as permanently maxed out.
   async getAvailableCredit(cardId: string): Promise<number> {
     const [card, linked] = await Promise.all([
       cardsService.get(cardId),
       cardsService.listLinkedTransactions(cardId),
     ]);
-    const alreadyLinked = linked
-      .filter((t) => t.type === 'EXPENSE')
-      .reduce((sum, t) => sum + t.amount, 0);
-    return card.creditLine - alreadyLinked;
+    const outstanding = linked.reduce((sum, t) => {
+      if (t.type === 'EXPENSE') return sum + t.amount;
+      if (t.type === 'CARD_PAYMENT') return sum - t.amount;
+      return sum;
+    }, 0);
+    return card.creditLine - outstanding;
   },
 };

@@ -1,7 +1,7 @@
 import { httpClient } from '@/shared/http/httpClient';
 import { transactionsService } from '@/modules/transactions/services/transactionsService';
 import type { Card, RegisterCardPayload, UpdateCardPayload } from '../types/Card';
-import type { NextBilling } from '../types/NextBilling';
+import type { BillingCycleOption, NextBilling } from '../types/NextBilling';
 import type { Transaction } from '@/modules/transactions/types/Transaction';
 
 const BASE = '/cards';
@@ -36,6 +36,13 @@ export const cardsService = {
   // linked transactions.
   async getNextBilling(cardId: string): Promise<NextBilling> {
     const { data } = await httpClient.get<NextBilling>(`${BASE}/${cardId}/next-billing`);
+    return data;
+  },
+
+  // FR-018: the cycles this card offers for a new movement — exactly two, computed
+  // server-side from the card's cut-off day, never guessed from the raw billingDate here.
+  async listBillingCycles(cardId: string): Promise<BillingCycleOption[]> {
+    const { data } = await httpClient.get<BillingCycleOption[]>(`${BASE}/${cardId}/billing-cycles`);
     return data;
   },
 
