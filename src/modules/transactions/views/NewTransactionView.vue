@@ -79,8 +79,14 @@ async function save() {
       description: description.value.trim() || null,
     });
     router.push({ name: 'history' });
-  } catch {
-    error.value = 'No se pudo registrar el movimiento. Revisa el monto y la categoría.';
+  } catch (err) {
+    // Surfaces the backend's own message (e.g. "Expense of ... exceeds the available
+    // balance of ...") — the only source of truth for server-side rules the client cannot
+    // check locally, like the available-balance gate.
+    const backendMessage = (err as { response?: { data?: unknown } })?.response?.data;
+    error.value = typeof backendMessage === 'string' && backendMessage
+      ? backendMessage
+      : 'No se pudo registrar el movimiento. Revisa el monto y la categoría.';
   } finally {
     saving.value = false;
   }
