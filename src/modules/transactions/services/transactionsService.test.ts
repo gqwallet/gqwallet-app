@@ -70,6 +70,14 @@ describe('transactionsService', () => {
     expect(cardsService.listBillingCycles).toHaveBeenCalledWith(CARD_ID);
   });
 
+  it('delegates the payment cycle options to the cards service', async () => {
+    const cycles = [{ closingDate: '2026-08-28', paymentDueDate: '2026-09-05', amountDue: 400 }];
+    vi.mocked(cardsService.listPaymentCycles).mockResolvedValue(cycles);
+
+    await expect(transactionsService.listPaymentCycles(CARD_ID)).resolves.toEqual(cycles);
+    expect(cardsService.listPaymentCycles).toHaveBeenCalledWith(CARD_ID);
+  });
+
   it('frees up available credit once a payment is registered', async () => {
     // 460 charged then 400 paid leaves 60 outstanding against a 500 line.
     vi.mocked(cardsService.get).mockResolvedValue({ creditLine: 500 } as never);

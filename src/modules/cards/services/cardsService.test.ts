@@ -23,6 +23,19 @@ describe('cardsService', () => {
     expect(result).toEqual(cycles);
   });
 
+  it('reads each payment cycle already priced from the card sub-resource', async () => {
+    const cycles = [
+      { closingDate: '2026-08-28', paymentDueDate: '2026-09-05', amountDue: 400 },
+      { closingDate: '2026-09-28', paymentDueDate: '2026-10-05', amountDue: 0 },
+    ];
+    vi.mocked(httpClient.get).mockResolvedValue({ data: cycles } as never);
+
+    const result = await cardsService.listPaymentCycles('card-1');
+
+    expect(httpClient.get).toHaveBeenCalledWith('/cards/card-1/payment-cycles');
+    expect(result).toEqual(cycles);
+  });
+
   it('returns the next-billing projection untouched, including payments', async () => {
     const projection = {
       cycleStart: '2026-07-28',
