@@ -10,7 +10,7 @@ vi.mock('vue-router', () => ({
   useRoute: () => ({ params: { id: 'card-1' } }),
 }));
 
-function mockCard(amountDue: number, linkedTotal = 0) {
+function mockCard(amountDue: number, linkedTotal = 0, hasOutstandingBalance = amountDue > 0) {
   vi.mocked(useCardDetail).mockReturnValue({
     card: ref({
       id: 'card-1',
@@ -35,6 +35,8 @@ function mockCard(amountDue: number, linkedTotal = 0) {
       amountDue,
     }),
     amountDue: ref(amountDue),
+    paymentCycles: ref([]),
+    hasOutstandingBalance: ref(hasOutstandingBalance),
     loading: ref(false),
     error: ref(null),
     fetch: vi.fn(),
@@ -66,6 +68,18 @@ describe('CardDetailView', () => {
     expect(buttons.length).toBeGreaterThan(0);
     buttons.forEach((button) => expect(button).toBeDisabled());
     expect(screen.queryByText('Registrar pago de esta tarjeta')).not.toBeInTheDocument();
+  });
+
+  // FR-019/FR-021: the button reflects whether ANY selectable cycle owes something — not
+  // just the currently-open one, which the amountDue-only bug this test guards against.
+  it('keeps the pay button enabled when the current cycle is settled but a later one is owed', () => {
+    mockCard(0, 0, true);
+
+    render(CardDetailView);
+
+    const buttons = screen.getAllByRole('button', { name: 'Registrar pago de esta tarjeta' });
+    expect(buttons.length).toBeGreaterThan(0);
+    buttons.forEach((button) => expect(button).toBeEnabled());
   });
 
   it('caps available credit at the credit line when a payment settles more than the raw expenses', () => {

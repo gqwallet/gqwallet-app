@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useTransactions } from '../composables/useTransactions';
-import { useBillingCycleOptions } from '../composables/useBillingCycleOptions';
+import { usePaymentCycleOptions } from '../composables/usePaymentCycleOptions';
 import { useCardDetail } from '@/modules/cards/composables/useCardDetail';
 import { formatMoney } from '@/shared/util/money';
 import { formatDateOnly } from '@/shared/util/dates';
@@ -14,8 +14,8 @@ const router = useRouter();
 const cardId = route.params.id as string;
 
 const { payCard } = useTransactions();
-const { cycles, fetchCycles } = useBillingCycleOptions();
-const { card, nextBilling, amountDue, fetch: fetchCard } = useCardDetail(cardId);
+const { cycles, fetchCycles } = usePaymentCycleOptions();
+const { card, fetch: fetchCard } = useCardDetail(cardId);
 
 const amount = ref('');
 const cycleClosingDate = ref('');
@@ -25,26 +25,29 @@ const error = ref<string | null>(null);
 
 onMounted(async () => {
   await Promise.all([fetchCard(), fetchCycles(cardId)]);
-  // Default to the cycle the card is currently accruing, and prefill what it owes — the
-  // overwhelmingly common case is settling the statement in full.
-  cycleClosingDate.value = nextBilling.value?.billingDate ?? cycles.value[0]?.closingDate ?? '';
-  if (amountDue.value != null && amountDue.value > 0) amount.value = String(amountDue.value);
+  // Default to the cycle the card is currently accruing — the first one the server offers.
+  cycleClosingDate.value = cycles.value[0]?.closingDate ?? '';
 });
 
 const selectedCycle = computed(
   () => cycles.value.find((c) => c.closingDate === cycleClosingDate.value) ?? null,
 );
 
-// The server is the real enforcer (a specific cycle can only be priced there — see
-// TransactionCommandServiceImpl.assertWithinOutstandingBalance). This is only a UX guard for
-// the default case, where we already have the current cycle's amount due preloaded; it says
-// nothing about the next cycle, whose debt (if any) isn't known until it accrues expenses.
-const isCurrentCycleSelected = computed(
-  () => !!nextBilling.value && cycleClosingDate.value === nextBilling.value.billingDate,
-);
+// Every cycle now arrives already priced (FR-019), so this applies equally to the current and
+// the next cycle — no longer a guard limited to whichever cycle happened to be preloaded.
 const nothingOwedOnSelectedCycle = computed(
-  () => isCurrentCycleSelected.value && (amountDue.value ?? 0) <= 0,
+  () => !!selectedCycle.value && selectedCycle.value.amountDue <= 0,
 );
+
+// Keep the amount in sync with whichever cycle is selected. Without this, switching from a
+// cycle with a balance to an empty one left the previous amount sitting in the field — the
+// exact bug this view exists to prevent (confirming a payment against a cycle that owes
+// nothing, using an amount that belonged to a different cycle).
+watch(cycleClosingDate, () => {
+  amount.value = selectedCycle.value && selectedCycle.value.amountDue > 0
+    ? String(selectedCycle.value.amountDue)
+    : '';
+});
 
 async function save() {
   if (!cycleClosingDate.value) {
@@ -90,7 +93,7 @@ async function save() {
         <div>
           <p class="text-[13px] font-bold text-ink lg:text-[14px]">{{ card.name }}</p>
           <p class="text-[11px] text-muted lg:text-[12px]">
-            Por pagar: {{ amountDue != null ? formatMoney(amountDue) : '—' }}
+            Por pagar: {{ selectedCycle ? formatMoney(selectedCycle.amountDue) : '—' }}
           </p>
         </div>
       </div>
@@ -103,7 +106,7 @@ async function save() {
         type="number"
         step="0.01"
         placeholder="0.00"
-        :max="isCurrentCycleSelected && amountDue != null ? String(amountDue) : undefined"
+        :max="selectedCycle && selectedCycle.amountDue > 0 ? String(selectedCycle.amountDue) : undefined"
       />
 
       <label v-if="cycles.length > 0" class="block">
@@ -113,8 +116,14 @@ async function save() {
           class="h-11 w-full rounded-btn border border-line bg-surface px-3 text-[14px] text-ink outline-none focus:border-ink lg:h-12 lg:text-[15px]"
         >
           <option value="" disabled>Selecciona un ciclo</option>
-          <option v-for="(cycle, i) in cycles" :key="cycle.closingDate" :value="cycle.closingDate">
+          <option
+            v-for="(cycle, i) in cycles"
+            :key="cycle.closingDate"
+            :value="cycle.closingDate"
+            :disabled="cycle.amountDue <= 0"
+          >
             {{ i === 0 ? 'Ciclo actual' : 'Próximo ciclo' }} · vence {{ formatDateOnly(cycle.paymentDueDate) }}
+            {{ cycle.amountDue > 0 ? `· ${formatMoney(cycle.amountDue)}` : '· sin saldo pendiente' }}
           </option>
         </select>
         <p v-if="selectedCycle" class="mt-1 text-[11px] text-muted lg:text-[12px]">

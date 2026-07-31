@@ -42,10 +42,12 @@ onMounted(fetch);
         <div class="mt-3 min-h-0 flex-1 space-y-2.5 overflow-y-auto pr-1">
           <div v-for="c in dashboard.upcomingCards" :key="c.cardId" class="flex items-center gap-3 rounded-lg bg-page p-3">
             <span class="w-1.5 shrink-0 self-stretch rounded-full" :style="{ backgroundColor: c.color }"></span>
-            <div>
+            <div class="min-w-0 flex-1">
               <p class="text-[13px] font-bold text-ink">{{ c.name }}</p>
-              <p class="text-[11px] text-muted">Vence: {{ formatDateOnly(c.paymentDueDate) }} · {{ daysUntil(c.paymentDueDate) }} días</p>
-              <p class="text-[11px] text-muted">Por pagar: {{ formatMoney(c.amountDue) }}</p>
+              <div class="mt-0.5 flex items-center justify-between gap-2">
+                <p class="text-[11px] text-muted">Vence: {{ formatDateOnly(c.paymentDueDate) }} · {{ daysUntil(c.paymentDueDate) }} días</p>
+                <p class="shrink-0 text-[11px] font-semibold text-ink">Por pagar: {{ formatMoney(c.amountDue) }}</p>
+              </div>
             </div>
           </div>
         </div>
@@ -100,10 +102,12 @@ onMounted(fetch);
           <div class="mt-3 min-h-0 flex-1 space-y-2.5 overflow-y-auto pr-1">
             <div v-for="c in dashboard.upcomingCards" :key="c.cardId" class="flex items-center gap-3 rounded-lg bg-page p-3">
               <span class="w-1.5 shrink-0 self-stretch rounded-full" :style="{ backgroundColor: c.color }"></span>
-              <div>
+              <div class="min-w-0 flex-1">
                 <p class="text-[13px] font-bold text-ink">{{ c.name }}</p>
-                <p class="text-[11px] text-muted">Vence: {{ formatDateOnly(c.paymentDueDate) }} · {{ daysUntil(c.paymentDueDate) }} días</p>
-                <p class="text-[11px] text-muted">Por pagar: {{ formatMoney(c.amountDue) }}</p>
+                <div class="mt-0.5 flex items-center justify-between gap-2">
+                  <p class="text-[11px] text-muted">Vence: {{ formatDateOnly(c.paymentDueDate) }} · {{ daysUntil(c.paymentDueDate) }} días</p>
+                  <p class="shrink-0 text-[11px] font-semibold text-ink">Por pagar: {{ formatMoney(c.amountDue) }}</p>
+                </div>
               </div>
             </div>
           </div>
