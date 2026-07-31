@@ -2,7 +2,7 @@ import { httpClient } from '@/shared/http/httpClient';
 import { cardsService } from '@/modules/cards/services/cardsService';
 import type { CategoryCode } from '@/shared/domain/categories';
 import type { Card } from '@/modules/cards/types/Card';
-import type { BillingCycleOption } from '@/modules/cards/types/NextBilling';
+import type { BillingCycleOption, PaymentCycleOption } from '@/modules/cards/types/NextBilling';
 import type {
   RegisterCardPaymentPayload,
   RegisterTransactionPayload,
@@ -46,6 +46,13 @@ export const transactionsService = {
   // Same outbound rule: the cycle select in the transaction form needs the card's cycles.
   async listBillingCycles(cardId: string): Promise<BillingCycleOption[]> {
     return cardsService.listBillingCycles(cardId);
+  },
+
+  // Same outbound rule: the cycle select in the "pay card" form needs each cycle already
+  // priced (FR-019), so it can disable/refresh correctly on selection instead of only ever
+  // knowing the currently-open cycle's amount.
+  async listPaymentCycles(cardId: string): Promise<PaymentCycleOption[]> {
+    return cardsService.listPaymentCycles(cardId);
   },
 
   // UX-only preventive check: the backend is the real enforcer of the credit limit

@@ -19,3 +19,12 @@ export interface BillingCycleOption {
   closingDate: string; // ISO date
   paymentDueDate: string; // ISO date
 }
+
+// Mirror of the backend PaymentCycleResource (FR-019) — the cycles a holder may settle a
+// payment against, each already priced against its own window. amountDue is THIS cycle's
+// outstanding balance — never the currently-open cycle's figure reused across both options.
+export interface PaymentCycleOption {
+  closingDate: string; // ISO date
+  paymentDueDate: string; // ISO date
+  amountDue: number;
+}
