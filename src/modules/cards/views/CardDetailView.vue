@@ -13,7 +13,7 @@ import type { Transaction } from '@/modules/transactions/types/Transaction';
 const route = useRoute();
 const router = useRouter();
 const cardId = route.params.id as string;
-const { card, linkedTransactions, linkedTotal, nextBilling, amountDue, loading, error, fetch, removeCard } = useCardDetail(cardId);
+const { card, linkedTransactions, linkedTotal, nextBilling, amountDue, hasOutstandingBalance, loading, error, fetch, removeCard } = useCardDetail(cardId);
 
 // linkedTotal only nets EXPENSE/CARD_PAYMENT rows, but a payment can legitimately be larger
 // than the raw expenses it settles (it also covers the seguro de desgravamen surcharge, which
@@ -22,10 +22,6 @@ const { card, linkedTransactions, linkedTotal, nextBilling, amountDue, loading, 
 const available = computed(() =>
   card.value ? Math.min(card.value.creditLine, card.value.creditLine - linkedTotal.value) : 0,
 );
-
-// A payment can only be registered against an outstanding balance (backend rule, FR-019) —
-// disabling here avoids sending someone into a form that can only fail.
-const hasOutstandingBalance = computed(() => (amountDue.value ?? 0) > 0);
 
 // FR-018: the due date of the cycle currently accruing, from the server projection. The
 // card's own paymentDueDate is the raw registration-time date and goes stale immediately —
