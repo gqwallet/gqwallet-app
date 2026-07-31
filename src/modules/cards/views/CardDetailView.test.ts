@@ -10,7 +10,7 @@ vi.mock('vue-router', () => ({
   useRoute: () => ({ params: { id: 'card-1' } }),
 }));
 
-function mockCard(amountDue: number) {
+function mockCard(amountDue: number, linkedTotal = 0) {
   vi.mocked(useCardDetail).mockReturnValue({
     card: ref({
       id: 'card-1',
@@ -23,7 +23,7 @@ function mockCard(amountDue: number) {
       insurancePercentage: null,
     }),
     linkedTransactions: ref([]),
-    linkedTotal: ref(0),
+    linkedTotal: ref(linkedTotal),
     nextBilling: ref({
       cycleStart: '2026-07-10',
       billingDate: '2026-08-10',
@@ -66,5 +66,18 @@ describe('CardDetailView', () => {
     expect(buttons.length).toBeGreaterThan(0);
     buttons.forEach((button) => expect(button).toBeDisabled());
     expect(screen.queryByText('Registrar pago de esta tarjeta')).not.toBeInTheDocument();
+  });
+
+  it('caps available credit at the credit line when a payment settles more than the raw expenses', () => {
+    // A payment can legitimately exceed the sum of EXPENSE rows because it also covers the
+    // seguro de desgravamen surcharge, which has no ledger row of its own — that pushed
+    // linkedTotal negative and inflated available credit past the card's own line.
+    mockCard(0, -1.35);
+
+    render(CardDetailView);
+
+    const values = screen.getAllByText('S/. 500');
+    expect(values.length).toBeGreaterThan(0);
+    expect(screen.queryByText('S/. 501.35')).not.toBeInTheDocument();
   });
 });
