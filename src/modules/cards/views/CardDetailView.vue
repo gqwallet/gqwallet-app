@@ -15,7 +15,13 @@ const router = useRouter();
 const cardId = route.params.id as string;
 const { card, linkedTransactions, linkedTotal, nextBilling, amountDue, loading, error, fetch, removeCard } = useCardDetail(cardId);
 
-const available = computed(() => (card.value ? card.value.creditLine - linkedTotal.value : 0));
+// linkedTotal only nets EXPENSE/CARD_PAYMENT rows, but a payment can legitimately be larger
+// than the raw expenses it settles (it also covers the seguro de desgravamen surcharge, which
+// has no ledger row of its own) — capping here keeps available credit from reading above the
+// card's own credit line when that happens.
+const available = computed(() =>
+  card.value ? Math.min(card.value.creditLine, card.value.creditLine - linkedTotal.value) : 0,
+);
 
 // A payment can only be registered against an outstanding balance (backend rule, FR-019) —
 // disabling here avoids sending someone into a form that can only fail.
