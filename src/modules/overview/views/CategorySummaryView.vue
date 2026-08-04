@@ -5,21 +5,13 @@ import { Chart as ChartJS, ArcElement, Tooltip } from 'chart.js';
 import { useCategorySummary } from '../composables/useCategorySummary';
 import { categoryColor, categoryLabel } from '@/shared/domain/categories';
 import { formatMoney } from '@/shared/util/money';
+import { resolveCssColor } from '@/shared/util/color';
 
 ChartJS.register(ArcElement, Tooltip);
 
 const { slices, total, isEmpty, loading, error, fetch } = useCategorySummary();
 
 onMounted(fetch);
-
-// Canvas fillStyle can't resolve a `var(--x)` reference the way the DOM cascade does, so
-// each category's CSS custom property is read to its computed value before handing it to
-// Chart.js — categories.ts itself stays framework-agnostic, unaware a canvas exists.
-function resolveCssColor(cssVar: string): string {
-  const varName = cssVar.match(/var\((--[\w-]+)\)/)?.[1];
-  if (!varName) return cssVar;
-  return getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
-}
 
 const chartData = computed(() => ({
   labels: slices.value.map((s) => categoryLabel(s.code)),
