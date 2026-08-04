@@ -107,7 +107,11 @@ async function onDelete(transaction: Transaction) {
       No hay movimientos para este filtro.
     </div>
 
-    <div v-else class="space-y-2 lg:space-y-2.5">
+    <!-- Capped at 8 rows on desktop before this scrolls internally (mobile keeps its normal
+         full-page scroll, unbounded, exactly as before — the cap is lg:-only). 672px is
+         measured, not guessed: each row is 74.5px plus the lg:space-y-2.5 (10px) gap between
+         them, so 8 rows need ~666px — verified with Playwright against a history of 12 rows. -->
+    <div v-else class="space-y-2 lg:space-y-2.5 lg:max-h-[672px] lg:overflow-y-auto lg:pr-1">
       <div
         v-for="t in visible"
         :key="t.id"
