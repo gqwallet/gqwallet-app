@@ -2,6 +2,12 @@
 import { computed, ref } from 'vue';
 import { RouterView, RouterLink, useRoute, useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth.store';
+import iconMetrics from '@/assets/icon-metrics.svg?raw';
+import iconDashboard from '@/assets/icon-dashboard.svg?raw';
+import iconCards from '@/assets/icon-cards.svg?raw';
+import iconFinances from '@/assets/icon-finances.svg?raw';
+import iconCalendar from '@/assets/icon-calendar.svg?raw';
+import iconSettings from '@/assets/icon-settings.svg?raw';
 
 // Authenticated layout: a persistent sidebar on desktop (lg+) and a hamburger drawer on
 // mobile (screen 11). The page title comes from the active route's meta.title.
@@ -15,12 +21,12 @@ const title = computed(() => (route.meta.title as string) ?? 'GQWallet');
 // Métricas leads the list, ahead of Dashboard, and only renders for ROLE_ADMINISTRATOR
 // (FR-013) — auth.isAdmin comes from ProfileResource.roles, hydrated on sign-in.
 const navItems = computed(() => [
-  ...(auth.isAdmin ? [{ to: '/metrics', label: 'Métricas' }] : []),
-  { to: '/dashboard', label: 'Dashboard' },
-  { to: '/cards', label: 'Tarjetas' },
-  { to: '/finances', label: 'Finanzas Personales' },
-  { to: '/calendar', label: 'Calendario' },
-  { to: '/profile', label: 'Configuración' },
+  ...(auth.isAdmin ? [{ to: '/metrics', label: 'Métricas', icon: iconMetrics }] : []),
+  { to: '/dashboard', label: 'Mi Dashboard', icon: iconDashboard },
+  { to: '/cards', label: 'Mis Tarjetas', icon: iconCards },
+  { to: '/finances', label: 'Mis Finanzas Personales', icon: iconFinances },
+  { to: '/calendar', label: 'Mi Calendario', icon: iconCalendar },
+  { to: '/profile', label: 'Configuración', icon: iconSettings },
 ]);
 
 async function onSignOut() {
@@ -41,9 +47,10 @@ async function onSignOut() {
           v-for="item in navItems"
           :key="item.to"
           :to="item.to"
-          class="mb-1 block rounded-btn px-3 py-2.5 text-[15px] font-medium text-ink hover:bg-page"
+          class="mb-1 flex items-center gap-3 rounded-btn px-3 py-2.5 text-[15px] font-medium text-ink hover:bg-page"
           active-class="bg-brand-bg text-brand"
         >
+          <span class="size-5 shrink-0 [&_svg]:size-full" aria-hidden="true" v-html="item.icon"></span>
           {{ item.label }}
         </RouterLink>
       </nav>
@@ -72,7 +79,17 @@ async function onSignOut() {
       </header>
 
       <main class="relative flex-1 p-4 lg:p-8">
-        <RouterView />
+        <RouterView v-slot="{ Component }">
+          <!-- Explicit :duration matches the .screen-* CSS (200ms): without it, mode="out-in"
+               waits for a `transitionend` DOM event on the leaving root before mounting the
+               next route, and some view/layout combinations never fire it (observed leaving
+               CalendarView, whose root is viewport-height-bound with an internal scroll
+               region), permanently freezing the outlet at an empty placeholder. :duration
+               switches Vue to a plain timer instead, so the swap always completes. -->
+          <Transition name="screen" mode="out-in" :duration="200">
+            <component :is="Component" :key="route.path" />
+          </Transition>
+        </RouterView>
       </main>
     </div>
 
@@ -94,10 +111,11 @@ async function onSignOut() {
             v-for="item in navItems"
             :key="item.to"
             :to="item.to"
-            class="block border-b border-line px-3 py-3 text-[15px] text-ink"
+            class="flex items-center gap-3 border-b border-line px-3 py-3 text-[15px] text-ink"
             active-class="text-brand"
             @click="drawerOpen = false"
           >
+            <span class="size-5 shrink-0 [&_svg]:size-full" aria-hidden="true" v-html="item.icon"></span>
             {{ item.label }}
           </RouterLink>
         </nav>

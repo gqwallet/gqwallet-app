@@ -53,3 +53,24 @@ body {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
 }
+
+/* Route transition between screens (AppShell's RouterView) — fade + slight vertical
+   slide. Plain CSS rather than Tailwind utilities: Vue's <Transition> toggles these
+   classes on the entering/leaving component's root node directly, which scoped SFC
+   styles can't target. */
+.screen-enter-active,
+.screen-leave-active {
+  transition:
+    opacity 200ms ease,
+    transform 200ms ease;
+}
+
+.screen-enter-from {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+.screen-leave-to {
+  opacity: 0;
+  transform: translateY(-8px);
+}
