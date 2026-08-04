@@ -79,7 +79,17 @@ async function onSignOut() {
       </header>
 
       <main class="relative flex-1 p-4 lg:p-8">
-        <RouterView />
+        <RouterView v-slot="{ Component }">
+          <!-- Explicit :duration matches the .screen-* CSS (200ms): without it, mode="out-in"
+               waits for a `transitionend` DOM event on the leaving root before mounting the
+               next route, and some view/layout combinations never fire it (observed leaving
+               CalendarView, whose root is viewport-height-bound with an internal scroll
+               region), permanently freezing the outlet at an empty placeholder. :duration
+               switches Vue to a plain timer instead, so the swap always completes. -->
+          <Transition name="screen" mode="out-in" :duration="200">
+            <component :is="Component" :key="route.path" />
+          </Transition>
+        </RouterView>
       </main>
     </div>
 
