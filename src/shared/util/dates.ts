@@ -14,6 +14,15 @@ export function formatInstant(iso: string): string {
   return new Date(iso).toLocaleDateString('es-PE', { day: '2-digit', month: 'short' });
 }
 
+// Same local-parse reasoning as formatDateOnly, but month-only — used for sparse axis labels
+// where showing every day would be unreadable (e.g. the admin usage chart's 5-month window).
+// Same { month: 'short', year: '2-digit' } shape already used inline for CalendarView's
+// month-tab labels, reused here instead of duplicated.
+export function formatMonthOnly(isoDate: string): string {
+  const [year, month, day] = isoDate.split('-').map(Number);
+  return new Date(year, month - 1, day).toLocaleDateString('es-PE', { month: 'short', year: '2-digit' });
+}
+
 // Whole days between today and a date-only string (yyyy-mm-dd), local-parsed for the same
 // reason as formatDateOnly. Both sides are clamped to midnight so "today" itself is 0.
 export function daysUntil(isoDate: string): number {
