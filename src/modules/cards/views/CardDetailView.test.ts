@@ -70,7 +70,7 @@ describe('CardDetailView', () => {
     expect(screen.queryByText('Registrar pago de esta tarjeta')).not.toBeInTheDocument();
   });
 
-  // FR-019/FR-021: the button reflects whether ANY selectable cycle owes something — not
+  // FR-019/FR-018: the button reflects whether ANY selectable cycle owes something — not
   // just the currently-open one, which the amountDue-only bug this test guards against.
   it('keeps the pay button enabled when the current cycle is settled but a later one is owed', () => {
     mockCard(0, 0, true);
