@@ -47,6 +47,9 @@ describe('PayCardView', () => {
     payCard = vi.fn().mockResolvedValue({});
     vi.mocked(useTransactions).mockReturnValue({ payCard } as never);
     mockCard();
+    // FR-021: a payment can never be deleted afterward, so submitting now asks for
+    // confirmation first — default to "yes" here, and test the "no" path explicitly below.
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
   });
 
   it('prefills the outstanding amount and the cycle the card is accruing', async () => {
@@ -100,11 +103,26 @@ describe('PayCardView', () => {
     await waitFor(() => expect(screen.getByLabelText('Monto a pagar (S/.)')).toHaveValue(400));
     await user.click(screen.getByRole('button', { name: 'Confirmar pago' }));
 
+    expect(window.confirm).toHaveBeenCalled();
     expect(payCard).toHaveBeenCalledWith('card-1', {
       amount: 400,
       cycleClosingDate: '2026-08-28',
       description: null,
     });
+  });
+
+  // FR-021: the confirmation is the only safety net left, since the payment can never be
+  // deleted afterward — declining it must not register anything.
+  it('does not submit when the confirmation is declined', async () => {
+    mockCycles([{ closingDate: '2026-08-28', paymentDueDate: '2026-09-05', amountDue: 400 }]);
+    vi.mocked(window.confirm).mockReturnValue(false);
+    const user = userEvent.setup();
+
+    render(PayCardView);
+    await waitFor(() => expect(screen.getByLabelText('Monto a pagar (S/.)')).toHaveValue(400));
+    await user.click(screen.getByRole('button', { name: 'Confirmar pago' }));
+
+    expect(payCard).not.toHaveBeenCalled();
   });
 
   it('refreshes the amount when switching to a differently priced cycle', async () => {

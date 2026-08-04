@@ -44,6 +44,14 @@ describe('transactionsService', () => {
     });
   });
 
+  it('deletes a transaction by id', async () => {
+    vi.mocked(httpClient.delete).mockResolvedValue({} as never);
+
+    await transactionsService.remove('tx-1');
+
+    expect(httpClient.delete).toHaveBeenCalledWith('/transactions/tx-1');
+  });
+
   it('sends the chosen cycle when registering a card expense', async () => {
     vi.mocked(httpClient.post).mockResolvedValue({ data: transaction({}) } as never);
 
