@@ -65,7 +65,7 @@ function linkedTitle(transaction: Transaction): string {
   <p v-if="loading" class="text-[13px] text-muted lg:text-[14px]">Cargando…</p>
   <p v-else-if="error" class="text-[13px] text-expense lg:text-[14px]">{{ error }}</p>
 
-  <template v-else-if="card">
+  <div v-else-if="card">
     <!-- Mobile / tablet: single column, unchanged below lg (screen 09) -->
     <div class="mx-auto max-w-md lg:hidden">
       <CreditCardVisual :card="card" />
@@ -229,5 +229,5 @@ function linkedTitle(transaction: Transaction): string {
         </div>
       </div>
     </div>
-  </template>
+  </div>
 </template>
