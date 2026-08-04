@@ -22,6 +22,13 @@ export const transactionsService = {
     return data;
   },
 
+  // FR-021: deletes a mis-registered income/expense, or a card payment — the latter only
+  // when it is the most recent payment for its card; the backend enforces that and rejects
+  // otherwise (409), the caller surfaces whatever message it returns.
+  async remove(transactionId: string): Promise<void> {
+    await httpClient.delete(`${BASE}/${transactionId}`);
+  },
+
   // FR-018: settling a statement is a non-CRUD action, so the backend models it as the
   // creation of a card sub-resource. The row it creates is still a Transaction, which is why
   // it lives in this service rather than in cardsService.
