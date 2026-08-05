@@ -1,5 +1,9 @@
 <script setup lang="ts">
 // Minimal public chrome for the auth flow: a brand topbar over a centered card.
+// `wide` widens the card and caps its height so long prose (e.g. TermsView) scrolls
+// internally — same max-h + overflow-y-auto pattern as DashboardView's "Próximos pagos" —
+// instead of growing the whole page.
+withDefaults(defineProps<{ wide?: boolean }>(), { wide: false });
 </script>
 
 <template>
@@ -10,7 +14,12 @@
     </header>
 
     <main class="flex flex-1 items-center justify-center p-6">
-      <div class="w-full max-w-100 rounded-2xl border border-line bg-surface p-8">
+      <div
+        :class="[
+          'w-full rounded-2xl border border-line bg-surface p-8',
+          wide ? 'flex max-h-[70vh] max-w-2xl flex-col overflow-hidden' : 'max-w-100',
+        ]"
+      >
         <slot />
       </div>
     </main>
