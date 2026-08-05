@@ -49,6 +49,16 @@ watch(cycleClosingDate, () => {
     : '';
 });
 
+// FR-021: a registered payment can never be deleted afterward, so this is the only chance
+// to catch a mistake (wrong cycle, wrong amount) — a native confirm() before submitting,
+// same mechanism HistoryView/CardDetailView already use for their own destructive actions.
+function confirmPayment(): boolean {
+  const cycleLabel = selectedCycle.value ? `que cierra el ${formatDateOnly(selectedCycle.value.closingDate)}` : 'seleccionado';
+  return confirm(
+    `¿Confirmas el pago de ${formatMoney(Number(amount.value))} para el ciclo ${cycleLabel} de la tarjeta ${card.value?.name ?? ''}? Esta acción no se puede deshacer.`,
+  );
+}
+
 async function save() {
   if (!cycleClosingDate.value) {
     error.value = 'Selecciona el ciclo que estás pagando.';
@@ -60,6 +70,9 @@ async function save() {
   }
   if (nothingOwedOnSelectedCycle.value) {
     error.value = 'No tienes saldo pendiente en este ciclo.';
+    return;
+  }
+  if (!confirmPayment()) {
     return;
   }
   saving.value = true;

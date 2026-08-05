@@ -199,16 +199,23 @@ function linkedTitle(transaction: Transaction): string {
               <span>Fecha</span>
               <span class="text-right">Monto</span>
             </div>
-            <div
-              v-for="t in linkedTransactions"
-              :key="t.id"
-              class="grid grid-cols-[1fr_auto_auto] items-center gap-x-4 border-t border-line py-2.5 text-[13px]"
-            >
-              <span class="text-ink">{{ linkedTitle(t) }}</span>
-              <span class="text-muted">{{ formatInstant(t.registeredAt) }}</span>
-              <span class="text-right font-bold" :class="t.type === 'CARD_PAYMENT' ? 'text-income' : 'text-expense'">
-                {{ t.type === 'CARD_PAYMENT' ? '+' : '-' }} {{ formatMoney(t.amount) }}
-              </span>
+            <!-- Capped at 6 rows before this scrolls internally — the header row above and
+                 the actions below stay put regardless of how long the list gets. 248px is
+                 measured, not guessed: each row renders at 40.5px, so max-h-60 (240px, the
+                 token DashboardView's own list uses) clipped the 6th row by a couple of
+                 pixels — verified with Playwright against a card with 8 linked expenses. -->
+            <div class="max-h-[248px] overflow-y-auto pr-1">
+              <div
+                v-for="t in linkedTransactions"
+                :key="t.id"
+                class="grid grid-cols-[1fr_auto_auto] items-center gap-x-4 border-t border-line py-2.5 text-[13px]"
+              >
+                <span class="text-ink">{{ linkedTitle(t) }}</span>
+                <span class="text-muted">{{ formatInstant(t.registeredAt) }}</span>
+                <span class="text-right font-bold" :class="t.type === 'CARD_PAYMENT' ? 'text-income' : 'text-expense'">
+                  {{ t.type === 'CARD_PAYMENT' ? '+' : '-' }} {{ formatMoney(t.amount) }}
+                </span>
+              </div>
             </div>
           </template>
           <p v-else class="border-t border-line pt-3 text-[13px] text-muted">Sin gastos vinculados todavía.</p>

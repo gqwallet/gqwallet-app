@@ -8,6 +8,10 @@ const routes: RouteRecordRaw[] = [
   { path: '/welcome', name: 'welcome', component: () => import('@/modules/iam/views/WelcomeView.vue'), meta: { public: true } },
   { path: '/sign-up', name: 'sign-up', component: () => import('@/modules/iam/views/SignUpView.vue'), meta: { public: true } },
   { path: '/sign-in', name: 'sign-in', component: () => import('@/modules/iam/views/SignInView.vue'), meta: { public: true } },
+  // No `public`/`requiresAuth` meta on purpose: reachable by anonymous visitors (from Sign Up)
+  // and by already-authenticated users alike (e.g. a future link from ProfileSettingsView),
+  // unlike the routes above which bounce a signed-in user back to /dashboard.
+  { path: '/terms', name: 'terms', component: () => import('@/modules/iam/views/TermsView.vue') },
 
   // Protected, standalone (own minimal chrome)
   { path: '/onboarding', name: 'onboarding', component: () => import('@/modules/profiles/views/OnboardingView.vue'), meta: { requiresAuth: true } },
