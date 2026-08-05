@@ -27,7 +27,7 @@ export function useCardDetail(cardId: string) {
   // next-billing projection, never recomputed from linkedTotal (NFR-004).
   const amountDue = computed(() => nextBilling.value?.amountDue ?? null);
 
-  // FR-019/FR-021: a payment is possible whenever ANY selectable cycle still carries a
+  // FR-019/FR-018: a payment is possible whenever ANY selectable cycle still carries a
   // balance — not just the currently-open one. Deriving this from `amountDue` alone left
   // the "pay" action disabled once the open cycle was settled, even when an earlier cycle
   // (which must be settled first, see assertWithinOutstandingBalance) still owed something.

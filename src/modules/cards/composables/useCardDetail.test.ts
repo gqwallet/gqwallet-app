@@ -62,7 +62,7 @@ describe('useCardDetail', () => {
     expect(amountDue.value).toBe(0);
   });
 
-  // FR-019/FR-021: the current cycle can be fully settled while a later one still owes —
+  // FR-019/FR-018: the current cycle can be fully settled while a later one still owes —
   // the "pay" action must stay available for that later cycle instead of reading amountDue
   // (which only ever reflects the currently-open cycle) in isolation.
   it('reports an outstanding balance from a later cycle even when the current one is settled', async () => {
