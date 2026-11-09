@@ -8,7 +8,8 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router';
 import { beforeEach, expect, it, vi } from 'vitest';
 import { FixedPaymentFormPage } from '@/pages/FixedPaymentFormPage';
-import type { FixedPayment, PaymentDue } from '@/types/obligation';
+import { useFixedPaymentForm } from '@/hooks/useFixedPaymentForm';
+import type { FixedPayment, FixedPaymentKind, PaymentDue } from '@/types/obligation';
 
 const { update } = vi.hoisted(() => ({ update: vi.fn() }));
 const payment: FixedPayment = {
@@ -24,10 +25,10 @@ const due: PaymentDue = {
 vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ profile: { preferredCurrency: 'PEN' } }) }));
 vi.mock('@/context/ToastContext', () => ({ useToast: () => ({ notify: vi.fn() }) }));
 vi.mock('@/hooks/useFixedPaymentForm', () => ({
-  useFixedPaymentForm: () => ({
+  useFixedPaymentForm: vi.fn(() => ({
     data: { fixedPayment: payment, dues: [due], categories: [{ id: 'c1', name: 'Servicios' }], accounts: [], cards: [] },
     isLoading: false, error: null, register: vi.fn(), update, finish: vi.fn(), isSaving: false, saveError: null,
-  }),
+  })),
 }));
 beforeEach(() => { vi.clearAllMocks(); update.mockResolvedValue(null); });
 
@@ -44,4 +45,20 @@ it('includes the saved paid count in the update payload', async () => {
     description: 'iPhone 16 Pro', budgetCategoryId: 'c1', amount: 250, dueDay: 28,
     paidInstallments: 13, usualPaymentMethodKind: null, usualInstrumentId: null,
   }));
+});
+
+const chargeKinds: FixedPaymentKind[] = ['HOUSEHOLD_SERVICES', 'SUBSCRIPTIONS', 'MEMBERSHIPS'];
+
+it.each(chargeKinds)('describes the pending history entry as a charge for %s', (kind) => {
+  vi.mocked(useFixedPaymentForm).mockReturnValueOnce({
+    data: {
+      fixedPayment: { ...payment, kind, totalInstallments: null, paidInstallments: 0 },
+      dues: [{ ...due, kind, installment: null }], categories: [], accounts: [], cards: [],
+    },
+    isLoading: false, error: null, register: vi.fn(), update, finish: vi.fn(), isSaving: false, saveError: null,
+  });
+  render(<MemoryRouter><FixedPaymentFormPage /></MemoryRouter>);
+  expect(screen.getByText(/Se cobra el 28 oct/)).toBeInTheDocument();
+  expect(screen.getByText('Pendiente')).toBeInTheDocument();
+  expect(screen.getByRole('heading', { name: 'Vencimientos' })).toBeInTheDocument();
 });

@@ -121,8 +121,8 @@ export function useFixedPayments(): FixedPaymentsState {
     isSettling: write.isSubmitting,
     settleError: write.error
       ? write.error.status === 409
-        ? 'Este vencimiento ya estaba pagado.'
-        : 'Ingresa un monto mayor a cero y un medio de pago de la misma moneda. El vencimiento sigue pendiente.'
+        ? 'Este pago ya estaba registrado.'
+        : 'Ingresa un monto mayor a cero y un medio de pago de la misma moneda. El pago sigue pendiente.'
       : null,
     resetSettle: write.reset,
   };

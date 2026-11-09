@@ -30,6 +30,8 @@ export interface DashboardCard {
   currency: Currency;
   /** Payment due date (ISO date). */
   paymentDueDate: string;
+  /** Billing date of the same cycle as the payment due date (ISO date). */
+  billingDate: string;
   /** Identifier color as `#RRGGBB`. */
   color: string;
   /** Amount due of the next billing. */

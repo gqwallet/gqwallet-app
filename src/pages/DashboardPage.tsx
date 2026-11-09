@@ -44,8 +44,7 @@ export function DashboardPage() {
     return <EmptyState icon="error" title="No pudimos cargar tu dashboard" text="Revisa tu conexión e inténtalo de nuevo." action={<Button label="Reintentar" onClick={refetch} />} />;
   }
 
-  const { dashboard, dues, budget, cards } = data;
-  const billingDates = Object.fromEntries(cards.map((card) => [card.id, card.billingDate]));
+  const { dashboard, dues, budget } = data;
   const newMovement = <Button key="new" label="Nuevo movimiento" icon="add" onClick={() => navigate(PATHS.newTransaction)} />;
   const currencyPicker = (
     <div className="mb-4 flex flex-col gap-2">
@@ -129,7 +128,6 @@ export function DashboardPage() {
         <div className="flex flex-col gap-4 lg:gap-6">
           <UpcomingCardsCard
             cards={dashboard.upcomingCards}
-            billingDates={billingDates}
             action={<Button label="Ver tarjetas" variant="ghost" onClick={() => navigate(PATHS.cards)} />}
             onSelect={(id) => navigate(withId(PATHS.card, id))}
           />

@@ -19,6 +19,7 @@ function setup(payment?: FixedPayment) {
   const onSubmit = vi.fn();
   render(<FixedPaymentForm id="fixed-payment" initial={payment} categories={[{ value: 'c1', label: 'Otros gastos' }]} means={[]} defaultCurrency="PEN" today="2026-10-15" onSubmit={onSubmit} />);
   if (!payment) {
+    fireEvent.change(screen.getByLabelText('Categoría fija'), { target: { value: 'INSTALLMENT_PURCHASE' } });
     fireEvent.change(screen.getByLabelText('Descripción'), { target: { value: 'iPhone 16 Pro' } });
     fireEvent.change(screen.getByLabelText('Categoría de gasto para el presupuesto'), { target: { value: 'c1' } });
     fireEvent.change(screen.getByLabelText('Monto mensual'), { target: { value: '250' } });
@@ -35,6 +36,64 @@ function submit() {
 }
 
 describe('FixedPaymentForm', () => {
+  it.each(['DEBT', 'INSTALLMENT_PURCHASE'])('allows installments for %s', (kind) => {
+    const onSubmit = setup();
+    change('Categoría fija', kind);
+    change('Número total de cuotas', '24');
+    change('Cuotas ya pagadas', '13');
+    submit();
+    expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ kind, totalInstallments: 24, paidInstallments: 13 }));
+  });
+
+  it.each(['HOUSEHOLD_SERVICES', 'SUBSCRIPTIONS', 'MEMBERSHIPS', 'RENT'])('ignores previous installment values when changing to %s', (kind) => {
+    const onSubmit = setup();
+    change('Número total de cuotas', '0');
+    submit();
+    change('Número total de cuotas', '24');
+    change('Cuotas ya pagadas', '-1');
+    submit();
+    change('Categoría fija', kind);
+    expect(screen.queryByLabelText('Número total de cuotas')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('Cuotas ya pagadas')).not.toBeInTheDocument();
+    submit();
+    expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ kind, totalInstallments: null, paidInstallments: null }));
+  });
+
+  it.each(['HOUSEHOLD_SERVICES', 'SUBSCRIPTIONS', 'MEMBERSHIPS'])('uses charge wording and day validation for %s', (kind) => {
+    const onSubmit = setup();
+    change('Categoría fija', kind);
+    expect(screen.getByLabelText('Día de cobro')).toBeInTheDocument();
+    expect(screen.getByText('El día del mes en que te cobran. Si el mes tiene menos días, se cobra el último día.')).toBeInTheDocument();
+    expect(screen.queryByLabelText('Día de vencimiento')).not.toBeInTheDocument();
+    change('Día de cobro', '32');
+    submit();
+    expect(screen.getByText('Elige un día entre 1 y 31.')).toBeInTheDocument();
+    expect(onSubmit).not.toHaveBeenCalled();
+  });
+
+  it.each(['DEBT', 'RENT', 'INSTALLMENT_PURCHASE'])('preserves due wording for %s', (kind) => {
+    setup();
+    change('Categoría fija', kind);
+    expect(screen.getByLabelText('Día de vencimiento')).toBeInTheDocument();
+    expect(screen.getByText('Si el mes tiene menos días, vence el último día del mes.')).toBeInTheDocument();
+  });
+
+  it('starts with a charge day and no installment fields', () => {
+    render(<FixedPaymentForm id="fp" categories={[]} means={[]} defaultCurrency="PEN" today="2026-11-09" onSubmit={vi.fn()} />);
+    expect(screen.getByLabelText('Día de cobro')).toBeInTheDocument();
+    expect(screen.queryByLabelText('Número total de cuotas')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('Cuotas ya pagadas')).not.toBeInTheDocument();
+  });
+
+  it('discards legacy installments when editing a charge kind', () => {
+    const onSubmit = setup({ ...initial, kind: 'SUBSCRIPTIONS' });
+    expect(screen.getByLabelText('Día de cobro')).toBeInTheDocument();
+    expect(screen.queryByLabelText('Número total de cuotas')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('Cuotas ya pagadas')).not.toBeInTheDocument();
+    submit();
+    expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ totalInstallments: null, paidInstallments: null }));
+  });
+
   it('shows the numeric paid field only when total installments has a value', () => {
     setup();
     expect(screen.queryByLabelText('Cuotas ya pagadas')).not.toBeInTheDocument();
@@ -108,6 +167,8 @@ describe('FixedPaymentForm', () => {
     submit();
     expect(screen.getByText('Si indicas cuotas, deben ser mayores a cero.')).toBeInTheDocument();
     expect(screen.queryByText(/Próxima: cuota/)).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('Cuotas ya pagadas')).not.toBeInTheDocument();
+    expect(screen.queryByText(/Numeramos de/)).not.toBeInTheDocument();
     expect(onSubmit).not.toHaveBeenCalled();
   });
 

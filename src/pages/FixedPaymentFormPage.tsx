@@ -14,6 +14,7 @@ import { useToast } from '@/context/ToastContext';
 import { useFixedPaymentForm } from '@/hooks/useFixedPaymentForm';
 import { PATHS } from '@/navigation/paths';
 import type { RegisterFixedPaymentInput } from '@/types/obligation';
+import { chargesOnDay } from '@/utils/fixedPaymentKinds';
 import { formatMoney, formatMonth, formatShortDate, shiftMonth, monthOf, todayIso } from '@/utils/format';
 import { FIXED_KIND_ICON, FIXED_KIND_LABEL } from '@/utils/options';
 
@@ -39,6 +40,7 @@ export function FixedPaymentFormPage() {
   if (error || !data || (id && !data.fixedPayment)) return <EmptyState icon="error" title="No pudimos cargar el pago fijo" />;
 
   const payment = data.fixedPayment;
+  const dueNoun = payment && chargesOnDay(payment.kind) ? 'cobro' : 'vencimiento';
   const means = [
     ...data.accounts.map((account) => ({ value: `ACCOUNT:${account.id}`, label: `${account.alias} · ${account.currency}`, currency: account.currency })),
     ...data.cards.map((card) => ({ value: `CARD:${card.id}`, label: `${card.name} · ${card.currency}`, currency: card.currency })),
@@ -63,16 +65,17 @@ export function FixedPaymentFormPage() {
         navigate(PATHS.fixedPaymentsSummary);
       }
     } else if (await register(input)) {
+      const registeredDueNoun = chargesOnDay(input.kind) ? 'cobro' : 'vencimiento';
       notify({
         title: 'Pago fijo registrado',
-        detail: input.startMonth === monthOf(todayIso()) ? `${input.description}: su vencimiento de este mes ya aparece en tus pagos fijos.` : `${input.description}: el primer vencimiento aparecerá en ${formatMonth(input.startMonth, true).toLowerCase()}.`,
+        detail: input.startMonth === monthOf(todayIso()) ? `${input.description}: su ${registeredDueNoun} de este mes ya aparece en tus pagos fijos.` : `${input.description}: el primer ${registeredDueNoun} aparecerá en ${formatMonth(input.startMonth, true).toLowerCase()}.`,
       });
       navigate(PATHS.fixedPayments);
     }
   };
   const handleFinish = async () => {
     if (await finish()) {
-      notify({ title: 'Pago fijo finalizado', detail: `${payment?.description ?? ''} ya no generará vencimientos.` });
+      notify({ title: 'Pago fijo finalizado', detail: `${payment?.description ?? ''} ya no generará ${dueNoun}s.` });
       navigate(PATHS.fixedPaymentsSummary);
     }
   };
@@ -111,14 +114,14 @@ export function FixedPaymentFormPage() {
         {payment && (
           <Card title="Vencimientos">
             {data.dues.length === 0 ? (
-              <p className="text-body text-content-secondary">Aún no hay vencimientos generados.</p>
+              <p className="text-body text-content-secondary">Aún no hay {dueNoun}s generados.</p>
             ) : (
               data.dues.map((due) => (
                 <ListRow
                   key={due.id}
                   icon={FIXED_KIND_ICON[payment.kind]}
                   title={due.installment ? `Cuota ${due.installment}` : formatMonth(due.dueDate.slice(0, 7), true)}
-                  detail={due.status === 'PAID' ? `Pagado · ${due.usualInstrumentId ? names[due.usualInstrumentId] ?? '' : ''}`.replace(/ · $/, '') : formatShortDate(due.dueDate, true)}
+                  detail={due.status === 'PAID' ? `Pagado · ${due.usualInstrumentId ? names[due.usualInstrumentId] ?? '' : ''}`.replace(/ · $/, '') : chargesOnDay(due.kind) ? `Se cobra el ${formatShortDate(due.dueDate, true)}` : formatShortDate(due.dueDate, true)}
                   badge={<Badge label={due.status === 'PAID' ? 'Pagado' : due.status === 'VOIDED' ? 'Anulado' : 'Pendiente'} tone={due.status === 'PAID' ? 'success' : due.status === 'VOIDED' ? 'neutral' : 'warning'} />}
                   amount={formatMoney(due.paidAmount ?? due.expectedAmount, due.currency)}
                 />
@@ -131,7 +134,7 @@ export function FixedPaymentFormPage() {
         isOpen={isFinishOpen}
         icon="event_busy"
         title={`¿Finalizar ${payment?.description ?? ''}?`}
-        description={`Dejará de generar vencimientos desde ${formatMonth(shiftMonth(monthOf(todayIso()), 1), true).toLowerCase()}. Los vencimientos pagados se conservan en tu historial.`}
+        description={`Dejará de generar ${dueNoun}s desde ${formatMonth(shiftMonth(monthOf(todayIso()), 1), true).toLowerCase()}. Los ${dueNoun}s pagados se conservan en tu historial.`}
         onClose={() => setIsFinishOpen(false)}
         footer={
           <>

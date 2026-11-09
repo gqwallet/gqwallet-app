@@ -13,7 +13,6 @@ import { overviewService } from '@/services/overview.service';
 import { transactionsService } from '@/services/transactions.service';
 import type { ApiError, Currency } from '@/types/api';
 import type { BudgetStatus } from '@/types/budget';
-import type { Card } from '@/types/card';
 import type { PaymentDue, UpcomingDues } from '@/types/obligation';
 import type { Dashboard } from '@/types/overview';
 import { monthOf, monthRange, todayIso } from '@/utils/format';
@@ -26,8 +25,6 @@ export interface DashboardData {
   dues: UpcomingDues;
   /** Budget table of the current month. */
   budget: BudgetStatus;
-  /** Cards of the currency, to show billing dates. */
-  cards: Card[];
   /** Number of incomes of the month. */
   incomeCount: number;
   /** Number of expenses of the month. */
@@ -65,7 +62,7 @@ function byCurrency(dues: UpcomingDues, currency: Currency): UpcomingDues {
 
 /**
  * Loads the dashboard of a currency, combining the server dashboard with the grouped dues, the
- * budget table, the cards and the month counters.
+ * budget table and the month counters; card presence also determines the empty state.
  *
  * @param currency - Currency to show.
  * @returns Data, loading flag, error and refetch.
@@ -96,7 +93,6 @@ export function useDashboard(currency: Currency): DashboardState {
         dashboard,
         dues: grouped,
         budget,
-        cards: cards.filter((card) => card.currency === currency),
         incomeCount: incomes.totalElements,
         expenseCount: expenses.totalElements,
         monthDues: ofCurrency.length,

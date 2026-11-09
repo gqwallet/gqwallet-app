@@ -7,6 +7,7 @@
 import { Fragment } from 'react';
 import { Badge, ListRow, Overline } from '@/components/ui';
 import type { PaymentDue, UpcomingDues } from '@/types/obligation';
+import { chargesOnDay } from '@/utils/fixedPaymentKinds';
 import { formatMoney, formatShortDate } from '@/utils/format';
 import { FIXED_KIND_ICON, FIXED_KIND_LABEL } from '@/utils/options';
 
@@ -31,7 +32,7 @@ function addDays(iso: string, days: number): string {
 }
 
 function detailOf(due: PaymentDue, isOverdue: boolean, instrumentNames: Record<string, string>, isCompact: boolean): string {
-  const parts = [FIXED_KIND_LABEL[due.kind], isOverdue ? `vencía ${formatShortDate(due.dueDate)}` : formatShortDate(due.dueDate)];
+  const parts = [FIXED_KIND_LABEL[due.kind], chargesOnDay(due.kind) ? `se cobra el ${formatShortDate(due.dueDate)}` : isOverdue ? `vencía ${formatShortDate(due.dueDate)}` : formatShortDate(due.dueDate)];
   if (due.installment) parts.push(`cuota ${due.installment}`);
   else if (!isCompact) parts.push(due.usualInstrumentId ? instrumentNames[due.usualInstrumentId] ?? 'medio habitual' : 'sin medio habitual');
   return parts.join(' · ');
@@ -66,9 +67,9 @@ export function DueGroups({ dues, today, instrumentNames = {}, onSelect, isCompa
                 icon={FIXED_KIND_ICON[due.kind]}
                 title={due.description}
                 detail={detailOf(due, Boolean(group.isOverdue), instrumentNames, isCompact)}
-                badge={group.isOverdue ? <Badge label="Vencido" tone="danger" className="hidden sm:inline-flex" /> : undefined}
+                badge={group.isOverdue ? <Badge label={chargesOnDay(due.kind) ? 'Cobro pendiente' : 'Vencido'} tone="danger" className="hidden sm:inline-flex" /> : undefined}
                 amount={formatMoney(due.expectedAmount, due.currency)}
-                meta={group.isOverdue ? <span className="text-danger sm:hidden">Vencido</span> : due.currency}
+                meta={group.isOverdue ? <span className="text-danger sm:hidden">{chargesOnDay(due.kind) ? 'Cobro pendiente' : 'Vencido'}</span> : due.currency}
                 onClick={onSelect ? () => onSelect(due) : undefined}
               />
             ))}
