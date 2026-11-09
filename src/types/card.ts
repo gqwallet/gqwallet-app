@@ -24,6 +24,8 @@ export interface Card {
   creditLine: number;
   /** Next billing date (ISO date). */
   billingDate: string;
+  /** Optional closing-day cut-off as `HH:mm`, in five-minute increments. */
+  billingCutoffTime: string | null;
   /** Next payment due date (ISO date). */
   paymentDueDate: string;
   /** Identifier color as `#RRGGBB`. */
@@ -46,6 +48,8 @@ export interface RegisterCardInput {
   creditLine: number;
   /** Billing date (ISO date). */
   billingDate: string;
+  /** Optional closing-day cut-off as `HH:mm`, in five-minute increments. */
+  billingCutoffTime: string | null;
   /** Payment due date (ISO date); after the billing date. */
   paymentDueDate: string;
   /** Identifier color. */
