@@ -36,6 +36,8 @@ export interface FixedPayment {
   startMonth: string;
   /** Number of installments for installment purchases. */
   totalInstallments: number | null;
+  /** Installments paid before registration, excluded from generated dues and expenses. */
+  paidInstallments: number;
   /** Active or finished. */
   status: FixedPaymentStatus;
 }
@@ -58,6 +60,8 @@ export interface RegisterFixedPaymentInput {
   startMonth: string;
   /** Installments, when applicable. */
   totalInstallments: number | null;
+  /** Previously paid installments, or `null` when there is no installment total. */
+  paidInstallments: number | null;
   /** Usual means of payment. */
   usualPaymentMethodKind: PaymentMethodKind | null;
   /** Usual account or card. */
@@ -74,6 +78,8 @@ export interface UpdateFixedPaymentInput {
   amount: number;
   /** Due day. */
   dueDay: number;
+  /** Previously paid installments, preserved from registration; `null` without a total. */
+  paidInstallments: number | null;
   /** Usual means of payment. */
   usualPaymentMethodKind: PaymentMethodKind | null;
   /** Usual account or card. */

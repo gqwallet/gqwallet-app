@@ -139,6 +139,20 @@ test('a new user manages her finances end to end', async ({ page }) => {
     await expect(page.getByText('S/ 1,188.00')).toBeVisible();
   });
 
+  await test.step('registers an installment purchase with thirteen installments already paid', async () => {
+    await page.goto('/pagos-fijos/nuevo');
+    await page.getByLabel('Descripción', { exact: true }).fill('iPhone 16 Pro');
+    await page.getByLabel('Categoría fija', { exact: true }).selectOption({ label: 'Consumo en cuotas' });
+    await page.getByLabel('Categoría de gasto para el presupuesto', { exact: true }).selectOption({ label: 'Servicios' });
+    await page.getByLabel('Monto mensual', { exact: true }).fill('250');
+    await page.getByLabel('Día de vencimiento', { exact: true }).fill('28');
+    await page.getByLabel('Número total de cuotas', { exact: true }).fill('24');
+    await page.getByLabel('Cuotas ya pagadas', { exact: true }).fill('13');
+    await page.getByRole('button', { name: 'Guardar pago fijo' }).click();
+    await expect(page.getByText('Pago fijo registrado')).toBeVisible();
+    await expect(page.getByRole('button', { name: /iPhone 16 Pro/ })).toContainText('cuota 14/24');
+  });
+
   await test.step('pays the card and transfers between accounts without touching totals (FR-023, FR-028)', async () => {
     await page.goto('/transferencias/nueva');
     await page.getByLabel('Cuenta de destino', { exact: true }).selectOption({ label: 'Interbank Ahorro · PEN' });

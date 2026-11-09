@@ -6,7 +6,7 @@
  */
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-vi.mock('@/services/obligations.service', () => ({ obligationsService: { get: vi.fn(() => Promise.resolve({ id: 'f1' })), listDues: vi.fn(() => Promise.resolve([{ fixedPaymentId: 'f1', dueDate: '2026-05-15' }, { fixedPaymentId: 'f2', dueDate: '2026-06-15' }])), register: vi.fn(() => Promise.resolve({})), update: vi.fn(() => Promise.resolve({})), finish: vi.fn(() => Promise.resolve({ id: 'f1' })) } }));
+vi.mock('@/services/obligations.service', () => ({ obligationsService: { get: vi.fn(() => Promise.resolve({ id: 'f1', paidInstallments: 0 })), listDues: vi.fn(() => Promise.resolve([{ fixedPaymentId: 'f1', dueDate: '2026-05-15' }, { fixedPaymentId: 'f2', dueDate: '2026-06-15' }])), register: vi.fn(() => Promise.resolve({ paidInstallments: 0 })), update: vi.fn(() => Promise.resolve({ paidInstallments: 0 })), finish: vi.fn(() => Promise.resolve({ id: 'f1', paidInstallments: 0 })) } }));
 import { obligationsService } from '@/services/obligations.service';
 vi.mock('@/services/transactions.service', () => ({ transactionsService: { listCategories: vi.fn(() => Promise.resolve([])) } }));
 vi.mock('@/services/accounts.service', () => ({ accountsService: { list: vi.fn(() => Promise.resolve([])) } }));
