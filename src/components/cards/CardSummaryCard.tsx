@@ -52,7 +52,7 @@ export function CardSummaryCard({ card, usage, nextBilling, onOpen, onPay, onEdi
       <ProgressBar value={Math.max(percent, usage.used > 0 ? 2 : 0)} tone={cardTone(card.color)} label={`Línea utilizada de ${card.name}`} className="mb-3" />
       <BreakdownRow label="Línea disponible" value={money(usage.available)} tone="income" />
       {usage.creditBalance > 0 && <BreakdownRow label="Saldo a favor" value={money(usage.creditBalance)} tone="income" />}
-      <BreakdownRow label={billed ? `Total a pagar · facturó el ${formatShortDate(nextBilling.billingDate)}` : 'Total a pagar'} value={money(nextBilling.amountDue)} />
+      <BreakdownRow label={`Total a pagar · ${billed ? 'facturó' : 'factura'} el ${formatShortDate(nextBilling.billingDate)}`} value={money(nextBilling.amountDue)} />
       <div className="mt-4 flex flex-wrap gap-3">
         {hasDue ? (
           <>
