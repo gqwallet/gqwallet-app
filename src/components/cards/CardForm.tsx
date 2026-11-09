@@ -73,7 +73,8 @@ export function CardForm({ id, banks, initial, hasMovements = false, defaultCurr
     const next: Errors = {};
     if (!name.trim()) next.name = 'Ingresa un nombre.';
     if (line === null || line <= 0) next.creditLine = 'Ingresa una línea de crédito mayor a cero.';
-    if (Number(paymentDay) < Number(billingDay)) next.paymentDay = 'La fecha de pago no puede ser anterior a la fecha de facturación.';
+    // A payment day before the billing day falls in the following month (billing 10, payment 05 of next month).
+    if (Number(paymentDay) === Number(billingDay)) next.paymentDay = 'El día de pago no puede ser el mismo día de facturación.';
     if (insurance.trim() && (percent === null || percent < 0 || percent > 100)) next.insurance = 'Ingresa un porcentaje entre 0 % y 100 %.';
     if (!bank || (bank === 'OTHER' && (!customBankName.trim() || customBankName.trim().length > 150))) next.bank = 'Selecciona un banco o ingresa su nombre (máximo 150 caracteres).';
     setErrors(next);
@@ -101,7 +102,14 @@ export function CardForm({ id, banks, initial, hasMovements = false, defaultCurr
         />
         <TextField label="Línea de crédito" inputMode="decimal" value={creditLine} onChange={setCreditLine} error={errors.creditLine} />
         <SelectField label="Día de facturación" value={billingDay} options={DAYS} onChange={setBillingDay} />
-        <SelectField label="Día de pago" value={paymentDay} options={DAYS} onChange={setPaymentDay} error={errors.paymentDay} />
+        <SelectField
+          label="Día de pago"
+          value={paymentDay}
+          options={DAYS}
+          onChange={setPaymentDay}
+          helper={Number(paymentDay) < Number(billingDay) ? 'Se paga en el mes siguiente al corte.' : 'Se paga en el mismo mes del corte.'}
+          error={errors.paymentDay}
+        />
         <TextField label="Seguro desgravamen (%)" inputMode="decimal" value={insurance} onChange={setInsurance} helper="Opcional. Entre 0 % y 100 %." error={errors.insurance} />
       </div>
       <div className="flex flex-col gap-1.5">
