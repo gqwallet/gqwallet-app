@@ -1,17 +1,25 @@
-import { defineConfig } from 'vite'
-import { fileURLToPath, URL } from 'node:url'
-import vue from '@vitejs/plugin-vue'
-import tailwindcss from '@tailwindcss/vite'
+/**
+ * Vite configuration: React, Tailwind CSS and the `@` alias, shared with Vitest.
+ *
+ * @author G0nz4loQu3dena
+ * @packageDocumentation
+ */
+import { fileURLToPath, URL } from 'node:url';
+import { defineConfig } from 'vitest/config';
+import react from '@vitejs/plugin-react';
+import tailwindcss from '@tailwindcss/vite';
 
-// https://vite.dev/config/
 export default defineConfig({
-  plugins: [vue(), tailwindcss()],
+  plugins: [react(), tailwindcss()],
   resolve: {
-    alias: {
-      '@': fileURLToPath(new URL('./src', import.meta.url)),
-    },
+    alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
   },
-  server: {
-    port: 5173,
+  server: { port: 5173 },
+  test: {
+    environment: 'jsdom',
+    globals: true,
+    setupFiles: ['./src/test/setup.ts'],
+    include: ['src/**/*.test.{ts,tsx}'],
+    css: false,
   },
-})
+});
