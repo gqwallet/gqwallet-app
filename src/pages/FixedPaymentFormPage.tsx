@@ -54,6 +54,7 @@ export function FixedPaymentFormPage() {
         budgetCategoryId: input.budgetCategoryId,
         amount: input.amount,
         dueDay: input.dueDay,
+        paidInstallments: input.paidInstallments,
         usualPaymentMethodKind: input.usualPaymentMethodKind,
         usualInstrumentId: input.usualInstrumentId,
       });

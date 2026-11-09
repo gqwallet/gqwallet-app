@@ -11,7 +11,8 @@ import type { Currency } from '@/types/api';
 import type { FixedPayment, FixedPaymentKind, RegisterFixedPaymentInput } from '@/types/obligation';
 import type { PaymentMethodKind } from '@/types/transaction';
 import { clampMonth } from '@/utils/dateLimits';
-import { formatAmount, monthOf } from '@/utils/format';
+import { formatAmount, formatMonth, monthOf } from '@/utils/format';
+import { installmentEndMonth } from '@/utils/installments';
 import { CURRENCY_OPTIONS, FIXED_KIND_LABEL, toOptions } from '@/utils/options';
 import { parseAmount } from '@/utils/parse';
 
@@ -51,6 +52,7 @@ interface Errors {
   amount?: string;
   dueDay?: string;
   installments?: string;
+  paidInstallments?: string;
 }
 
 /**
@@ -70,21 +72,28 @@ export function FixedPaymentForm({ id, initial, initialMeans = '', categories, m
   const [dueDay, setDueDay] = useState(String(initial?.dueDay ?? 1));
   const [startMonth, setStartMonth] = useState(initial?.startMonth ?? clampMonth(monthOf(today)));
   const [installments, setInstallments] = useState(initial?.totalInstallments ? String(initial.totalInstallments) : '');
+  const [paidInstallments, setPaidInstallments] = useState(initial ? String(initial.paidInstallments) : '');
   const [usual, setUsual] = useState(initialMeans);
   const [errors, setErrors] = useState<Errors>({});
   const isEdit = Boolean(initial);
+  const total = installments.trim() ? Number(installments) : null;
+  const paid = total !== null ? Number(paidInstallments.trim() || '0') : null;
+  const endMonth = installmentEndMonth(startMonth, total, paid ?? 0);
 
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
     const value = parseAmount(amount);
     const day = Number(dueDay);
-    const total = installments.trim() ? Number(installments) : null;
     const next: Errors = {};
     if (!description.trim()) next.description = 'Ingresa una descripción.';
     if (!categoryId) next.categoryId = 'Elige la categoría de gasto que afectará tu presupuesto.';
     if (value === null || value <= 0) next.amount = 'Ingresa un monto mayor a cero.';
     if (!Number.isInteger(day) || day < 1 || day > 31) next.dueDay = 'Elige un día entre 1 y 31.';
     if (total !== null && (!Number.isInteger(total) || total <= 0)) next.installments = 'Si indicas cuotas, deben ser mayores a cero.';
+    if (paid !== null) {
+      if (!Number.isInteger(paid) || paid < 0) next.paidInstallments = 'Ingresa un número entero desde 0.';
+      else if (total !== null && Number.isInteger(total) && total > 0 && paid >= total) next.paidInstallments = 'Deben ser menos que el número total de cuotas.';
+    }
     setErrors(next);
     if (Object.keys(next).length || value === null) return;
     const [meansKind, meansId] = usual ? usual.split(':') : [null, null];
@@ -97,6 +106,7 @@ export function FixedPaymentForm({ id, initial, initialMeans = '', categories, m
       dueDay: day,
       startMonth,
       totalInstallments: total,
+      paidInstallments: paid,
       usualPaymentMethodKind: meansKind as PaymentMethodKind | null,
       usualInstrumentId: meansId,
     });
@@ -141,9 +151,25 @@ export function FixedPaymentForm({ id, initial, initialMeans = '', categories, m
           value={installments}
           onChange={setInstallments}
           disabled={isEdit}
-          helper={isEdit ? undefined : `Opcional. Numeramos de 1/${installments || 'N'} a ${installments || 'N'}/${installments || 'N'} y lo finalizamos tras la última.`}
+          helper={isEdit ? undefined : `Opcional. Numeramos de ${paid !== null && Number.isInteger(paid) && paid > 0 ? paid + 1 : 1}/${installments || 'N'} a ${installments || 'N'}/${installments || 'N'} y lo finalizamos tras la última.`}
           error={errors.installments}
         />
+        {total !== null && (
+          <TextField
+            label="Cuotas ya pagadas"
+            inputMode="numeric"
+            value={paidInstallments}
+            onChange={setPaidInstallments}
+            disabled={isEdit}
+            helper={
+              <>
+                Opcional. Las que pagaste antes de usar GQWallet: no se registran como gastos.
+                {endMonth && <span className="block">Próxima: cuota {(paid ?? 0) + 1} de {total} · termina en {formatMonth(endMonth, true).toLowerCase()}</span>}
+              </>
+            }
+            error={errors.paidInstallments}
+          />
+        )}
         <SelectField
           label="Medio de pago habitual"
           value={usual}
