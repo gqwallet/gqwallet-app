@@ -10,7 +10,7 @@ import { useResource } from '@/hooks/useResource';
 import { accountsService } from '@/services/accounts.service';
 import { cardsService } from '@/services/cards.service';
 import { transactionsService } from '@/services/transactions.service';
-import type { Card, CreditLineUsage, NextBilling } from '@/types/card';
+import type { BillingCycleOption, Card, CreditLineUsage, NextBilling, PaymentCycle } from '@/types/card';
 import type { PayingAccount } from '@/hooks/useCards';
 import { parseIsoDate, toIsoDate } from '@/utils/format';
 
@@ -36,10 +36,12 @@ export interface CardDetailData {
   usage: CreditLineUsage;
   /** Next billing. */
   nextBilling: NextBilling;
+  /** Payable and current cycles returned by the server. */
+  paymentCycles: PaymentCycle[];
+  /** Server-confirmed options for editing opening debt. */
+  billingCycles: BillingCycleOption[];
   /** Expenses of the current cycle, newest first. */
   expenses: CycleExpense[];
-  /** Total consumption ever charged to the card. */
-  consumption: number;
   /** Accounts that can pay the card. */
   accounts: PayingAccount[];
 }
@@ -56,13 +58,14 @@ export interface CardDetailData {
  */
 export function useCardDetail(id: string) {
   const resource = useResource(id ? async (signal) => {
-    const [card, usage, nextBilling, categories, accounts, all] = await Promise.all([
+    const [card, usage, nextBilling, categories, accounts, paymentCycles, billingCycles] = await Promise.all([
       cardsService.get(id, signal),
       cardsService.getCreditLineUsage(id, signal),
       cardsService.getNextBilling(id, signal),
       transactionsService.listCategories('EXPENSE', signal),
       accountsService.list(signal),
-      transactionsService.list({ instrumentId: id, nature: 'EXPENSE', status: 'ACTIVE', size: 1 }, signal),
+      cardsService.listPaymentCycles(id, signal),
+      cardsService.listBillingCycles(id, signal),
     ]);
     const active = accounts.filter((account) => account.status === 'ACTIVE' && account.currency === card.currency);
     const balances = await Promise.all(active.map((account) => accountsService.getBalance(account.id, undefined, signal)));
@@ -71,7 +74,8 @@ export function useCardDetail(id: string) {
       card,
       usage,
       nextBilling,
-      consumption: all.totals.reduce((sum, entry) => sum + entry.total, 0),
+      paymentCycles,
+      billingCycles,
       names,
       expenses: [] as CycleExpense[],
       accounts: active.map((account, index) => ({ ...account, balance: balances[index].balance })),

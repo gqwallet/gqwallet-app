@@ -12,7 +12,7 @@ import { useToast } from '@/context/ToastContext';
 import { useTransferForm } from '@/hooks/useTransferForm';
 import { PATHS } from '@/navigation/paths';
 import type { TransferKind } from '@/types/transaction';
-import { formatAmount, formatMoney, todayIso } from '@/utils/format';
+import { formatAmount, formatMoney, formatShortDate, todayIso } from '@/utils/format';
 import { parseAmount } from '@/utils/parse';
 import { MIN_DATE } from '@/utils/dateLimits';
 
@@ -34,10 +34,11 @@ export function NewTransferPage() {
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const { notify } = useToast();
-  const { lookups, isLoading, loadError, submit, suggestCardPayment, isSaving, saveError } = useTransferForm();
   const [kind, setKind] = useState<TransferKind>((params.get('tipo') as TransferKind | null) ?? 'ACCOUNT_TO_ACCOUNT');
   const [sourceId, setSourceId] = useState('');
   const [targetId, setTargetId] = useState(params.get('destino') ?? '');
+  const { lookups, isLoading, loadError, submit, paymentCycles, cyclesLoading, cyclesError, isSaving, saveError } = useTransferForm(kind === 'CARD_PAYMENT' ? targetId : undefined);
+  const [closingDate, setClosingDate] = useState('');
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
   const [date, setDate] = useState(todayIso());
@@ -48,15 +49,10 @@ export function NewTransferPage() {
   }, [lookups, sourceId]);
 
   useEffect(() => {
-    if (kind !== 'CARD_PAYMENT' || !targetId) return undefined;
-    let isCurrent = true;
-    void suggestCardPayment(targetId).then((suggested) => {
-      if (isCurrent && suggested !== null) setAmount(formatAmount(suggested));
-    });
-    return () => {
-      isCurrent = false;
-    };
-  }, [kind, targetId, suggestCardPayment]);
+    const oldest = [...paymentCycles].filter((cycle) => Number(cycle.amountDue) > 0).sort((a, b) => a.closingDate.localeCompare(b.closingDate))[0];
+    setClosingDate(oldest?.closingDate ?? '');
+    if (oldest) setAmount(formatAmount(oldest.amountDue));
+  }, [paymentCycles]);
 
   if (isLoading && !lookups) return <Spinner />;
   if (loadError || !lookups) return <EmptyState icon="error" title="No pudimos preparar la transferencia" />;
@@ -81,7 +77,8 @@ export function NewTransferPage() {
     }
     setAmountError(null);
     if (!source || !target || isMismatch) return;
-    if (await submit({ kind, sourceAccountId: source.id, targetId: target.value, amount: value, currency: source.currency, economicDate: date, description: description.trim() || null })) {
+    if (kind === 'CARD_PAYMENT' && (cyclesLoading || cyclesError || !paymentCycles.some((cycle) => cycle.closingDate === closingDate && Number(cycle.amountDue) > 0))) return;
+    if (await submit({ kind, sourceAccountId: source.id, targetId: target.value, amount: value, currency: source.currency, economicDate: date, description: description.trim() || null, cycleClosingDate: kind === 'CARD_PAYMENT' ? closingDate : null })) {
       const money = formatMoney(value, source.currency);
       notify(
         kind === 'ACCOUNT_TO_ACCOUNT'
@@ -131,6 +128,10 @@ export function NewTransferPage() {
                 onChange={setTargetId}
                 error={isMismatch ? 'Las dos cuentas deben tener la misma moneda. El cambio de moneda no está disponible en esta versión.' : null}
               />
+              {kind === 'CARD_PAYMENT' && <SelectField label="Facturación" value={closingDate} options={paymentCycles.filter((cycle) => Number(cycle.amountDue) > 0).map((cycle) => ({ value: cycle.closingDate, label: `Factura el ${formatShortDate(cycle.closingDate, true)} · paga hasta ${formatShortDate(cycle.paymentDueDate, true)}` }))} onChange={(value) => {
+                setClosingDate(value);
+                setAmount(formatAmount(paymentCycles.find((cycle) => cycle.closingDate === value)?.amountDue ?? 0));
+              }} disabled={cyclesLoading} error={cyclesError ? 'No pudimos cargar las facturaciones.' : undefined} />}
               <TextField
                 label="Importe"
                 inputMode="decimal"
@@ -138,7 +139,7 @@ export function NewTransferPage() {
                 value={amount}
                 onChange={setAmount}
                 error={amountError}
-                helper={kind === 'CARD_PAYMENT' ? 'Sugerimos el total a pagar de esta facturación.' : undefined}
+                helper={kind === 'CARD_PAYMENT' ? 'Puedes pagar una parte; el saldo queda pendiente' : undefined}
               />
               <TextField label="Descripción (opcional)" maxLength={120} value={description} onChange={setDescription} />
               <TextField label="Fecha económica" type="date" min={MIN_DATE} value={date} onChange={setDate} />
@@ -162,7 +163,7 @@ export function NewTransferPage() {
             {isMismatch ? (
               <Button label="Elegir otra cuenta" onClick={() => setTargetId('')} />
             ) : (
-              <Button type="submit" label={kind === 'CARD_PAYMENT' ? 'Registrar pago' : kind === 'GOAL_CONTRIBUTION' ? 'Registrar aporte' : 'Registrar transferencia'} icon="check" isLoading={isSaving} disabled={!target} />
+              <Button type="submit" label={kind === 'CARD_PAYMENT' ? 'Registrar pago' : kind === 'GOAL_CONTRIBUTION' ? 'Registrar aporte' : 'Registrar transferencia'} icon="check" isLoading={isSaving} disabled={!target || (kind === 'CARD_PAYMENT' && (!paymentCycles.some((cycle) => cycle.closingDate === closingDate && Number(cycle.amountDue) > 0) || cyclesLoading || Boolean(cyclesError)))} />
             )}
           </div>
         </form>

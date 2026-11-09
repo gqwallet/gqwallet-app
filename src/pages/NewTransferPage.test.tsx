@@ -9,9 +9,10 @@ import { MemoryRouter } from 'react-router';
 import { beforeEach, expect, it, vi } from 'vitest';
 import { NewTransferPage } from '@/pages/NewTransferPage';
 
+const paymentCycles: [] = [];
 const { submit } = vi.hoisted(() => ({ submit: vi.fn() }));
 vi.mock('@/context/ToastContext', () => ({ useToast: () => ({ notify: vi.fn() }) }));
-vi.mock('@/hooks/useTransferForm', () => ({ useTransferForm: () => ({ lookups: { accounts: [{ id: 'a1', alias: 'BCP', currency: 'PEN', balance: 100 }, { id: 'a2', alias: 'Ahorro', currency: 'PEN', balance: 20 }], goals: [], cards: [] }, isLoading: false, loadError: null, submit, suggestCardPayment: vi.fn(), isSaving: false, saveError: null }) }));
+vi.mock('@/hooks/useTransferForm', () => ({ useTransferForm: () => ({ paymentCycles, cyclesLoading: false, cyclesError: null, lookups: { accounts: [{ id: 'a1', alias: 'BCP', currency: 'PEN', balance: 100 }, { id: 'a2', alias: 'Ahorro', currency: 'PEN', balance: 20 }], goals: [], cards: [] }, isLoading: false, loadError: null, submit, suggestCardPayment: vi.fn(), isSaving: false, saveError: null }) }));
 beforeEach(() => { vi.clearAllMocks(); submit.mockResolvedValue(false); });
 
 it.each(['Reserva mensual', ''])('sends the optional description %s', async (description) => {

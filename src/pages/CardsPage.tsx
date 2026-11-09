@@ -64,7 +64,7 @@ export function CardsPage() {
           </div>
           <Callout
             title="Cómo leerlo"
-            text="Línea utilizada = consumos con la tarjeta − pagos de tarjeta. Si pagaste de más, la línea disponible queda igual a la línea total y el excedente se muestra como saldo a favor."
+            text="Línea utilizada = deuda inicial + consumos con la tarjeta − pagos de tarjeta. Si pagaste de más, la línea disponible queda igual a la línea total y el excedente se muestra como saldo a favor."
           />
         </>
       )}
@@ -73,7 +73,7 @@ export function CardsPage() {
           isOpen
           cardName={paying.card.name}
           currency={paying.card.currency}
-          suggestedAmount={paying.nextBilling.amountDue}
+          cycles={paying.paymentCycles}
           accounts={accounts.filter((account) => account.currency === paying.card.currency)}
           isSaving={isSaving}
           error={payError}

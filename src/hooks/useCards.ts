@@ -12,7 +12,7 @@ import { cardsService } from '@/services/cards.service';
 import { transactionsService } from '@/services/transactions.service';
 import type { Account } from '@/types/account';
 import type { ApiError } from '@/types/api';
-import type { Card, CreditLineUsage, NextBilling, RegisterCardInput, UpdateCardInput } from '@/types/card';
+import type { Card, CreditLineUsage, NextBilling, PaymentCycle, RegisterCardInput, UpdateCardInput } from '@/types/card';
 
 /** Card with its server projections. */
 export interface CardSummary {
@@ -22,6 +22,8 @@ export interface CardSummary {
   usage: CreditLineUsage;
   /** Next billing projection. */
   nextBilling: NextBilling;
+  /** Server payment cycles. */
+  paymentCycles: PaymentCycle[];
 }
 
 /** Account offered to pay a card, with its balance. */
@@ -57,13 +59,14 @@ export function useCards(): CardsState {
   const { data, isLoading, error, refetch } = useResource(async (signal) => {
     const [cards, accounts] = await Promise.all([cardsService.list(signal), accountsService.list(signal)]);
     const active = accounts.filter((account) => account.status === 'ACTIVE');
-    const [usages, billings, balances] = await Promise.all([
+    const [usages, billings, balances, paymentCycles] = await Promise.all([
       Promise.all(cards.map((card) => cardsService.getCreditLineUsage(card.id, signal))),
       Promise.all(cards.map((card) => cardsService.getNextBilling(card.id, signal))),
       Promise.all(active.map((account) => accountsService.getBalance(account.id, undefined, signal))),
+      Promise.all(cards.map((card) => cardsService.listPaymentCycles(card.id, signal))),
     ]);
     return {
-      cards: cards.map((card, index) => ({ card, usage: usages[index], nextBilling: billings[index] })),
+      cards: cards.map((card, index) => ({ card, usage: usages[index], nextBilling: billings[index], paymentCycles: paymentCycles[index] })),
       accounts: active.map((account, index) => ({ ...account, balance: balances[index].balance })),
     };
   }, []);

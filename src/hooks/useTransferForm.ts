@@ -13,7 +13,7 @@ import { savingsService } from '@/services/savings.service';
 import { transactionsService } from '@/services/transactions.service';
 import type { Account } from '@/types/account';
 import type { ApiError, Currency } from '@/types/api';
-import type { Card } from '@/types/card';
+import type { Card, PaymentCycle } from '@/types/card';
 import type { SavingsGoal } from '@/types/savings';
 import type { TransferKind } from '@/types/transaction';
 
@@ -35,6 +35,8 @@ export interface TransferLookups {
 
 /** Values submitted by the transfer form. */
 export interface TransferValues {
+  /** Explicit billing cycle for a card payment. */
+  cycleClosingDate?: string | null;
   /** Optional description, up to 120 characters. */
   description?: string | null;
   /** Kind of transfer. */
@@ -53,6 +55,12 @@ export interface TransferValues {
 
 /** Result of {@link useTransferForm}. */
 export interface TransferFormState {
+  /** Cycles for the selected card. */
+  paymentCycles: PaymentCycle[];
+  /** Whether the selected card cycles are loading. */
+  cyclesLoading: boolean;
+  /** Selected card cycle request failure. */
+  cyclesError: ApiError | null;
   /** Lookups, `null` while loading. */
   lookups: TransferLookups | null;
   /** Whether lookups are loading. */
@@ -61,18 +69,13 @@ export interface TransferFormState {
   loadError: ApiError | null;
   /** Registers the transfer; resolves whether it succeeded. */
   submit: (values: TransferValues) => Promise<boolean>;
-  /** Suggested amount for paying a card: amount due of its oldest unpaid cycle. */
-  suggestCardPayment: (cardId: string) => Promise<number | null>;
   /** Whether a write is in flight. */
   isSaving: boolean;
   /** Message of the last write error. */
   saveError: string | null;
 }
 
-async function oldestUnpaidCycle(cardId: string) {
-  const cycles = await cardsService.listPaymentCycles(cardId);
-  return [...cycles].sort((a, b) => a.closingDate.localeCompare(b.closingDate)).find((cycle) => cycle.amountDue > 0) ?? null;
-}
+const EMPTY_CYCLES: PaymentCycle[] = [];
 
 function messageOf(error: ApiError | null): string | null {
   if (!error) return null;
@@ -83,13 +86,14 @@ function messageOf(error: ApiError | null): string | null {
 /**
  * Loads accounts with balances, goals and cards, and registers any kind of transfer.
  *
- * @returns Lookups and actions.
+ * @param cardId - Selected card whose payable cycles should be loaded.
+ * @returns Lookups, cycle options and actions.
  * @example
  * ```ts
  * const { lookups, submit } = useTransferForm();
  * ```
  */
-export function useTransferForm(): TransferFormState {
+export function useTransferForm(cardId?: string): TransferFormState {
   const { data, isLoading, error } = useResource(async (signal) => {
     const [accounts, goals, cards] = await Promise.all([accountsService.list(signal), savingsService.list(signal), cardsService.list(signal)]);
     const active = accounts.filter((account) => account.status === 'ACTIVE');
@@ -100,6 +104,8 @@ export function useTransferForm(): TransferFormState {
       cards,
     };
   }, []);
+
+  const cycles = useResource(cardId ? async (signal) => ({ cardId, cycles: await cardsService.listPaymentCycles(cardId, signal) }) : null, [cardId]);
 
   const write = useMutation(async (values: TransferValues) => {
     if (values.kind === 'GOAL_CONTRIBUTION') {
@@ -112,18 +118,10 @@ export function useTransferForm(): TransferFormState {
       });
       return true;
     }
-    const cycle = values.kind === 'CARD_PAYMENT' ? await oldestUnpaidCycle(values.targetId) : null;
-    await transactionsService.registerTransfer({ ...values, description: values.description?.trim() || null, cycleClosingDate: cycle?.closingDate ?? null });
+    await transactionsService.registerTransfer({ ...values, description: values.description?.trim() || null, cycleClosingDate: values.kind === 'CARD_PAYMENT' ? values.cycleClosingDate ?? null : null });
     return true;
   });
   const { submit: run } = write;
   const submit = useCallback(async (values: TransferValues) => (await run(values)) === true, [run]);
-  const suggestCardPayment = useCallback(async (cardId: string) => {
-    try {
-      return (await oldestUnpaidCycle(cardId))?.amountDue ?? null;
-    } catch {
-      return null;
-    }
-  }, []);
-  return { lookups: data, isLoading, loadError: error, submit, suggestCardPayment, isSaving: write.isSubmitting, saveError: messageOf(write.error) };
+  return { paymentCycles: cycles.data && cycles.data.cardId === cardId ? cycles.data.cycles : EMPTY_CYCLES, cyclesLoading: cycles.isLoading, cyclesError: cycles.error, lookups: data, isLoading, loadError: error, submit, isSaving: write.isSubmitting, saveError: messageOf(write.error) };
 }
