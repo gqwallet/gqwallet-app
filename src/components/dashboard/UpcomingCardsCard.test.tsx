@@ -25,6 +25,12 @@ describe('UpcomingCardsCard', () => {
     expect(screen.getByText('S/ 250.00')).toBeInTheDocument();
   });
 
+  it('says there is nothing pending when the amount due is zero', () => {
+    render(<UpcomingCardsCard cards={[{ ...card, amountDue: 0, billingDate: '2026-11-24', paymentDueDate: '2026-12-20' }]} action={null} onSelect={vi.fn()} />);
+    expect(screen.getByText('Sin pagos pendientes · factura el 24 nov.')).toBeInTheDocument();
+    expect(screen.queryByText(/Paga hasta/)).not.toBeInTheDocument();
+  });
+
   it.each([
     ['2026-11-08', 'facturó el 08 nov.'],
     ['2026-11-09', 'facturó el 09 nov.'],
