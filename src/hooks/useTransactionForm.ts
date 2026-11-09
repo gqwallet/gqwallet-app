@@ -55,13 +55,13 @@ export interface TransactionFormState {
   suggestMerchants: (prefix: string) => Promise<string[]>;
 }
 
-// A card expense must name its billing cycle. The backend window is [previous closing, closing), so an expense
-// on the closing day already belongs to the next cycle: pick the first closing date strictly after the economic date.
+// A card expense must name its billing cycle. A cycle runs from the day after the previous closing up to and
+// including its closing day, so an expense made on the closing day still belongs to the cycle that closes that day.
 async function cycleFor(input: TransactionInput): Promise<string | null> {
   if (input.paymentMethodKind !== 'CARD' || !input.instrumentId) return null;
   if (input.cycleClosingDate) return input.cycleClosingDate;
   const cycles = [...(await cardsService.listBillingCycles(input.instrumentId))].sort((a, b) => a.closingDate.localeCompare(b.closingDate));
-  return (cycles.find((cycle) => cycle.closingDate > input.economicDate) ?? cycles[cycles.length - 1])?.closingDate ?? null;
+  return (cycles.find((cycle) => cycle.closingDate >= input.economicDate) ?? cycles[cycles.length - 1])?.closingDate ?? null;
 }
 
 function messageOf(error: ApiError | null): string | null {
