@@ -35,4 +35,20 @@ describe('useCalendar', () => {
     const { result } = renderHook(() => useCalendar('2026-10'));
     await waitFor(() => expect(result.current.data?.marks.find((mark) => mark.key === 'due-d1')?.installment).toBe('14/24'));
   });
+
+  it('excludes voided dues while preserving pending and paid calendar marks', async () => {
+    const due = {
+      id: 'd1', fixedPaymentId: 'f1', description: 'Internet', kind: 'HOUSEHOLD_SERVICES' as const,
+      dueDate: '2026-06-28', expectedAmount: 99, paidAmount: null, currency: 'PEN' as const,
+      installment: null, usualPaymentMethodKind: null, usualInstrumentId: null,
+    };
+    vi.mocked(obligationsService.listDues).mockResolvedValueOnce([
+      { ...due, status: 'PENDING' }, { ...due, id: 'd2', status: 'PAID', paidAmount: 99 },
+      { ...due, id: 'd3', status: 'VOIDED' },
+    ]);
+    const { result } = renderHook(() => useCalendar('2026-06'));
+    await waitFor(() => expect(result.current.data).not.toBeNull());
+    expect(result.current.data?.marks.filter((mark) => mark.kind === 'DUE').map((mark) => mark.key)).toEqual(['due-d1', 'due-d2']);
+    expect(result.current.data?.marks.find((mark) => mark.key === 'due-d2')?.status).toBe('PAID');
+  });
 });
