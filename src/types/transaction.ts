@@ -119,6 +119,18 @@ export interface RegisterTransactionInput extends TransactionInput {
   nature: TransactionNature;
 }
 
+/** Form-only movement fields; the purchase time is never sent to the API. */
+export interface TransactionFormInput extends TransactionInput {
+  /** Optional purchase time as `HH:mm`, used only to select the billing cycle. */
+  purchaseTime?: string;
+}
+
+/** Registration form fields, including the transient purchase time. */
+export interface RegisterTransactionFormInput extends TransactionFormInput {
+  /** Income or expense. */
+  nature: TransactionNature;
+}
+
 /** Total of the filtered movements for one nature and currency. */
 export interface NatureTotal {
   /** Income or expense. */

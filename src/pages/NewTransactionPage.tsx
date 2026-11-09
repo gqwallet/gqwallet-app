@@ -13,7 +13,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/context/ToastContext';
 import { useTransactionForm } from '@/hooks/useTransactionForm';
 import { PATHS } from '@/navigation/paths';
-import type { RegisterTransactionInput, TransactionNature } from '@/types/transaction';
+import type { RegisterTransactionFormInput, TransactionNature } from '@/types/transaction';
 import { formatMoney, formatMonth, todayIso } from '@/utils/format';
 
 const FORM_ID = 'new-transaction';
@@ -32,12 +32,12 @@ export function NewTransactionPage() {
   const { profile } = useAuth();
   const { notify } = useToast();
   const [nature, setNature] = useState<TransactionNature>(params.get('tipo') === 'ingreso' ? 'INCOME' : 'EXPENSE');
-  const [pending, setPending] = useState<RegisterTransactionInput | null>(null);
+  const [pending, setPending] = useState<RegisterTransactionFormInput | null>(null);
   const { lookups, isLoading, loadError, register, isSaving, saveError, findZeroLimit, suggestMerchants } = useTransactionForm();
   const isExpense = nature === 'EXPENSE';
   const categories = lookups ? (isExpense ? lookups.expenseCategories : lookups.incomeCategories) : [];
 
-  const save = async (input: RegisterTransactionInput) => {
+  const save = async (input: RegisterTransactionFormInput) => {
     const saved = await register(input);
     setPending(null);
     if (!saved) return;
@@ -50,7 +50,7 @@ export function NewTransactionPage() {
     navigate(PATHS.transactions);
   };
 
-  const handleSubmit = async (input: RegisterTransactionInput) => {
+  const handleSubmit = async (input: RegisterTransactionFormInput) => {
     if (isExpense && (await findZeroLimit(input.categoryId, input.currency, input.economicDate))) {
       setPending(input);
       return;
