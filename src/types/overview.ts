@@ -4,6 +4,7 @@
  * @author G0nz4loQu3dena
  * @packageDocumentation
  */
+import type { PaymentCycleStatus } from '@/types/card';
 import type { Currency } from '@/types/api';
 
 /** Pending due shown on the dashboard. */
@@ -36,44 +37,76 @@ export interface DashboardCard {
   color: string;
   /** Amount due of the next billing. */
   amountDue: number;
+  /** Server cycle status. */
+  status: PaymentCycleStatus;
 }
 
-/** Dashboard of one currency (FR-009). */
+/** Pending commitments, informational and separate from balances. */
+export interface Commitments {
+  /** Pending fixed dues. */
+  dues: number;
+  /** Unpaid card statements. */
+  cards: number;
+  /** Total pending. */
+  total: number;
+  /** Number of commitments. */
+  count: number;
+}
+
+/** Effective money leaving accounts. */
+export interface CashOutflows {
+  /** Expenses paid from accounts or cash. */
+  accountExpenses: number;
+  /** Fixed dues already paid. */
+  fixedPaid: number;
+  /** Card payments. */
+  cardPayments: number;
+  /** Total effective outflows. */
+  total: number;
+}
+
+/** Dashboard of one currency. */
 export interface Dashboard {
   /** Currency. */
   currency: Currency;
-  /** Available balance at today. */
-  available: number;
-  /** Incomes of the current month. */
+  /** Actual active account balances. */
+  accountsBalance: number;
+  /** Outstanding card debt. */
+  cardsDebt: number;
+  /** Accounts balance minus card debt. */
+  netPosition: number;
+  /** Current month incomes. */
   monthIncomes: number;
-  /** Variable expenses of the current month. */
-  monthVariableExpenses: number;
-  /** Fixed payments of the current month. */
-  monthFixedPayments: number;
-  /** Total budget usage percentage. */
-  budgetUsage: number | null;
-  /** Next pending dues. */
+  /** Current month income count. */
+  monthIncomesCount: number;
+  /** Current month effective outflows. */
+  monthOutflows: CashOutflows;
+  /** Commitments due through the end of this month. */
+  pendingCommitments: Commitments;
+  /** Budgeted usage and spending without limits. */
+  budgetUsage: { totalUsage: number | null; unbudgetedConsumption: number };
+  /** Upcoming fixed dues. */
   upcomingDues: DashboardDue[];
-  /** Cards with the closest payment. */
+  /** Oldest unpaid card statements. */
   upcomingCards: DashboardCard[];
 }
 
-/** Available balance at a cutoff with its breakdown (FR-036). */
-export interface AvailableBalance {
+/** Current net position and its server-calculated breakdown. */
+export interface NetPosition {
   /** Currency. */
   currency: Currency;
-  /** Cutoff date (ISO date). */
-  cutoff: string;
-  /** Sum of the opening balances. */
-  openingBalances: number;
-  /** Accumulated incomes. */
-  incomes: number;
-  /** Accumulated variable expenses. */
-  variableExpenses: number;
-  /** Accumulated fixed payments. */
-  fixedPayments: number;
-  /** Resulting available balance. */
-  available: number;
+  /** Active accounts and their actual balances. */
+  accounts: { accountId: string; name: string; balance: number }[];
+  /** Sum of account balances. */
+  accountsBalance: number;
+  /** Cards and outstanding debt. */
+  cards: { cardId: string; name: string; debt: number }[];
+  /** Total card debt. */
+  cardsDebt: number;
+  /** Balance minus debt. */
+  netPosition: number;
+  /** Informational pending commitments. */
+  commitments: Commitments;
 }
 
 /** Referential consolidated position in the main currency (FR-047). */
@@ -102,10 +135,16 @@ export interface CashFlowRow {
   month: string;
   /** Incomes. */
   incomes: number;
-  /** Variable expenses. */
-  variableExpenses: number;
-  /** Fixed payments. */
-  fixedPayments: number;
+  /** Expenses paid from accounts or cash. */
+  accountExpenses: number;
+  /** Paid fixed dues. */
+  fixedPaid: number;
+  /** Card payments. */
+  cardPayments: number;
+  /** Effective outflows or projected payments. */
+  outflows: number;
+  /** Informational unpaid commitments. */
+  pendingCommitments: number;
   /** Incomes minus expenses. */
   flow: number;
   /** Accumulated flow. */

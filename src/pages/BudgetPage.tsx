@@ -49,7 +49,7 @@ export function BudgetPage() {
   const withLimit = status?.lines.filter((line) => line.limit !== null).length ?? 0;
   const usage = status?.totalUsage ?? 0;
   const totalRow: BudgetLine | undefined = status
-    ? { categoryId: TOTAL_ID, categoryName: `Total ${monthName}`, limit: status.totalLimit, consumption: status.totalConsumption, balance: status.totalLimit - status.totalConsumption, usage: status.totalUsage, state: 'NORMAL' }
+    ? { categoryId: TOTAL_ID, categoryName: `Total ${monthName}`, limit: status.totalLimit, consumption: status.totalConsumption, balance: null, usage: null, state: 'NORMAL' }
     : undefined;
 
   const handleCopy = async (fromPeriod: string) => {
@@ -77,38 +77,29 @@ export function BudgetPage() {
       </div>
       {isLoading && !data && <Spinner />}
       {error && <EmptyState icon="error" title="No pudimos cargar el presupuesto" />}
-      {status && withLimit === 0 && status.lines.every((line) => line.state === 'NO_BUDGET') ? (
-        <Card>
-          <EmptyState
-            icon="pie_chart"
-            title={`No hay límites en ${currency} para ${monthName}`}
-            text={`Define un límite por categoría o copia los de otro mes. Tus límites en ${currency === 'PEN' ? 'dólares' : 'soles'} no se mezclan con estos.`}
-            action={<Button label="Definir límite" icon="add" onClick={() => setLimitCategory('')} />}
-          />
-        </Card>
-      ) : (
-        status &&
-        totalRow && (
-          <>
-            <div className="mb-4 grid grid-cols-2 gap-3 lg:mb-6 lg:grid-cols-3 lg:gap-4">
-              <StatCard label={`Límite total de ${monthName}`} value={money(status.totalLimit)} detail={`${withLimit} ${withLimit === 1 ? "categoría" : "categorías"} con límite`} tone="neutral" />
-              <StatCard label={`Consumo de ${monthName}`} value={money(status.totalConsumption)} detail="Incluye pagos fijos con esa categoría" tone="warning" />
-              <StatCard
-                label="Uso del presupuesto"
-                value={formatPercent(usage)}
-                detail={`Saldo ${money(status.totalLimit - status.totalConsumption)}`}
-                tone={usage > 100 ? 'danger' : usage >= 75 ? 'warning' : 'success'}
-                className="col-span-2 lg:col-span-1"
-              />
+      {status && totalRow && <>
+            <div className="mb-4 grid grid-cols-2 items-stretch gap-3 lg:mb-6 lg:grid-cols-4 lg:gap-4">
+              <StatCard label="Límite total" value={money(status.totalLimit)} detail={`${withLimit} categorías con límite`} tone="neutral" />
+              <StatCard label="Gastado con presupuesto" value={money(status.budgetedConsumption)} detail={`Uso ${formatPercent(usage)}`} tone={usage > 100 ? 'danger' : 'warning'} />
+              <StatCard label="Gastado sin presupuesto" value={money(status.unbudgetedConsumption)} detail={`${status.lines.filter((line) => line.limit === null).length} categorías`} tone="neutral" />
+              <StatCard label="Total gastado" value={money(status.totalConsumption)} detail="Consumos y pagos fijos" tone="warning" />
             </div>
             <Card title="Por categoría" className="mb-4">
               <DataTable
                 caption={`Presupuesto de ${monthName}`}
                 isWide
-                rows={status.lines}
+                rows={[
+                  { categoryId: 'group-budgeted', categoryName: 'Con presupuesto', limit: null, consumption: null, balance: null, usage: null, state: 'NORMAL' },
+                  ...status.lines.filter((line) => line.limit !== null),
+                  { categoryId: 'subtotal-budgeted', categoryName: 'Subtotal con presupuesto', limit: status.totalLimit, consumption: status.budgetedConsumption, balance: null, usage: status.totalUsage, state: 'NORMAL' },
+                  { categoryId: 'group-unbudgeted', categoryName: 'Sin presupuesto', limit: null, consumption: null, balance: null, usage: null, state: 'NO_BUDGET' },
+                  ...status.lines.filter((line) => line.limit === null),
+                  { categoryId: 'subtotal-unbudgeted', categoryName: 'Subtotal sin presupuesto', limit: null, consumption: status.unbudgetedConsumption, balance: null, usage: null, state: 'NO_BUDGET' },
+                ] as Array<Omit<BudgetLine, 'consumption'> & { consumption: number | null }>}
+                rowClassName={(line) => line.categoryId.startsWith('group-') ? 'bg-surface-container text-subtitle' : line.categoryId.startsWith('subtotal-') ? 'text-subtitle' : undefined}
                 rowKey={(line) => line.categoryId}
                 footer={totalRow}
-                onRowClick={(line) => setLimitCategory(line.categoryId)}
+                onRowClick={(line) => { if (status.lines.some((item) => item.categoryId === line.categoryId)) setLimitCategory(line.categoryId); }}
                 columns={[
                   {
                     key: 'category',
@@ -116,10 +107,10 @@ export function BudgetPage() {
                     render: (line) => line.categoryName,
                   },
                   { key: 'limit', header: 'Límite', isNumeric: true, render: (line) => amount(line.limit) },
-                  { key: 'consumption', header: 'Consumo', isNumeric: true, render: (line) => formatAmount(line.consumption) },
+                  { key: 'consumption', header: 'Consumo', isNumeric: true, render: (line) => amount(line.consumption) },
                   { key: 'balance', header: 'Saldo', isNumeric: true, render: (line) => <span className={cn(line.balance !== null && line.balance < 0 && 'text-danger')}>{amount(line.balance)}</span> },
                   { key: 'usage', header: 'Uso', isNumeric: true, render: (line) => (line.usage === null ? '—' : formatPercent(line.usage)) },
-                  { key: 'state', header: 'Estado', isNumeric: true, render: (line) => (line.categoryId === TOTAL_ID ? null : <BudgetStateBadge state={line.state} />) },
+                  { key: 'state', header: 'Estado', isNumeric: true, render: (line) => (!status.lines.some((item) => item.categoryId === line.categoryId) ? null : <BudgetStateBadge state={line.state} />) },
                 ]}
               />
             </Card>
@@ -127,9 +118,7 @@ export function BudgetPage() {
               title="Cómo leerlo"
               text="Normal: menos de 75 %. Atención: de 75 % a menos de 100 %. Alcanzado: 100 %. Excedido: más de 100 %. Con límite 0 (decidiste no gastar): Sin gasto sin consumo y Excedido desde el primer gasto. Sin límite: Sin presupuesto."
             />
-          </>
-        )
-      )}
+          </>}
       {data && (
         <LimitModal
           isOpen={limitCategory !== null}

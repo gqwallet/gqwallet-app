@@ -61,6 +61,10 @@
   --text-amount--line-height: 28px;
   --text-amount--letter-spacing: -0.2px;
   --text-amount--font-weight: 700;
+  --text-amount-s: 18px;
+  --text-amount-s--line-height: 26px;
+  --text-amount-s--letter-spacing: -0.2px;
+  --text-amount-s--font-weight: 700;
   --text-headline: 20px;
   --text-headline--line-height: 26px;
   --text-headline--font-weight: 700;

@@ -12,7 +12,7 @@ import type { Card } from '@/types/card';
 const card: Card = {
   id: 'c1', name: 'Visa', bankName: 'BCP', bankId: null, customBankName: 'BCP', currency: 'PEN',
   creditLine: 1000, billingDate: '2026-11-08', billingCutoffTime: '22:00', paymentDueDate: '2026-11-28',
-  color: '#3333B2', insurancePercentage: null,
+  color: '#3333B2', insurancePercentage: null, openingDebts: [],
 };
 
 function props(): TransactionFormProps {

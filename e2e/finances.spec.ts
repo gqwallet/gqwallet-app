@@ -186,9 +186,9 @@ test('a new user manages her finances end to end', async ({ page }) => {
   await test.step('shows the dashboard, cash flow, debt load and reports (FR-009, FR-035, FR-036, FR-037, FR-040)', async () => {
     await goTo(page, 'Dashboard');
     await expect(page.getByText('Próximos vencimientos')).toBeVisible();
-    await expect(page.getByText('Uso del presupuesto de')).toBeVisible();
-    await page.getByRole('button', { name: /Disponible al/ }).click();
-    await expect(page.getByText('Disponible calculado')).toBeVisible();
+    await expect(page.getByText(/Uso del presupuesto de/)).toBeVisible();
+    await page.getByRole('button', { name: /Posición neta.*Ver desglose/ }).click();
+    await expect(page.getByRole('heading', { name: 'Posición neta', exact: true })).toBeVisible();
     await goTo(page, 'Flujo de caja');
     await expect(page.getByRole('table', { name: /Flujo de caja/ })).toContainText('7,500.00');
     await page.getByRole('button', { name: 'Carga de deuda' }).click();

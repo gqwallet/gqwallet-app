@@ -13,7 +13,7 @@ import type { Bank } from '@/types/catalog';
 const banks: Bank[] = [{ id: 'bcp-id', name: 'BCP', countryCode: 'PE', active: true }];
 const initial: Card = {
   id: 'card-id', name: 'Visa', bankId: 'retired-id', bankName: 'Banco anterior', customBankName: null,
-  currency: 'PEN', creditLine: 1000, billingDate: '2026-06-10', billingCutoffTime: null, paymentDueDate: '2026-06-28', color: '#3333B2', insurancePercentage: null,
+  currency: 'PEN', creditLine: 1000, billingDate: '2026-06-10', billingCutoffTime: null, paymentDueDate: '2026-06-28', color: '#3333B2', insurancePercentage: null, openingDebts: [],
 };
 
 function fillRequiredFields() {
@@ -146,4 +146,51 @@ describe('CardForm', () => {
     expect(onSubmit).toHaveBeenLastCalledWith(expect.objectContaining({ billingCutoffTime: '22:00' }));
   });
 
+});
+it('submits opening debt in two confirmed cycles and defaults to the last billed cycle', () => {
+  const onSubmit = vi.fn();
+  render(<CardForm id="card" banks={banks} defaultCurrency="PEN" today="2026-11-09" onSubmit={onSubmit} />);
+  fillRequiredFields();
+  fireEvent.change(screen.getByLabelText('Banco'), { target: { value: 'bcp-id' } });
+  fireEvent.click(screen.getByRole('button', { name: 'Agregar otra facturación' }));
+  expect(screen.getByLabelText('Facturación 1')).toHaveValue('2026-10-10');
+  fireEvent.change(screen.getByLabelText('Monto 1'), { target: { value: '125.50' } });
+  fireEvent.click(screen.getByRole('button', { name: 'Agregar otra facturación' }));
+  fireEvent.change(screen.getByLabelText('Monto 2'), { target: { value: '80' } });
+  fireEvent.change(screen.getByLabelText('Facturación 2'), { target: { value: '2026-11-10' } });
+  submit();
+  expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ openingDebts: [{ amount: 125.5, closingDate: '2026-10-10' }, { amount: 80, closingDate: '2026-11-10' }] }));
+});
+
+it('requires reconfirming the cycle after changing the billing day and rejects nonpositive debt', () => {
+  const onSubmit = vi.fn();
+  render(<CardForm id="card" banks={banks} defaultCurrency="PEN" today="2026-11-09" onSubmit={onSubmit} />);
+  fillRequiredFields();
+  fireEvent.change(screen.getByLabelText('Banco'), { target: { value: 'bcp-id' } });
+  fireEvent.click(screen.getByRole('button', { name: 'Agregar otra facturación' }));
+  fireEvent.change(screen.getByLabelText('Monto 1'), { target: { value: '0' } });
+  submit();
+  expect(onSubmit).not.toHaveBeenCalled();
+  fireEvent.change(screen.getByLabelText('Monto 1'), { target: { value: '30' } });
+  fireEvent.change(screen.getByLabelText('Día de facturación'), { target: { value: '15' } });
+  expect(screen.getByLabelText('Facturación 1')).toHaveValue('');
+  submit();
+  expect(onSubmit).not.toHaveBeenCalled();
+  fireEvent.change(screen.getByLabelText('Facturación 1'), { target: { value: '2026-10-15' } });
+  submit();
+  expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ openingDebts: [{ amount: 30, closingDate: '2026-10-15' }] }));
+});
+
+it('only offers server-confirmed cycles when editing and preserves existing opening debt', () => {
+  const onSubmit = vi.fn();
+  render(<CardForm id="card" banks={banks} initial={{ ...initial, openingDebts: [{ amount: 90, closingDate: '2026-03-10' }] }} billingCycles={[{ closingDate: '2026-03-10', paymentDueDate: '2026-03-28' }]} defaultCurrency="PEN" today="2026-11-09" onSubmit={onSubmit} />);
+  expect(screen.getByLabelText('Monto 1')).toHaveValue('90.00');
+  const select = screen.getByLabelText('Facturación 1');
+  expect(select).toHaveValue('2026-03-10');
+  expect(within(select).getAllByRole('option')).toHaveLength(2);
+  submit();
+  expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ openingDebts: [{ amount: 90, closingDate: '2026-03-10' }] }));
+  fireEvent.click(screen.getByRole('button', { name: 'Quitar facturación 1' }));
+  submit();
+  expect(onSubmit).toHaveBeenLastCalledWith(expect.objectContaining({ openingDebts: [] }));
 });

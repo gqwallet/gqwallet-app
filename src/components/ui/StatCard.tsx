@@ -5,6 +5,7 @@
  * @packageDocumentation
  */
 import type { ReactNode } from 'react';
+import { Icon } from '@/components/ui/Icon';
 import { cn } from '@/utils/cn';
 
 /** Tone of a stat card. */
@@ -34,6 +35,8 @@ export interface StatCardProps {
   value: string;
   /** Detail below the value. */
   detail?: ReactNode;
+  /** Link-style footer within the single card button. */
+  actionLabel?: string;
   /**
    * Color tone.
    *
@@ -54,20 +57,23 @@ export interface StatCardProps {
  * <StatCard label="Ingresos de junio" value="S/ 7,500.00" detail="1 ingreso" tone="success" />
  * ```
  */
-export function StatCard({ label, value, detail, tone = 'primary', onClick, className }: StatCardProps) {
+export function StatCard({ label, value, detail, actionLabel, tone = 'primary', onClick, className }: StatCardProps) {
   const body = (
     <>
-      <span className="text-body-s text-content-secondary">{label}</span>
-      <span className={cn('text-amount break-all', VALUE[tone])}>{value}</span>
-      {detail && <span className="text-caption text-content-muted">{detail}</span>}
+      <span className="min-h-10 text-body-s leading-5 line-clamp-2 text-content-secondary">{label}</span>
+      <span data-stat-value className={cn('text-amount-s whitespace-nowrap lg:text-amount', VALUE[tone])}>{value}</span>
+      <span className="mt-auto min-h-5 pt-1 text-caption text-content-muted">
+        {detail}
+        {actionLabel && <span className="inline-flex items-center text-primary group-hover:underline group-focus-visible:underline">{actionLabel}<Icon name="chevron_right" size={16} /></span>}
+      </span>
     </>
   );
-  const classes = cn('flex flex-col gap-1 rounded-lg border border-line-subtle p-4 text-left', SURFACE[tone], className);
+  const classes = cn('group flex h-full min-w-0 flex-col gap-1 rounded-lg border border-line-subtle p-4 text-left', SURFACE[tone], className);
   return onClick ? (
-    <button type="button" onClick={onClick} className={cn(classes, 'transition-shadow hover:shadow-card focus-visible:outline-2 focus-visible:outline-primary')}>
+    <button data-stat-card type="button" onClick={onClick} className={cn(classes, 'transition-shadow hover:shadow-card focus-visible:outline-2 focus-visible:outline-primary')}>
       {body}
     </button>
   ) : (
-    <div className={classes}>{body}</div>
+    <div data-stat-card className={classes}>{body}</div>
   );
 }

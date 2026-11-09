@@ -14,7 +14,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useDashboard } from '@/hooks/useDashboard';
 import { PATHS, withId } from '@/navigation/paths';
 import type { Currency } from '@/types/api';
-import { formatMoney, formatShortDate, formatWeekdayDate, MONTHS_LONG, todayIso } from '@/utils/format';
+import { formatMoney, formatWeekdayDate, MONTHS_LONG, todayIso } from '@/utils/format';
 import { CURRENCY_OPTIONS } from '@/utils/options';
 
 function plural(count: number, one: string, many: string): string {
@@ -53,16 +53,13 @@ export function DashboardPage() {
     </div>
   );
   const stats = (
-    <div className="mb-4 grid grid-cols-2 gap-3 lg:mb-6 lg:grid-cols-4 lg:gap-4">
-      <StatCard
-        label={`Disponible al ${formatShortDate(today)}`}
-        value={formatMoney(dashboard.available, currency)}
-        detail={data.isEmpty ? undefined : 'Calculado · ver desglose'}
-        onClick={() => navigate(`${PATHS.availableBalance}?moneda=${currency}`)}
-      />
-      <StatCard label={`Ingresos de ${month}`} value={formatMoney(dashboard.monthIncomes, currency)} detail={data.isEmpty ? undefined : plural(data.incomeCount, 'ingreso', 'ingresos')} tone="success" />
-      <StatCard label={`Gastos variables de ${month}`} value={formatMoney(dashboard.monthVariableExpenses, currency)} detail={data.isEmpty ? undefined : plural(data.expenseCount, 'gasto', 'gastos')} tone="neutral" />
-      <StatCard label={`Pagos fijos de ${month}`} value={formatMoney(dashboard.monthFixedPayments, currency)} detail={data.isEmpty ? undefined : `${data.paidDues} de ${data.monthDues} pagados`} tone="warning" />
+    <div className="mb-4 grid grid-cols-2 items-stretch gap-3 lg:mb-6 lg:grid-cols-3 lg:gap-4">
+      <StatCard label="Saldo en cuentas" value={formatMoney(dashboard.accountsBalance, currency)} tone="neutral" />
+      <StatCard label="Deuda de tarjetas" value={formatMoney(dashboard.cardsDebt, currency)} tone="warning" />
+      <StatCard label="Posición neta" value={formatMoney(dashboard.netPosition, currency)} actionLabel="Ver desglose" onClick={() => navigate(`${PATHS.netPosition}?moneda=${currency}`)} />
+      <StatCard label="Ingresos" value={formatMoney(dashboard.monthIncomes, currency)} detail={plural(dashboard.monthIncomesCount, 'ingreso', 'ingresos')} tone="success" />
+      <StatCard label="Salidas" value={formatMoney(dashboard.monthOutflows.total, currency)} detail={`Gastos desde cuentas ${formatMoney(dashboard.monthOutflows.accountExpenses, currency)} · Pagos fijos pagados ${formatMoney(dashboard.monthOutflows.fixedPaid, currency)} · Pagos de tarjeta ${formatMoney(dashboard.monthOutflows.cardPayments, currency)}`} tone="neutral" />
+      <StatCard label="Compromisos" value={formatMoney(dashboard.pendingCommitments.total, currency)} detail={`${dashboard.pendingCommitments.count} por vencer`} tone="warning" />
     </div>
   );
 
@@ -109,7 +106,7 @@ export function DashboardPage() {
     <>
       <PageHeader
         title={name}
-        subtitle={`Así van tus finanzas en ${currencyWord} al ${formatWeekdayDate(today).toLowerCase()} ${today.slice(0, 4)}.`}
+        subtitle={`Resumen de ${month} en ${currencyWord} al ${formatWeekdayDate(today).toLowerCase()} ${today.slice(0, 4)}.`}
         actions={[<Button key="transfer" label="Nueva transferencia" icon="swap_horiz" variant="secondary" onClick={() => navigate(PATHS.newTransfer)} />, newMovement]}
       />
       {currencyPicker}

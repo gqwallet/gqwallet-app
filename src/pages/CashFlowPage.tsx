@@ -20,17 +20,20 @@ import { formatAmount, formatMoney, MONTHS_LONG, todayIso } from '@/utils/format
 import { CURRENCY_OPTIONS } from '@/utils/options';
 
 interface ConceptRow {
-  key: keyof Pick<CashFlowRow, 'incomes' | 'variableExpenses' | 'fixedPayments' | 'flow' | 'accumulated'>;
+  key: keyof Pick<CashFlowRow, 'incomes' | 'accountExpenses' | 'fixedPaid' | 'cardPayments' | 'outflows' | 'pendingCommitments' | 'flow' | 'accumulated'>;
   label: string;
   isStrong?: boolean;
 }
 
 const CONCEPTS: ConceptRow[] = [
   { key: 'incomes', label: 'Ingresos' },
-  { key: 'variableExpenses', label: 'Gastos variables' },
-  { key: 'fixedPayments', label: 'Pagos fijos' },
+  { key: 'outflows', label: 'Salidas efectivas', isStrong: true },
+  { key: 'accountExpenses', label: 'Gastos desde cuentas' },
+  { key: 'fixedPaid', label: 'Pagos fijos pagados' },
+  { key: 'cardPayments', label: 'Pagos de tarjeta' },
   { key: 'flow', label: 'Flujo de caja', isStrong: true },
-  { key: 'accumulated', label: 'Flujo acumulado', isStrong: true },
+  { key: 'accumulated', label: 'Acumulado', isStrong: true },
+  { key: 'pendingCommitments', label: 'Compromisos pendientes' },
 ];
 
 function cell(value: number) {
@@ -72,7 +75,7 @@ export function CashFlowPage() {
     <>
       <PageHeader
         title="Flujo de caja"
-        subtitle={`Ingresos − gastos variables − pagos fijos, mes a mes, en ${currency === 'PEN' ? 'soles' : 'dólares'}. Las transferencias y aportes no intervienen.`}
+        subtitle={`Ingresos y salidas efectivas, mes a mes, en ${currency === 'PEN' ? 'soles' : 'dólares'}. Los pagos de tarjeta son salidas; los compromisos se muestran por separado.`}
         actions={[
           <Button key="debt" label="Carga de deuda" icon="trending_up" variant="secondary" onClick={() => navigate(PATHS.debtLoad)} />,
           <Button key="csv" label="Exportar CSV" icon="download" variant="soft" isLoading={isExporting} onClick={handleExport} />,
@@ -89,8 +92,8 @@ export function CashFlowPage() {
       )}
       {data && visible.length > 0 && total && (
         <>
-          <div className="mb-4 grid grid-cols-2 gap-3 lg:mb-6 lg:grid-cols-3 lg:gap-4">
-            <StatCard label={`Flujo acumulado a ${monthName}`} value={money(rows[anchor - 1].accumulated)} detail={`Saldo inicial ${money(data.opening.openingBalances)}`} />
+          <div className="mb-4 grid grid-cols-2 items-stretch gap-3 lg:mb-6 lg:grid-cols-3 lg:gap-4">
+            <StatCard label={`Flujo acumulado a ${monthName}`} value={money(rows[anchor - 1].accumulated)} detail="Saldo real de cuentas" />
             <StatCard label={`Flujo de ${monthName}`} value={money(rows[anchor - 1].flow)} detail={isCurrentYear ? 'Mes en curso' : 'Último mes del año'} tone={rows[anchor - 1].flow < 0 ? 'danger' : 'success'} />
             <StatCard label="Acumulado proyectado a diciembre" value={money(rows[11].accumulated)} detail="Solo con lo ya registrado" tone="neutral" className="col-span-2 lg:col-span-1" />
           </div>
@@ -100,12 +103,12 @@ export function CashFlowPage() {
               isWide
               rows={CONCEPTS}
               rowKey={(row) => row.key}
-              rowClassName={(row) => (row.key === 'flow' ? 'bg-surface-container text-subtitle' : row.isStrong ? 'text-subtitle' : undefined)}
+              rowClassName={(row) => (row.key === 'pendingCommitments' ? 'italic text-content-muted' : row.key === 'flow' ? 'bg-surface-container text-subtitle' : row.isStrong ? 'text-subtitle' : undefined)}
               columns={[
                 { key: 'concept', header: 'Concepto', render: (row) => <span className="whitespace-nowrap">{row.label}</span> },
                 ...visible.map((month) => ({
                   key: month.month,
-                  header: `${MONTHS_LONG[Number(month.month.slice(5, 7)) - 1].slice(0, 3)}${month.projection ? '*' : ''}`,
+                  header: `${MONTHS_LONG[Number(month.month.slice(5, 7)) - 1].slice(0, 3)}${month.projection ? ' · proyección' : ''}`,
                   isNumeric: true,
                   render: (row: ConceptRow) => cell(month[row.key]),
                 })),
@@ -114,7 +117,7 @@ export function CashFlowPage() {
             />
             <p className="mt-3 text-caption text-content-muted">
               {visible.some((month) => month.projection)
-                ? `* Proyección: los meses posteriores a ${monthName} solo incluyen pagos fijos y movimientos ya registrados. `
+                ? `Proyección: los meses posteriores a ${monthName} incluyen vencimientos pendientes y facturaciones proyectadas. `
                 : ''}
               Los valores negativos van entre paréntesis.
             </p>

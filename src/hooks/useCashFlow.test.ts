@@ -6,7 +6,7 @@
  */
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-vi.mock('@/services/overview.service', () => ({ overviewService: { getCashFlow: vi.fn(() => Promise.resolve({ rows: [] })), getAvailableBalance: vi.fn(() => Promise.resolve({ openingBalances: 0 })), exportCashFlowCsv: vi.fn(() => Promise.resolve({ content: 'a', fileName: null })) } }));
+vi.mock('@/services/overview.service', () => ({ overviewService: { getCashFlow: vi.fn(() => Promise.resolve({ rows: [] })), exportCashFlowCsv: vi.fn(() => Promise.resolve({ content: 'a', fileName: null })) } }));
 import { overviewService } from '@/services/overview.service';
 import { downloadText } from '@/utils/download';
 import { useCashFlow } from '@/hooks/useCashFlow';

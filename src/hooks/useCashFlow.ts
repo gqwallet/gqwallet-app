@@ -9,15 +9,13 @@ import { useMutation } from '@/hooks/useMutation';
 import { useResource, type ResourceState } from '@/hooks/useResource';
 import { overviewService } from '@/services/overview.service';
 import type { Currency } from '@/types/api';
-import type { AvailableBalance, CashFlow } from '@/types/overview';
+import type { CashFlow } from '@/types/overview';
 import { downloadText, exportFileName } from '@/utils/download';
 
 /** Data of the cash flow page. */
 export interface CashFlowData {
   /** Monthly matrix. */
   cashFlow: CashFlow;
-  /** Opening balances of the currency. */
-  opening: AvailableBalance;
 }
 
 /** Result of {@link useCashFlow}. */
@@ -33,7 +31,7 @@ export interface CashFlowState extends ResourceState<CashFlowData> {
  *
  * @param year - Year.
  * @param currency - Currency.
- * @returns Matrix, opening balances and the export action.
+ * @returns Matrix and the export action.
  * @example
  * ```ts
  * const { data, exportCsv } = useCashFlow(2026, 'PEN');
@@ -41,11 +39,8 @@ export interface CashFlowState extends ResourceState<CashFlowData> {
  */
 export function useCashFlow(year: number, currency: Currency): CashFlowState {
   const state = useResource(async (signal) => {
-    const [cashFlow, opening] = await Promise.all([
-      overviewService.getCashFlow(year, currency, signal),
-      overviewService.getAvailableBalance(currency, `${year}-01-01`, signal),
-    ]);
-    return { cashFlow, opening };
+    const cashFlow = await overviewService.getCashFlow(year, currency, signal);
+    return { cashFlow };
   }, [year, currency]);
   const { submit, isSubmitting } = useMutation(async () => {
     const from = `${year}-01-01`;

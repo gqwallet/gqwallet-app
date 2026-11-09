@@ -12,7 +12,7 @@ import type { Card, CreditLineUsage, NextBilling } from '@/types/card';
 const card: Card = {
   id: 'c1', name: 'Visa', bankName: 'BCP', bankId: null, customBankName: null, currency: 'PEN',
   creditLine: 1000, billingDate: '2026-11-24', billingCutoffTime: null, paymentDueDate: '2026-11-20',
-  color: '#3333B2', insurancePercentage: null,
+  color: '#3333B2', insurancePercentage: null, openingDebts: [],
 };
 const usage: CreditLineUsage = { cardId: 'c1', currency: 'PEN', creditLine: 1000, used: 250, available: 750, creditBalance: 0 };
 const billing: NextBilling = {
@@ -28,7 +28,15 @@ it.each([
   ['2026-11-09', 'facturó el 09 nov.'],
   ['2026-11-24', 'factura el 24 nov.'],
 ])('shows the billing date with the correct tense for %s', (billingDate, text) => {
-  render(<CardSummaryCard card={card} usage={usage} nextBilling={{ ...billing, billingDate }} onOpen={vi.fn()} onPay={vi.fn()} onEdit={vi.fn()} />);
+  render(<CardSummaryCard card={card} usage={usage} nextBilling={{ ...billing, billingDate }} paymentCycles={[{ cycleStart: billing.cycleStart, closingDate: billingDate, paymentDueDate: billing.paymentDueDate, billed: 250, paid: 0, amountDue: 250, status: 'PENDING' }]} onOpen={vi.fn()} onPay={vi.fn()} onEdit={vi.fn()} />);
   expect(screen.getByText(`Total a pagar · ${text}`)).toBeInTheDocument();
   expect(screen.getByText('S/ 250.00')).toBeInTheDocument();
+});
+
+it.each(['OVERDUE', 'PARTIAL'] as const)('offers payment for a previous %s cycle even when the next billing is empty', (status) => {
+  const onPay = vi.fn();
+  render(<CardSummaryCard card={card} usage={usage} nextBilling={{ ...billing, amountDue: 0 }} paymentCycles={[{ cycleStart: '2026-09-25', closingDate: '2026-10-24', paymentDueDate: '2026-11-01', billed: 100, paid: 40, amountDue: 60, status }]} onOpen={vi.fn()} onPay={onPay} onEdit={vi.fn()} />);
+  expect(screen.getByText('Parcial · falta S/ 60.00')).toBeVisible();
+  if (status === 'OVERDUE') expect(screen.getByText('Vencida · pagar')).toBeVisible();
+  expect(screen.getByRole('button', { name: /Pagar tarjeta/ })).toBeEnabled();
 });

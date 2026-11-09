@@ -5,7 +5,7 @@
  * @packageDocumentation
  */
 import { BreakdownRow, Button, Card, ProgressBar } from '@/components/ui';
-import type { Card as CreditCard, CreditLineUsage, NextBilling } from '@/types/card';
+import type { Card as CreditCard, CreditLineUsage, NextBilling, PaymentCycle } from '@/types/card';
 import { cardTone } from '@/utils/cardPalette';
 import { formatMoney, formatShortDate, parseIsoDate, todayIso } from '@/utils/format';
 
@@ -17,6 +17,8 @@ export interface CardSummaryCardProps {
   usage: CreditLineUsage;
   /** Next billing. */
   nextBilling: NextBilling;
+  /** Payment cycle history. */
+  paymentCycles: PaymentCycle[];
   /** Opens the detail. */
   onOpen: () => void;
   /** Opens the payment dialog. */
@@ -33,11 +35,13 @@ export interface CardSummaryCardProps {
  * <CardSummaryCard card={card} usage={usage} nextBilling={billing} onOpen={open} onPay={pay} onEdit={edit} />
  * ```
  */
-export function CardSummaryCard({ card, usage, nextBilling, onOpen, onPay, onEdit }: CardSummaryCardProps) {
+export function CardSummaryCard({ card, usage, nextBilling, paymentCycles, onOpen, onPay, onEdit }: CardSummaryCardProps) {
   const money = (value: number) => formatMoney(value, card.currency);
   const percent = usage.creditLine > 0 ? (usage.used / usage.creditLine) * 100 : 0;
-  const billed = nextBilling.billingDate <= todayIso();
-  const hasDue = nextBilling.amountDue > 0;
+  const oldest = [...paymentCycles].sort((a, b) => a.closingDate.localeCompare(b.closingDate)).find((cycle) => Number(cycle.amountDue) > 0);
+  const closingDate = oldest?.closingDate ?? nextBilling.billingDate;
+  const billed = closingDate <= todayIso();
+  const hasDue = Boolean(oldest);
   return (
     <Card title={card.name}>
       <p className="-mt-2 mb-4 text-body-s text-content-secondary">
@@ -52,7 +56,9 @@ export function CardSummaryCard({ card, usage, nextBilling, onOpen, onPay, onEdi
       <ProgressBar value={Math.max(percent, usage.used > 0 ? 2 : 0)} tone={cardTone(card.color)} label={`Línea utilizada de ${card.name}`} className="mb-3" />
       <BreakdownRow label="Línea disponible" value={money(usage.available)} tone="income" />
       {usage.creditBalance > 0 && <BreakdownRow label="Saldo a favor" value={money(usage.creditBalance)} tone="income" />}
-      <BreakdownRow label={`Total a pagar · ${billed ? 'facturó' : 'factura'} el ${formatShortDate(nextBilling.billingDate)}`} value={money(nextBilling.amountDue)} />
+      <BreakdownRow label={`Total a pagar · ${billed ? 'facturó' : 'factura'} el ${formatShortDate(closingDate)}`} value={money(oldest?.amountDue ?? nextBilling.amountDue)} />
+      {oldest?.status === 'OVERDUE' && <p className="mt-2 text-body-s text-danger">Vencida · pagar</p>}
+      {oldest && Number(oldest.paid) > 0 && Number(oldest.amountDue) > 0 && <p className="mt-2 text-body-s text-tertiary">Parcial · falta {money(oldest.amountDue)}</p>}
       <div className="mt-4 flex flex-wrap gap-3">
         {hasDue ? (
           <>

@@ -82,7 +82,7 @@ export function CardFormPage() {
       />
       {error && <Callout tone="danger" text={error} className="mb-4" />}
       <Card title="Datos de la tarjeta">
-        <CardForm banks={banks.data ?? []} id={FORM_ID} initial={card} hasMovements={movements > 0} defaultCurrency={profile?.preferredCurrency ?? 'PEN'} today={todayIso()} onSubmit={handleSubmit} />
+        <CardForm banks={banks.data ?? []} id={FORM_ID} initial={card} billingCycles={detail.data?.billingCycles} hasMovements={movements > 0} defaultCurrency={profile?.preferredCurrency ?? 'PEN'} today={todayIso()} onSubmit={handleSubmit} />
       </Card>
       <div className="mt-4 flex flex-col-reverse gap-2 lg:mt-6 lg:flex-row lg:justify-end">
         <Button label="Cancelar" variant="secondary" onClick={() => navigate(-1)} />

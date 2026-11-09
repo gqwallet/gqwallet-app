@@ -36,7 +36,7 @@ describe('cardsService', () => {
     const input: RegisterCardInput = {
       name: 'Visa', bankId: null, customBankName: 'BCP', currency: 'PEN', creditLine: 1000,
       billingDate: '2026-11-10', paymentDueDate: '2026-11-28', billingCutoffTime,
-      color: '#3333B2', insurancePercentage: null,
+      color: '#3333B2', insurancePercentage: null, openingDebts: [],
     };
     await cardsService.register(input);
     expect(apiClient.post).toHaveBeenLastCalledWith('/cards', input);
