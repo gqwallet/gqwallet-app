@@ -26,7 +26,7 @@ import { formatMoney, formatWeekdayDate, MONTHS_LONG, todayIso } from '@/utils/f
 export function FixedPaymentsPage() {
   const navigate = useNavigate();
   const { notify } = useToast();
-  const { data, isLoading, error, settle, isSettling, settleError, resetSettle } = useFixedPayments();
+  const { data, isLoading, error, settle, isSettling, settleError, resetSettle, skip, isSkipping, skipError, resetSkip } = useFixedPayments();
   const [selected, setSelected] = useState<PaymentDue | null>(null);
   const today = todayIso();
   const month = MONTHS_LONG[Number(today.slice(5, 7)) - 1].toLowerCase();
@@ -34,6 +34,7 @@ export function FixedPaymentsPage() {
   const close = () => {
     setSelected(null);
     resetSettle();
+    resetSkip();
   };
   const handleConfirm = async (input: SettleDueInput) => {
     if (!selected || !data) return;
@@ -46,6 +47,13 @@ export function FixedPaymentsPage() {
       title: 'Pago registrado',
       detail: `${selected.description} · ${formatMoney(amount, selected.currency)} con ${data.instrumentNames[input.instrumentId] ?? 'tu medio de pago'}.${categoryName ? ` Creamos el gasto en ${categoryName}.` : ''}`,
     });
+    close();
+  };
+
+  const handleSkip = async () => {
+    if (!selected) return;
+    if (!await skip(selected)) return;
+    notify({ title: 'Vencimiento omitido' });
     close();
   };
 
@@ -108,6 +116,9 @@ export function FixedPaymentsPage() {
         isSaving={isSettling}
         error={settleError}
         onConfirm={handleConfirm}
+        isSkipping={isSkipping}
+        skipError={skipError}
+        onSkip={handleSkip}
         onClose={close}
       />
     </>

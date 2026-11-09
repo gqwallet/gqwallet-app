@@ -121,8 +121,8 @@ export function FixedPaymentFormPage() {
                   key={due.id}
                   icon={FIXED_KIND_ICON[payment.kind]}
                   title={due.installment ? `Cuota ${due.installment}` : formatMonth(due.dueDate.slice(0, 7), true)}
-                  detail={due.status === 'PAID' ? `Pagado · ${due.usualInstrumentId ? names[due.usualInstrumentId] ?? '' : ''}`.replace(/ · $/, '') : chargesOnDay(due.kind) ? `Se cobra el ${formatShortDate(due.dueDate, true)}` : formatShortDate(due.dueDate, true)}
-                  badge={<Badge label={due.status === 'PAID' ? 'Pagado' : due.status === 'VOIDED' ? 'Anulado' : 'Pendiente'} tone={due.status === 'PAID' ? 'success' : due.status === 'VOIDED' ? 'neutral' : 'warning'} />}
+                  detail={due.status === 'PAID' ? `Pagado · ${due.usualInstrumentId ? names[due.usualInstrumentId] ?? '' : ''}`.replace(/ · $/, '') : due.status === 'VOIDED' ? `Omitido · ${formatShortDate(due.dueDate, true)}` : chargesOnDay(due.kind) ? `Se cobra el ${formatShortDate(due.dueDate, true)}` : formatShortDate(due.dueDate, true)}
+                  badge={<Badge label={due.status === 'PAID' ? 'Pagado' : due.status === 'VOIDED' ? 'Omitido' : 'Pendiente'} tone={due.status === 'PAID' ? 'success' : due.status === 'VOIDED' ? 'neutral' : 'warning'} />}
                   amount={formatMoney(due.paidAmount ?? due.expectedAmount, due.currency)}
                 />
               ))

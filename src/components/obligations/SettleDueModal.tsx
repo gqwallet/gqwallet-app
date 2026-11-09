@@ -9,7 +9,7 @@ import { BreakdownRow, Button, Callout, ChipGroup, Modal, TextField } from '@/co
 import type { PaymentDue, SettleDueInput } from '@/types/obligation';
 import type { PaymentMethodKind } from '@/types/transaction';
 import { chargesOnDay } from '@/utils/fixedPaymentKinds';
-import { formatMoney, formatShortDate } from '@/utils/format';
+import { formatMoney, formatMonth, formatShortDate, monthOf } from '@/utils/format';
 import { FIXED_KIND_LABEL } from '@/utils/options';
 import { parseAmount } from '@/utils/parse';
 
@@ -39,6 +39,12 @@ export interface SettleDueModalProps {
   error: string | null;
   /** Called with the payment. */
   onConfirm: (input: SettleDueInput) => void;
+  /** Whether the skip request is saving. */
+  isSkipping: boolean;
+  /** Server error from skipping the due. */
+  skipError: string | null;
+  /** Called after confirming that the due should be skipped. */
+  onSkip: () => void;
   /** Called to close. */
   onClose: () => void;
 }
@@ -49,23 +55,45 @@ export interface SettleDueModalProps {
  *
  * @example
  * ```tsx
- * <SettleDueModal due={due} today={today} means={means} categoryName="Servicios" isSaving={false} error={null} onConfirm={pay} onClose={close} />
+ * <SettleDueModal due={due} today={today} means={means} categoryName="Servicios" isSaving={false} error={null} onConfirm={pay} isSkipping={false} skipError={null} onSkip={skip} onClose={close} />
  * ```
  */
-export function SettleDueModal({ due, today, means, categoryName, isSaving, error, onConfirm, onClose }: SettleDueModalProps) {
+export function SettleDueModal({ due, today, means, categoryName, isSaving, error, onConfirm, isSkipping, skipError, onSkip, onClose }: SettleDueModalProps) {
   const [meansId, setMeansId] = useState('');
   const [showOther, setShowOther] = useState(false);
   const [paid, setPaid] = useState('');
   const [paidError, setPaidError] = useState<string | null>(null);
   const [current, setCurrent] = useState<string | null>(null);
+  const [isSkipOpen, setIsSkipOpen] = useState(false);
   if ((due?.id ?? null) !== current) {
     setCurrent(due?.id ?? null);
     setMeansId('');
     setShowOther(false);
     setPaid('');
     setPaidError(null);
+    setIsSkipOpen(false);
   }
   if (!due) return null;
+
+  if (isSkipOpen) {
+    const cancelSkip = () => { if (!isSkipping) setIsSkipOpen(false); };
+    return (
+      <Modal
+        isOpen
+        title={`¿Omitir el vencimiento de ${formatMonth(monthOf(due.dueDate), true).toLowerCase()}?`}
+        description={`No se registra ningún gasto y el vencimiento sale de tus pendientes. ${due.description} sigue activo los próximos meses.`}
+        onClose={cancelSkip}
+        footer={
+          <>
+            <Button label="Cancelar" variant="secondary" disabled={isSkipping} onClick={cancelSkip} />
+            <Button label="Omitir este mes" variant="danger" isLoading={isSkipping} onClick={onSkip} />
+          </>
+        }
+      >
+        {skipError && <Callout tone="danger" text={skipError} />}
+      </Modal>
+    );
+  }
 
   const isCharge = chargesOnDay(due.kind);
   const dueNoun = isCharge ? 'cobro' : 'vencimiento';
@@ -132,6 +160,7 @@ export function SettleDueModal({ due, today, means, categoryName, isSaving, erro
           <Button label="Pagué otro monto" icon="edit" variant="ghost" className="self-start" onClick={() => setShowOther(true)} />
         </>
       )}
+      {due.status === 'PENDING' && <Button label="Omitir este mes" variant="ghost" className="self-start" disabled={isSaving} onClick={() => setIsSkipOpen(true)} />}
     </Modal>
   );
 }
