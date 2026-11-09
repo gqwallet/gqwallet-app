@@ -12,6 +12,7 @@ import type { Bank } from '@/types/catalog';
 import { formatAmount } from '@/utils/format';
 import { ACCOUNT_TYPE_LABEL, CURRENCY_OPTIONS, toOptions } from '@/utils/options';
 import { parseAmount } from '@/utils/parse';
+import { MIN_DATE } from '@/utils/dateLimits';
 
 /** Props of {@link AccountForm}. */
 export interface AccountFormProps {
@@ -82,7 +83,7 @@ export function AccountForm({ id, banks, initial, defaultCurrency, today, aliasE
       </>}
       <SelectField label="Moneda" value={currency} options={CURRENCY_OPTIONS} onChange={(value) => setCurrency(value as Currency)} disabled={isEdit} />
       <TextField label="Saldo inicial" inputMode="decimal" value={opening} onChange={setOpening} helper={isEdit ? undefined : 'Mayor o igual a cero.'} error={errors.opening} />
-      <TextField label="Fecha del saldo inicial" type="date" value={date} onChange={setDate} />
+      <TextField label="Fecha del saldo inicial" type="date" min={MIN_DATE} value={date} onChange={setDate} />
     </form>
   );
 }

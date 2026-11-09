@@ -14,7 +14,7 @@ import { useInstruments } from '@/hooks/useInstruments';
 import { useTransactionHistory } from '@/hooks/useTransactionHistory';
 import { PATHS, withId } from '@/navigation/paths';
 import type { TransactionFilter } from '@/types/transaction';
-import { formatMonth, monthOf, monthRange, shiftMonth, todayIso } from '@/utils/format';
+import { formatMonth, monthOf, monthRange, todayIso } from '@/utils/format';
 
 
 function defaults(): HistoryFilterValues {
@@ -58,7 +58,6 @@ export function TransactionsPage() {
   const { instruments } = useInstruments();
 
   const isFiltered = JSON.stringify(filters) !== JSON.stringify(initial);
-  const months = Array.from({ length: 24 }, (_, index) => shiftMonth(monthOf(todayIso()), -index)).map((month) => ({ value: month, label: formatMonth(month, true) }));
   const periodText = filters.month ? formatMonth(filters.month, true) : `${filters.from} – ${filters.to}`;
   const subtitle = isFiltered
     ? `Mostrando ${filters.status === 'VOIDED' ? 'movimientos anulados' : 'movimientos'}${filters.currency ? ` en ${filters.currency}` : ''} ${filters.month ? `de ${periodText.toLowerCase()}` : `entre ${periodText}`}${filters.text ? ` que contienen «${filters.text}»` : ''}.`
@@ -128,7 +127,6 @@ export function TransactionsPage() {
         isOpen={isFilterOpen}
         value={filters}
         defaults={initial}
-        months={months}
         categories={[...expense.categories, ...income.categories].map((category) => ({ value: category.id, label: category.name }))}
         instruments={[
           ...instruments.accounts.map((account) => ({ value: account.id, label: `${account.alias} · ${account.currency}` })),

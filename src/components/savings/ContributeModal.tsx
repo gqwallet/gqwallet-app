@@ -10,6 +10,7 @@ import type { Currency } from '@/types/api';
 import type { RegisterContributionInput } from '@/types/savings';
 import { formatMoney, todayIso } from '@/utils/format';
 import { parseAmount } from '@/utils/parse';
+import { MIN_DATE } from '@/utils/dateLimits';
 
 /** Account offered as source. */
 export interface SourceAccount {
@@ -92,7 +93,7 @@ export function ContributeModal({ goalName, currency, accounts, isSaving, error,
       )}
       <TextField label="Importe" inputMode="decimal" placeholder="0.00" value={amount} onChange={setAmount} error={amountError ?? error} />
       <TextField label="Descripción (opcional)" maxLength={120} value={description} onChange={setDescription} />
-      <TextField label="Fecha" type="date" value={date} onChange={setDate} />
+      <TextField label="Fecha" type="date" min={MIN_DATE} value={date} onChange={setDate} />
     </Modal>
   );
 }

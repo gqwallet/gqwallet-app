@@ -5,7 +5,7 @@
  * @packageDocumentation
  */
 import { useEffect, useState } from 'react';
-import { BreakdownRow, Button, Modal, SelectField, type SelectOption } from '@/components/ui';
+import { BreakdownRow, Button, Modal, MonthPickerPanel, SelectField } from '@/components/ui';
 
 /** Counts shown before copying. */
 export interface CopyCounts {
@@ -21,8 +21,6 @@ export interface CopyCounts {
 export interface CopyLimitsModalProps {
   /** Whether the dialog is open. */
   isOpen: boolean;
-  /** Source month options. */
-  months: SelectOption[];
   /** Default source month. */
   defaultSource: string;
   /** Target month label. */
@@ -46,10 +44,10 @@ export interface CopyLimitsModalProps {
  *
  * @example
  * ```tsx
- * <CopyLimitsModal isOpen months={months} defaultSource="2026-05" targetLabel="Junio 2026" currencyLabel="PEN · Soles" monthName={name} onPreview={preview} isSaving={false} onCopy={copy} onClose={close} />
+ * <CopyLimitsModal isOpen defaultSource="2026-05" targetLabel="Junio 2026" currencyLabel="PEN · Soles" monthName={name} onPreview={preview} isSaving={false} onCopy={copy} onClose={close} />
  * ```
  */
-export function CopyLimitsModal({ isOpen, months, defaultSource, targetLabel, currencyLabel, monthName, onPreview, isSaving, onCopy, onClose }: CopyLimitsModalProps) {
+export function CopyLimitsModal({ isOpen, defaultSource, targetLabel, currencyLabel, monthName, onPreview, isSaving, onCopy, onClose }: CopyLimitsModalProps) {
   const [source, setSource] = useState(defaultSource);
   const [counts, setCounts] = useState<CopyCounts | null>(null);
   useEffect(() => {
@@ -76,9 +74,10 @@ export function CopyLimitsModal({ isOpen, months, defaultSource, targetLabel, cu
         </>
       }
     >
-      <div className="grid grid-cols-2 gap-3">
-        <SelectField label="Copiar desde" value={source} options={months} onChange={setSource} />
-        <SelectField label="Hacia" value="target" options={[{ value: 'target', label: targetLabel }]} onChange={() => undefined} disabled />
+      <SelectField label="Hacia" value="target" options={[{ value: 'target', label: targetLabel }]} onChange={() => undefined} disabled />
+      <div className="flex flex-col gap-1.5">
+        <span className="text-label text-content-secondary">Copiar desde · {monthName(source)}</span>
+        <MonthPickerPanel value={source} onChange={setSource} />
       </div>
       <SelectField label="Moneda" value="currency" options={[{ value: 'currency', label: currencyLabel }]} onChange={() => undefined} disabled />
       {counts && (

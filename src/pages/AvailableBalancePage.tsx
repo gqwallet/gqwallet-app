@@ -13,6 +13,7 @@ import { PATHS } from '@/navigation/paths';
 import type { Currency } from '@/types/api';
 import { formatMoney, formatShortDate, todayIso } from '@/utils/format';
 import { CURRENCY_OPTIONS } from '@/utils/options';
+import { MIN_DATE } from '@/utils/dateLimits';
 
 /**
  * Shows the breakdown from {@link useAvailableBalance} for a chosen cutoff and currency.
@@ -38,7 +39,7 @@ export function AvailableBalancePage() {
         actions={<Button label="Volver al dashboard" icon="arrow_back" variant="secondary" onClick={() => navigate(PATHS.dashboard)} />}
       />
       <div className="mb-4 grid gap-4 sm:grid-cols-2">
-        <TextField label="Fecha de corte" type="date" value={cutoff} onChange={setCutoff} />
+        <TextField label="Fecha de corte" type="date" min={MIN_DATE} value={cutoff} onChange={setCutoff} />
         <SelectField label="Moneda" value={currency} options={CURRENCY_OPTIONS} onChange={(value) => setCurrency(value as Currency)} />
       </div>
       <Card title={`Desglose al ${formatShortDate(cutoff || todayIso(), true)}`} className="mb-4">

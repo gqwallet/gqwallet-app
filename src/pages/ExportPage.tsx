@@ -11,6 +11,7 @@ import { useToast } from '@/context/ToastContext';
 import { useExport, type ExportEntity } from '@/hooks/useExport';
 import type { CurrencyFilter } from '@/types/api';
 import { todayIso } from '@/utils/format';
+import { MIN_DATE } from '@/utils/dateLimits';
 
 const ENTITIES: Array<{ value: ExportEntity; label: string; noun: string }> = [
   { value: 'MOVEMENTS', label: 'Movimientos', noun: 'movimientos' },
@@ -37,7 +38,7 @@ export function ExportPage() {
   const { notify } = useToast();
   const year = todayIso().slice(0, 4);
   const [entity, setEntity] = useState<ExportEntity>('MOVEMENTS');
-  const [from, setFrom] = useState(`${year}-01-01`);
+  const [from, setFrom] = useState(`${year}-01-01` < MIN_DATE ? MIN_DATE : `${year}-01-01`);
   const [to, setTo] = useState(`${year}-12-31`);
   const [currency, setCurrency] = useState<CurrencyFilter>('BOTH');
   const { files, isLoading, error, download, isDownloading } = useExport(entity, from, to, currency);
@@ -61,8 +62,8 @@ export function ExportPage() {
       </div>
       <Card title="Filtros" className="mb-4">
         <div className="grid gap-4 lg:grid-cols-3">
-          <TextField label="Desde" type="date" value={from} onChange={setFrom} error={isRangeValid ? null : 'La fecha inicial debe ser anterior a la final.'} />
-          <TextField label="Hasta" type="date" value={to} onChange={setTo} />
+          <TextField label="Desde" type="date" min={MIN_DATE} value={from} onChange={setFrom} error={isRangeValid ? null : 'La fecha inicial debe ser anterior a la final.'} />
+          <TextField label="Hasta" type="date" min={MIN_DATE} value={to} onChange={setTo} />
           <SelectField
             label="Moneda"
             value={currency}

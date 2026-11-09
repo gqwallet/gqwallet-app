@@ -7,7 +7,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { PageHeader } from '@/components/layout';
-import { Badge, BarChart, Button, Callout, Card, ChipGroup, ChipPicker, DataTable, EmptyState, Modal, Spinner, TextField } from '@/components/ui';
+import { Badge, BarChart, Button, Callout, Card, ChipGroup, DataTable, EmptyState, Modal, Spinner, TextField, YearChip } from '@/components/ui';
 import { useAuth } from '@/context/AuthContext';
 import { useDebtLoad } from '@/hooks/useDebtLoad';
 import { useDebtThreshold } from '@/hooks/useDebtThreshold';
@@ -36,7 +36,6 @@ export function DebtLoadPage() {
   const [isThresholdOpen, setIsThresholdOpen] = useState(false);
   const [draft, setDraft] = useState(String(threshold));
   const [draftError, setDraftError] = useState<string | null>(null);
-  const years = Array.from({ length: 5 }, (_, index) => String(thisYear + 1 - index)).map((value) => ({ value, label: value }));
   const months = data?.months ?? [];
   const tableRows = months.filter((month) => month.debtPayments > 0);
 
@@ -59,7 +58,7 @@ export function DebtLoadPage() {
         actions={<Button label="Cambiar umbral" icon="tune" variant="secondary" onClick={() => { setDraft(String(threshold)); setDraftError(null); setIsThresholdOpen(true); }} />}
       />
       <div className="mb-4 flex gap-2 overflow-x-auto [scrollbar-width:none]">
-        <ChipPicker title="Elige el año" options={years} value={year} onChange={setYear} />
+        <YearChip title="Elige el año" value={year} onChange={setYear} />
         <ChipGroup label="Moneda" options={CURRENCY_OPTIONS} value={currency} onChange={setCurrency} className="mx-0 px-0" />
       </div>
       {isLoading && !data && <Spinner />}

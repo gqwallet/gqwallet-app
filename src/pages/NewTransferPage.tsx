@@ -14,6 +14,7 @@ import { PATHS } from '@/navigation/paths';
 import type { TransferKind } from '@/types/transaction';
 import { formatAmount, formatMoney, todayIso } from '@/utils/format';
 import { parseAmount } from '@/utils/parse';
+import { MIN_DATE } from '@/utils/dateLimits';
 
 const KIND_OPTIONS: Array<{ value: TransferKind; label: string }> = [
   { value: 'ACCOUNT_TO_ACCOUNT', label: 'Entre cuentas' },
@@ -140,7 +141,7 @@ export function NewTransferPage() {
                 helper={kind === 'CARD_PAYMENT' ? 'Sugerimos el total a pagar de esta facturación.' : undefined}
               />
               <TextField label="Descripción (opcional)" maxLength={120} value={description} onChange={setDescription} />
-              <TextField label="Fecha económica" type="date" value={date} onChange={setDate} />
+              <TextField label="Fecha económica" type="date" min={MIN_DATE} value={date} onChange={setDate} />
             </div>
             {!isMismatch && source && (
               <Callout
