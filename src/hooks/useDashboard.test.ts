@@ -17,6 +17,8 @@ vi.mock('@/services/budgets.service', () => ({ budgetsService: { getStatus: vi.f
 vi.mock('@/services/cards.service', () => ({ cardsService: { list: vi.fn(() => Promise.resolve([])) } }));
 vi.mock('@/services/transactions.service', () => ({ transactionsService: { list: vi.fn(() => Promise.resolve({ content: [], totals: [], page: 0, size: 1, totalElements: 0, totalPages: 1 })) } }));
 import { useDashboard } from '@/hooks/useDashboard';
+import { overviewService } from '@/services/overview.service';
+import { cardsService } from '@/services/cards.service';
 
 beforeEach(() => vi.clearAllMocks());
 
@@ -27,5 +29,25 @@ describe('useDashboard', () => {
     expect(result.current.data?.monthDues).toBe(1);
     expect(result.current.data?.paidDues).toBe(1);
     expect(result.current.data?.isEmpty).toBe(false);
+  });
+
+  it('preserves the dashboard cycle billing date rather than the card next billing date', async () => {
+    vi.mocked(overviewService.getDashboard).mockResolvedValueOnce({
+      currency: 'PEN', available: 0, monthIncomes: 0, monthVariableExpenses: 0, monthFixedPayments: 0,
+      budgetUsage: null, upcomingDues: [], upcomingCards: [{
+        cardId: 'c1', name: 'Visa', currency: 'PEN', color: '#3333B2', amountDue: 250,
+        paymentDueDate: '2026-11-20', billingDate: '2026-10-24',
+      }],
+    });
+    vi.mocked(cardsService.list).mockResolvedValueOnce([{
+      id: 'c1', name: 'Visa', bankName: 'BCP', bankId: null, customBankName: null, currency: 'PEN',
+      creditLine: 1000, billingDate: '2026-11-24', billingCutoffTime: null, paymentDueDate: '2026-12-20',
+      color: '#3333B2', insurancePercentage: null,
+    }]);
+    const { result } = renderHook(() => useDashboard('PEN'));
+    await waitFor(() => expect(result.current.data).not.toBeNull());
+    expect(result.current.data?.dashboard.upcomingCards[0]).toEqual(expect.objectContaining({
+      paymentDueDate: '2026-11-20', billingDate: '2026-10-24', amountDue: 250,
+    }));
   });
 });

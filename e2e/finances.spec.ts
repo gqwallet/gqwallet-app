@@ -125,7 +125,7 @@ test('a new user manages her finances end to end', async ({ page }) => {
     await page.getByLabel('Descripción', { exact: true }).fill('Internet');
     await page.getByLabel('Categoría de gasto para el presupuesto', { exact: true }).selectOption({ label: 'Servicios' });
     await page.getByLabel('Monto mensual', { exact: true }).fill('99');
-    await page.getByLabel('Día de vencimiento', { exact: true }).fill('28');
+    await page.getByLabel('Día de cobro', { exact: true }).fill('28');
     await page.getByLabel('Medio de pago habitual', { exact: true }).selectOption({ label: 'BCP Débito · PEN' });
     await page.getByRole('button', { name: 'Guardar pago fijo' }).click();
     await expect(page.getByText('Pago fijo registrado')).toBeVisible();
