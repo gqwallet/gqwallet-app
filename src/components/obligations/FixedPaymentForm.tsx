@@ -6,11 +6,12 @@
  * @packageDocumentation
  */
 import { useState, type FormEvent } from 'react';
-import { Callout, SelectField, TextField, type SelectOption } from '@/components/ui';
+import { Callout, MonthField, SelectField, TextField, type SelectOption } from '@/components/ui';
 import type { Currency } from '@/types/api';
 import type { FixedPayment, FixedPaymentKind, RegisterFixedPaymentInput } from '@/types/obligation';
 import type { PaymentMethodKind } from '@/types/transaction';
-import { formatAmount, formatMonth, monthOf, shiftMonth } from '@/utils/format';
+import { clampMonth } from '@/utils/dateLimits';
+import { formatAmount, monthOf } from '@/utils/format';
 import { CURRENCY_OPTIONS, FIXED_KIND_LABEL, toOptions } from '@/utils/options';
 import { parseAmount } from '@/utils/parse';
 
@@ -67,13 +68,11 @@ export function FixedPaymentForm({ id, initial, initialMeans = '', categories, m
   const [currency, setCurrency] = useState<Currency>(initial?.currency ?? defaultCurrency);
   const [amount, setAmount] = useState(initial ? formatAmount(initial.amount) : '');
   const [dueDay, setDueDay] = useState(String(initial?.dueDay ?? 1));
-  const [startMonth, setStartMonth] = useState(initial?.startMonth ?? monthOf(today));
+  const [startMonth, setStartMonth] = useState(initial?.startMonth ?? clampMonth(monthOf(today)));
   const [installments, setInstallments] = useState(initial?.totalInstallments ? String(initial.totalInstallments) : '');
   const [usual, setUsual] = useState(initialMeans);
   const [errors, setErrors] = useState<Errors>({});
   const isEdit = Boolean(initial);
-  const months = Array.from({ length: 13 }, (_, index) => shiftMonth(monthOf(today), index - 1)).map((month) => ({ value: month, label: formatMonth(month, true) }));
-  if (initial && !months.some((option) => option.value === initial.startMonth)) months.unshift({ value: initial.startMonth, label: formatMonth(initial.startMonth, true) });
 
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
@@ -135,7 +134,7 @@ export function FixedPaymentForm({ id, initial, initialMeans = '', categories, m
           helper={isEdit ? undefined : 'Si el mes tiene menos días, vence el último día del mes.'}
           error={errors.dueDay}
         />
-        {!isEdit && <SelectField label="Mes de inicio" value={startMonth} options={months} onChange={setStartMonth} />}
+        {!isEdit && <MonthField label="Mes de inicio" value={startMonth} onChange={setStartMonth} />}
         <TextField
           label="Número total de cuotas"
           inputMode="numeric"

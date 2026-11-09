@@ -8,11 +8,11 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { MonthGrid } from '@/components/calendar';
 import { PageHeader } from '@/components/layout';
-import { Badge, Button, Card, EmptyState, ListRow, Modal, SelectField, Spinner, Toggle } from '@/components/ui';
+import { Badge, Button, Card, EmptyState, ListRow, Modal, MonthField, SelectField, Spinner, Toggle } from '@/components/ui';
 import { useToast } from '@/context/ToastContext';
 import { useCalendar, type CalendarMark } from '@/hooks/useCalendar';
 import { PATHS } from '@/navigation/paths';
-import { formatMoney, formatMonth, formatShortDate, monthOf, parseIsoDate, shiftMonth, todayIso } from '@/utils/format';
+import { formatMoney, formatMonth, formatShortDate, monthOf, parseIsoDate, todayIso } from '@/utils/format';
 
 type Filter = 'ALL' | 'CARDS' | 'DUES';
 
@@ -50,7 +50,6 @@ export function CalendarPage() {
   const [filter, setFilter] = useState<Filter>('ALL');
   const [isSyncOpen, setIsSyncOpen] = useState(false);
   const { data, isLoading, error, link, disconnect, isLinking, consentUrl, isSyncAvailable } = useCalendar(period);
-  const months = Array.from({ length: 15 }, (_, index) => shiftMonth(current, index - 3)).map((month) => ({ value: month, label: formatMonth(month, true) }));
   const marks = (data?.marks ?? []).filter((mark) => filter === 'ALL' || (filter === 'CARDS' ? mark.kind !== 'DUE' : mark.kind === 'DUE'));
   const isEmpty = data !== null && data.cards.length === 0 && data.marks.length === 0;
 
@@ -94,7 +93,7 @@ export function CalendarPage() {
       {data && !isEmpty && (
         <>
           <div className="mb-4 grid gap-4 sm:grid-cols-2">
-            <SelectField label="Mes" value={period} options={months} onChange={setPeriod} />
+            <MonthField label="Mes" value={period} onChange={setPeriod} />
             <SelectField label="Mostrar" value={filter} options={FILTERS} onChange={(value) => setFilter(value as Filter)} />
           </div>
           <Card title={formatMonth(period, true)} className="mb-4 lg:mb-6">

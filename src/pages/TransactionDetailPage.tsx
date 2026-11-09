@@ -13,7 +13,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/context/ToastContext';
 import { useTransactionForm } from '@/hooks/useTransactionForm';
 import { PATHS } from '@/navigation/paths';
-import type { RegisterTransactionInput } from '@/types/transaction';
+import type { RegisterTransactionFormInput } from '@/types/transaction';
 import { formatMoney, formatShortDate, todayIso } from '@/utils/format';
 
 const FORM_ID = 'edit-transaction';
@@ -53,7 +53,7 @@ export function TransactionDetailPage() {
   const category = categories.find((item) => item.id === transaction.categoryId)?.name ?? 'Movimiento';
   const isVoided = transaction.status === 'VOIDED';
 
-  const handleSave = async ({ nature: _nature, ...input }: RegisterTransactionInput) => {
+  const handleSave = async ({ nature: _nature, ...input }: RegisterTransactionFormInput) => {
     void _nature;
     if (await update(input)) {
       notify({ title: 'Cambios guardados', detail: `${category} · ${formatMoney(input.amount, input.currency)}` });

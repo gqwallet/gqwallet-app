@@ -14,7 +14,7 @@ import { transactionsService } from '@/services/transactions.service';
 import type { Account } from '@/types/account';
 import type { ApiError, Currency } from '@/types/api';
 import type { Card } from '@/types/card';
-import type { Category, RegisterTransactionInput, Transaction, TransactionInput } from '@/types/transaction';
+import type { Category, RegisterTransactionFormInput, Transaction, TransactionFormInput, TransactionInput } from '@/types/transaction';
 import { monthOf } from '@/utils/format';
 
 /** Lookups of the form. */
@@ -40,9 +40,9 @@ export interface TransactionFormState {
   /** Load error. */
   loadError: ApiError | null;
   /** Registers a movement; resolves it or `null`. */
-  register: (input: RegisterTransactionInput) => Promise<Transaction | null>;
+  register: (input: RegisterTransactionFormInput) => Promise<Transaction | null>;
   /** Saves an edited movement; resolves it or `null`. */
-  update: (input: TransactionInput) => Promise<Transaction | null>;
+  update: (input: TransactionFormInput) => Promise<Transaction | null>;
   /** Voids the movement with a reason; resolves it or `null`. */
   voidWithReason: (reason: string) => Promise<Transaction | null>;
   /** Whether a write is in flight. */
@@ -55,13 +55,17 @@ export interface TransactionFormState {
   suggestMerchants: (prefix: string) => Promise<string[]>;
 }
 
-// A card expense must name its billing cycle. A cycle runs from the day after the previous closing up to and
-// including its closing day, so an expense made on the closing day still belongs to the cycle that closes that day.
-async function cycleFor(input: TransactionInput): Promise<string | null> {
+// Select the first closing date on or after the economic date. Only on the card's billing day,
+// a purchase strictly after its optional cut-off skips that day's cycle. Missing times keep that cycle.
+async function cycleFor(input: TransactionInput, purchaseTime: string | undefined, cards: Card[]): Promise<string | null> {
   if (input.paymentMethodKind !== 'CARD' || !input.instrumentId) return null;
   if (input.cycleClosingDate) return input.cycleClosingDate;
   const cycles = [...(await cardsService.listBillingCycles(input.instrumentId))].sort((a, b) => a.closingDate.localeCompare(b.closingDate));
-  return (cycles.find((cycle) => cycle.closingDate >= input.economicDate) ?? cycles[cycles.length - 1])?.closingDate ?? null;
+  const card = cards.find((item) => item.id === input.instrumentId);
+  const afterCutoff = Boolean(card?.billingCutoffTime && purchaseTime && purchaseTime > card.billingCutoffTime
+    && Number(input.economicDate.slice(8, 10)) === Number(card.billingDate.slice(8, 10)));
+  return (cycles.find((cycle) => afterCutoff ? cycle.closingDate > input.economicDate : cycle.closingDate >= input.economicDate)
+    ?? (afterCutoff ? undefined : cycles[cycles.length - 1]))?.closingDate ?? null;
 }
 
 function messageOf(error: ApiError | null): string | null {
@@ -105,13 +109,13 @@ export function useTransactionForm(transactionId?: string): TransactionFormState
   const write = useMutation((run: () => Promise<Transaction>) => run());
   const { submit } = write;
   const register = useCallback(
-    (input: RegisterTransactionInput) => submit(async () => transactionsService.register({ ...input, cycleClosingDate: await cycleFor(input) })),
-    [submit],
+    ({ purchaseTime, ...input }: RegisterTransactionFormInput) => submit(async () => transactionsService.register({ ...input, cycleClosingDate: await cycleFor(input, purchaseTime, data?.lookups.cards ?? []) })),
+    [submit, data],
   );
   const update = useCallback(
-    (input: TransactionInput) =>
-      transactionId ? submit(async () => transactionsService.update(transactionId, { ...input, cycleClosingDate: await cycleFor(input) })) : Promise.resolve(null),
-    [submit, transactionId],
+    ({ purchaseTime, ...input }: TransactionFormInput) =>
+      transactionId ? submit(async () => transactionsService.update(transactionId, { ...input, cycleClosingDate: await cycleFor(input, purchaseTime, data?.lookups.cards ?? []) })) : Promise.resolve(null),
+    [submit, transactionId, data],
   );
   const voidWithReason = useCallback(
     (reason: string) => (transactionId ? submit(() => transactionsService.voidTransaction(transactionId, reason)) : Promise.resolve(null)),

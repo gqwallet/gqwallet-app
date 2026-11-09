@@ -7,7 +7,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { PageHeader } from '@/components/layout';
-import { Button, Card, ChipGroup, ChipPicker, DataTable, EmptyState, Spinner, StatCard } from '@/components/ui';
+import { Button, Card, ChipGroup, DataTable, EmptyState, Spinner, StatCard, YearChip } from '@/components/ui';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/context/ToastContext';
 import { useCashFlow } from '@/hooks/useCashFlow';
@@ -53,7 +53,6 @@ export function CashFlowPage() {
   const [year, setYear] = useState(String(thisYear));
   const [currency, setCurrency] = useState<Currency>(profile?.preferredCurrency ?? 'PEN');
   const { data, isLoading, error, exportCsv, isExporting } = useCashFlow(Number(year), currency);
-  const years = Array.from({ length: 5 }, (_, index) => String(thisYear + 1 - index)).map((value) => ({ value, label: value }));
   const money = (value: number) => formatMoney(value, currency);
   const rows = data?.cashFlow.rows ?? [];
   const isCurrentYear = Number(year) === thisYear;
@@ -77,7 +76,7 @@ export function CashFlowPage() {
         ]}
       />
       <div className="mb-4 flex gap-2 overflow-x-auto [scrollbar-width:none]">
-        <ChipPicker title="Elige el año" options={years} value={year} onChange={setYear} />
+        <YearChip title="Elige el año" value={year} onChange={setYear} />
         <ChipGroup label="Moneda" options={CURRENCY_OPTIONS} value={currency} onChange={setCurrency} className="mx-0 px-0" />
       </div>
       {isLoading && !data && <Spinner />}

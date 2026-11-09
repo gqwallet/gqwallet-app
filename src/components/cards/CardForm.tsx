@@ -5,7 +5,7 @@
  * @packageDocumentation
  */
 import { useState, type FormEvent } from 'react';
-import { Callout, ChipGroup, SelectField, TextField } from '@/components/ui';
+import { Callout, ChipGroup, SelectField, TextField, TimeField } from '@/components/ui';
 import type { Currency } from '@/types/api';
 import type { Card, RegisterCardInput } from '@/types/card';
 import type { Bank } from '@/types/catalog';
@@ -58,6 +58,7 @@ export function CardForm({ id, banks, initial, hasMovements = false, defaultCurr
   const [currency, setCurrency] = useState<Currency>(initial?.currency ?? defaultCurrency);
   const [creditLine, setCreditLine] = useState(initial ? formatAmount(initial.creditLine) : '');
   const [billingDay, setBillingDay] = useState(initial ? String(parseIsoDate(initial.billingDate).getDate()) : '10');
+  const [billingCutoffTime, setBillingCutoffTime] = useState(initial?.billingCutoffTime ?? '');
   const [paymentDay, setPaymentDay] = useState(initial ? String(parseIsoDate(initial.paymentDueDate).getDate()) : '28');
   const [insurance, setInsurance] = useState(initial?.insurancePercentage !== null && initial?.insurancePercentage !== undefined ? initial.insurancePercentage.toFixed(2) : '');
   const [color, setColor] = useState(initial?.color.toUpperCase() ?? CARD_COLORS[0].hex);
@@ -81,7 +82,7 @@ export function CardForm({ id, banks, initial, hasMovements = false, defaultCurr
     if (Object.keys(next).length || line === null) return;
     const billingDate = nextDayOfMonth(Number(billingDay), today);
     const paymentDueDate = nextDayOfMonth(Number(paymentDay), billingDate);
-    onSubmit({ name: name.trim(), bankId: bank === 'OTHER' ? null : bank, customBankName: bank === 'OTHER' ? customBankName.trim() : null, currency, creditLine: line, billingDate, paymentDueDate, color, insurancePercentage: percent });
+    onSubmit({ name: name.trim(), bankId: bank === 'OTHER' ? null : bank, customBankName: bank === 'OTHER' ? customBankName.trim() : null, currency, creditLine: line, billingDate, billingCutoffTime: billingCutoffTime || null, paymentDueDate, color, insurancePercentage: percent });
   };
 
   const hasErrors = Object.keys(errors).length > 0;
@@ -109,6 +110,12 @@ export function CardForm({ id, banks, initial, hasMovements = false, defaultCurr
           onChange={setPaymentDay}
           helper={Number(paymentDay) < Number(billingDay) ? 'Se paga en el mes siguiente al corte.' : 'Se paga en el mismo mes del corte.'}
           error={errors.paymentDay}
+        />
+        <TimeField
+          label="Hora de corte"
+          value={billingCutoffTime}
+          onChange={setBillingCutoffTime}
+          helper="Opcional. Revisa tu contrato: los consumos del día de facturación después de esta hora pasan al ciclo siguiente. Si la dejas vacía, cuenta todo el día."
         />
         <TextField label="Seguro desgravamen (%)" inputMode="decimal" value={insurance} onChange={setInsurance} helper="Opcional. Entre 0 % y 100 %." error={errors.insurance} />
       </div>

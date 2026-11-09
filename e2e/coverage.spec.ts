@@ -170,4 +170,64 @@ test('profile, cards, calendar and consolidated view', async ({ page }) => {
     await page.getByRole('dialog').getByRole('button', { name: 'Eliminar tarjeta' }).click();
     await expect(page.getByText('Tarjeta eliminada')).toBeVisible();
   });
+
+  await test.step('assigns closing-day purchases according to the optional card cut-off', async () => {
+    const today = new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'America/Lima', year: 'numeric', month: '2-digit', day: '2-digit',
+    }).format(new Date());
+    const billingDay = Number(today.slice(8, 10));
+    await page.goto('/tarjetas/nueva');
+    await page.getByLabel('Nombre', { exact: true }).fill('Visa con corte');
+    await page.getByLabel('Banco', { exact: true }).selectOption({ label: 'Interbank' });
+    await page.getByLabel('Línea de crédito', { exact: true }).fill('10000');
+    await page.getByLabel('Día de facturación', { exact: true }).selectOption(String(billingDay));
+    await page.getByLabel('Día de pago', { exact: true }).selectOption(billingDay === 28 ? '5' : '28');
+    const cutoff = page.getByRole('group', { name: 'Hora de corte' });
+    await cutoff.getByLabel('Hora de corte', { exact: true }).selectOption('22');
+    await cutoff.getByLabel('Minutos', { exact: true }).selectOption('00');
+    const creation = page.waitForResponse((response) => response.url().endsWith('/api/v1/cards') && response.request().method() === 'POST');
+    await page.getByRole('button', { name: 'Guardar tarjeta' }).click();
+    const card: { id: string; billingCutoffTime: string | null } = await (await creation).json();
+    expect(card.billingCutoffTime).toBe('22:00');
+    await expect(page.getByText('Tarjeta registrada')).toBeVisible();
+    await expect(page.getByText(`PEN · Facturación día ${billingDay} · corte 22:00 · Pago día ${billingDay === 28 ? 5 : 28}`)).toBeVisible();
+
+    const cyclesResponse = await page.request.get(`http://localhost:8080/api/v1/cards/${card.id}/billing-cycles`);
+    expect(cyclesResponse.ok()).toBe(true);
+    const cycles: { closingDate: string }[] = await cyclesResponse.json();
+    const nextClosingDate = cycles.map((cycle) => cycle.closingDate).sort().find((date) => date > today);
+    expect(nextClosingDate).toBeDefined();
+
+    for (const purchase of [
+      { hour: '22', minute: '30', amount: '30', merchant: 'Después del corte', closingDate: nextClosingDate, total: 'S/ 0.00' },
+      { hour: '21', minute: '00', amount: '20', merchant: 'Antes del corte', closingDate: today, total: 'S/ 20.00' },
+    ]) {
+      await page.goto('/movimientos/nuevo');
+      await page.getByLabel('Importe', { exact: true }).fill(purchase.amount);
+      await chooseCategory(page, 'Supermercado');
+      await page.getByLabel('Fecha económica', { exact: true }).fill(today);
+      await page.getByLabel('Medio de pago', { exact: true }).selectOption({ label: 'Visa con corte · PEN' });
+      const time = page.getByRole('group', { name: 'Hora del consumo' });
+      await time.getByLabel('Hora del consumo', { exact: true }).selectOption(purchase.hour);
+      await time.getByLabel('Minutos', { exact: true }).selectOption(purchase.minute);
+      await page.getByLabel('Comercio', { exact: true }).fill(purchase.merchant);
+      const registration = page.waitForResponse((response) => response.url().endsWith('/api/v1/transactions') && response.request().method() === 'POST');
+      await page.getByRole('button', { name: 'Guardar gasto' }).click();
+      const response = await registration;
+      expect(response.ok()).toBe(true);
+      expect(response.request().postDataJSON()).not.toHaveProperty('purchaseTime');
+      const transaction: { cycleClosingDate: string } = await response.json();
+      expect(transaction.cycleClosingDate).toBe(purchase.closingDate);
+      await expect(page.getByText('Gasto registrado')).toBeVisible();
+
+      const projection = page.waitForResponse((result) => result.url().endsWith(`/cards/${card.id}/next-billing`) && result.ok());
+      await page.goto(`/tarjetas/${card.id}`);
+      const nextBilling: { billingDate: string } = await (await projection).json();
+      expect(nextBilling.billingDate).toBe(today);
+      await expect(page.getByText('Total a pagar', { exact: true }).first().locator('..')).toContainText(purchase.total);
+      await expect(page.getByText('Corte', { exact: true }).locator('..')).toContainText('22:00');
+      await expect(page.getByText(/Después del corte ·/)).not.toBeVisible();
+    }
+    await expect(page.getByText(/Antes del corte ·/)).toBeVisible();
+  });
 });

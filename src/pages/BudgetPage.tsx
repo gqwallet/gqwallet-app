@@ -7,13 +7,14 @@
 import { useState } from 'react';
 import { BudgetStateBadge, CopyLimitsModal, LimitModal } from '@/components/budget';
 import { PageHeader } from '@/components/layout';
-import { Button, Callout, Card, ChipGroup, ChipPicker, DataTable, EmptyState, Spinner, StatCard } from '@/components/ui';
+import { Button, Callout, Card, ChipGroup, DataTable, EmptyState, MonthChip, Spinner, StatCard } from '@/components/ui';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/context/ToastContext';
 import { useBudget } from '@/hooks/useBudget';
 import type { Currency } from '@/types/api';
 import type { BudgetLine } from '@/types/budget';
 import { cn } from '@/utils/cn';
+import { clampMonth } from '@/utils/dateLimits';
 import { formatAmount, formatMoney, formatMonth, formatPercent, monthOf, shiftMonth, todayIso } from '@/utils/format';
 import { CURRENCY_OPTIONS } from '@/utils/options';
 
@@ -36,12 +37,11 @@ export function BudgetPage() {
   const { profile } = useAuth();
   const { notify } = useToast();
   const current = monthOf(todayIso());
-  const [period, setPeriod] = useState(current);
+  const [period, setPeriod] = useState(clampMonth(current));
   const [currency, setCurrency] = useState<Currency>(profile?.preferredCurrency ?? 'PEN');
   const { data, isLoading, error, saveLimit, previewCopy, copyFrom, isSaving } = useBudget(period, currency);
   const [limitCategory, setLimitCategory] = useState<string | null>(null);
   const [isCopyOpen, setIsCopyOpen] = useState(false);
-  const months = Array.from({ length: 15 }, (_, index) => shiftMonth(current, 2 - index)).map((month) => ({ value: month, label: formatMonth(month, true) }));
   const monthName = formatMonth(period).toLowerCase();
   const currencyLabel = CURRENCY_OPTIONS.find((option) => option.value === currency)?.label ?? currency;
   const money = (value: number) => formatMoney(value, currency);
@@ -72,7 +72,7 @@ export function BudgetPage() {
         ]}
       />
       <div className="mb-4 flex gap-2 overflow-x-auto [scrollbar-width:none]">
-        <ChipPicker title="Elige el mes" options={months} value={period} onChange={setPeriod} />
+        <MonthChip title="Elige el mes" value={period} onChange={setPeriod} />
         <ChipGroup label="Moneda" options={CURRENCY_OPTIONS} value={currency} onChange={setCurrency} className="mx-0 px-0" />
       </div>
       {isLoading && !data && <Spinner />}
@@ -150,8 +150,7 @@ export function BudgetPage() {
       )}
       <CopyLimitsModal
         isOpen={isCopyOpen}
-        months={months.filter((option) => option.value !== period)}
-        defaultSource={shiftMonth(period, -1)}
+        defaultSource={clampMonth(shiftMonth(period, -1))}
         targetLabel={formatMonth(period, true)}
         currencyLabel={currencyLabel}
         monthName={(value) => formatMonth(value).toLowerCase()}

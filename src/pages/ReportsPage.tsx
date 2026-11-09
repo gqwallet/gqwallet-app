@@ -7,7 +7,7 @@
 import { useState } from 'react';
 import { PageHeader } from '@/components/layout';
 import { RankingTable, ShareList } from '@/components/reports';
-import { BarChart, Button, Card, ChipGroup, EmptyState, SelectField, Spinner, StatCard, type ProgressTone } from '@/components/ui';
+import { BarChart, Button, Card, ChipGroup, EmptyState, MonthField, SelectField, Spinner, StatCard, type ProgressTone } from '@/components/ui';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/context/ToastContext';
 import { useReports, type ReportKind } from '@/hooks/useReports';
@@ -48,13 +48,6 @@ export function ReportsPage() {
   const isMonth = period.includes('-');
   const reportPeriod = { year: Number(period.slice(0, 4)), month: isMonth ? Number(period.slice(5, 7)) : undefined, currency };
   const { expense, income, isLoading, error, exportCsv, isExporting } = useReports(kind, reportPeriod);
-  const periodOptions = [
-    ...[year, year - 1, year - 2].map((value) => ({ value: String(value), label: `Año ${value}` })),
-    ...Array.from({ length: Number(today.slice(5, 7)) }, (_, index) => {
-      const value = `${year}-${String(index + 1).padStart(2, '0')}`;
-      return { value, label: formatMonth(value, true) };
-    }).reverse(),
-  ];
   const periodText = isMonth ? formatMonth(period, true).toLowerCase() : period;
   const money = (value: number) => formatMoney(value, currency);
   const report = kind === 'EXPENSE' ? expense : income;
@@ -74,7 +67,7 @@ export function ReportsPage() {
       />
       <ChipGroup label="Tipo de reporte" options={[{ value: 'EXPENSE', label: 'Gastos' }, { value: 'INCOME', label: 'Ingresos' }]} value={kind} onChange={setKind} className="mb-4" />
       <div className="mb-4 grid gap-4 sm:grid-cols-2 lg:mb-6">
-        <SelectField label="Periodo" value={period} options={periodOptions} onChange={setPeriod} />
+        <MonthField label="Periodo" value={period} allowYear onChange={setPeriod} />
         <SelectField label="Moneda" value={currency} options={CURRENCY_OPTIONS} onChange={(value) => setCurrency(value as Currency)} helper="Obligatoria. Por defecto, tu moneda principal." />
       </div>
       {isLoading && !report && <Spinner />}

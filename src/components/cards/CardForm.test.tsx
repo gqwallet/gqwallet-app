@@ -13,7 +13,7 @@ import type { Bank } from '@/types/catalog';
 const banks: Bank[] = [{ id: 'bcp-id', name: 'BCP', countryCode: 'PE', active: true }];
 const initial: Card = {
   id: 'card-id', name: 'Visa', bankId: 'retired-id', bankName: 'Banco anterior', customBankName: null,
-  currency: 'PEN', creditLine: 1000, billingDate: '2026-06-10', paymentDueDate: '2026-06-28', color: '#3333B2', insurancePercentage: null,
+  currency: 'PEN', creditLine: 1000, billingDate: '2026-06-10', billingCutoffTime: null, paymentDueDate: '2026-06-28', color: '#3333B2', insurancePercentage: null,
 };
 
 function fillRequiredFields() {
@@ -123,4 +123,27 @@ describe('CardForm', () => {
     submit();
     expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ bankId: null, customBankName: 'Cooperativa local' }));
   });
+  it('registers an optional cut-off or null when cleared', () => {
+    const onSubmit = vi.fn();
+    render(<CardForm id="card" banks={banks} defaultCurrency="PEN" today="2026-11-08" onSubmit={onSubmit} />);
+    fillRequiredFields();
+    fireEvent.change(screen.getByLabelText('Banco'), { target: { value: 'bcp-id' } });
+    fireEvent.change(screen.getByLabelText('Hora de corte'), { target: { value: '22' } });
+    fireEvent.change(screen.getByLabelText('Minutos'), { target: { value: '05' } });
+    submit();
+    expect(onSubmit).toHaveBeenLastCalledWith(expect.objectContaining({ billingCutoffTime: '22:05' }));
+    fireEvent.change(screen.getByLabelText('Hora de corte'), { target: { value: '' } });
+    submit();
+    expect(onSubmit).toHaveBeenLastCalledWith(expect.objectContaining({ billingCutoffTime: null }));
+  });
+
+  it('prefills and saves the cut-off when editing', () => {
+    const onSubmit = vi.fn();
+    render(<CardForm id="card" banks={banks} initial={{ ...initial, billingCutoffTime: '22:00' }} defaultCurrency="PEN" today="2026-11-08" onSubmit={onSubmit} />);
+    expect(screen.getByLabelText('Hora de corte')).toHaveValue('22');
+    expect(screen.getByLabelText('Minutos')).toHaveValue('00');
+    submit();
+    expect(onSubmit).toHaveBeenLastCalledWith(expect.objectContaining({ billingCutoffTime: '22:00' }));
+  });
+
 });

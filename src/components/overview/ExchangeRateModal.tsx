@@ -9,6 +9,7 @@ import { Button, Modal, TextField } from '@/components/ui';
 import type { RegisterExchangeRateInput } from '@/types/profile';
 import { todayIso } from '@/utils/format';
 import { parseAmount } from '@/utils/parse';
+import { MIN_DATE } from '@/utils/dateLimits';
 
 /** Props of {@link ExchangeRateModal}. */
 export interface ExchangeRateModalProps {
@@ -62,7 +63,7 @@ export function ExchangeRateModal({ isOpen, isSaving, error, onSubmit, onClose }
       }
     >
       <TextField label="Soles por 1 dólar" inputMode="decimal" value={rate} onChange={setRate} error={fieldError ?? error} />
-      <TextField label="Fecha del tipo de cambio" type="date" value={date} onChange={setDate} />
+      <TextField label="Fecha del tipo de cambio" type="date" min={MIN_DATE} value={date} onChange={setDate} />
     </Modal>
   );
 }

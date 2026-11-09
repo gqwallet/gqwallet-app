@@ -15,6 +15,7 @@ import { PATHS } from '@/navigation/paths';
 import type { Currency } from '@/types/api';
 import { CURRENCY_OPTIONS } from '@/utils/options';
 import { parseAmount } from '@/utils/parse';
+import { MIN_DATE } from '@/utils/dateLimits';
 
 /**
  * Creates a goal through {@link useCreateGoal}; a repeated emergency fund shows the danger callout.
@@ -59,7 +60,7 @@ export function NewGoalPage() {
             <TextField label="Nombre" value={name} onChange={setName} error={errors.name} />
             <SelectField label="Moneda" value={currency} options={CURRENCY_OPTIONS} onChange={(value) => setCurrency(value as Currency)} />
             <TextField label="Importe objetivo" inputMode="decimal" placeholder="0.00" value={target} onChange={setTarget} error={errors.target} />
-            <TextField label="Fecha objetivo" type="date" value={date} onChange={setDate} helper="Opcional." />
+            <TextField label="Fecha objetivo" type="date" min={MIN_DATE} value={date} onChange={setDate} helper="Opcional." />
             <Toggle label="Usar como fondo de emergencia" description="Su saldo se usa para calcular cuántos meses de pagos fijos cubres." isOn={isFund} onChange={setIsFund} />
             {isDuplicateFund && (
               <Callout

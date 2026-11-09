@@ -9,6 +9,7 @@ import { Button, Callout, Modal, SelectField, TextField } from '@/components/ui'
 import type { Currency } from '@/types/api';
 import { formatAmount, formatMoney, todayIso } from '@/utils/format';
 import { parseAmount } from '@/utils/parse';
+import { MIN_DATE } from '@/utils/dateLimits';
 
 /** Account offered as payment source. */
 export interface PayingAccountOption {
@@ -112,7 +113,7 @@ export function PayCardModal({ isOpen, cardName, currency, suggestedAmount, acco
         />
       )}
       <TextField label="Importe" inputMode="decimal" value={amount} onChange={setAmount} helper="Sugerimos el total a pagar de esta facturación." error={amountError ?? error} />
-      <TextField label="Fecha" type="date" value={date} onChange={setDate} />
+      <TextField label="Fecha" type="date" min={MIN_DATE} value={date} onChange={setDate} />
     </Modal>
   );
 }

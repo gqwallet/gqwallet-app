@@ -41,7 +41,7 @@ export function CardSummaryCard({ card, usage, nextBilling, onOpen, onPay, onEdi
   return (
     <Card title={card.name}>
       <p className="-mt-2 mb-4 text-body-s text-content-secondary">
-        {card.currency} · Facturación día {parseIsoDate(card.billingDate).getDate()} · Pago día {parseIsoDate(card.paymentDueDate).getDate()}
+        {card.currency} · Facturación día {parseIsoDate(card.billingDate).getDate()}{card.billingCutoffTime ? ` · corte ${card.billingCutoffTime}` : ''} · Pago día {parseIsoDate(card.paymentDueDate).getDate()}
       </p>
       <div className="mb-1 flex flex-wrap items-center justify-between gap-2">
         <span className="text-subtitle">Línea utilizada</span>

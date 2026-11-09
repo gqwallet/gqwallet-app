@@ -97,6 +97,7 @@ export function CardDetailPage() {
         <div className="flex flex-col gap-4 lg:gap-6">
           <Card title="Fechas fijas">
             <BreakdownRow label="Facturación" value={`Día ${billingDay} de cada mes`} />
+            <BreakdownRow label="Corte" value={card.billingCutoffTime || 'Fin del día'} />
             <BreakdownRow label="Pago" value={`Día ${parseIsoDate(card.paymentDueDate).getDate()} de cada mes`} />
             <BreakdownRow label="Próxima facturación" value={formatShortDate(nextCycle, true)} />
           </Card>

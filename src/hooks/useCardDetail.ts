@@ -12,6 +12,7 @@ import { cardsService } from '@/services/cards.service';
 import { transactionsService } from '@/services/transactions.service';
 import type { Card, CreditLineUsage, NextBilling } from '@/types/card';
 import type { PayingAccount } from '@/hooks/useCards';
+import { parseIsoDate, toIsoDate } from '@/utils/format';
 
 /** Expense of the current cycle. */
 export interface CycleExpense {
@@ -78,11 +79,17 @@ export function useCardDetail(id: string) {
   } : null, [id]);
   const cycleStart = resource.data?.nextBilling.cycleStart;
   const cycleEnd = resource.data?.nextBilling.billingDate;
-  const list = useInfiniteList(cycleStart && cycleEnd ? (page, signal) => transactionsService.list({ instrumentId: id, nature: 'EXPENSE', status: 'ACTIVE', from: cycleStart, to: cycleEnd, page, size: 20 }, signal) : null, JSON.stringify([id, cycleStart, cycleEnd]));
+  // Include purchases after the previous closing day's cut-off, even if the cut-off was later removed.
+  // Their persisted cycle assignment determines which expenses belong here.
+  const fromDate = cycleStart ? parseIsoDate(cycleStart) : null;
+  if (fromDate) fromDate.setDate(fromDate.getDate() - 1);
+  const from = fromDate ? toIsoDate(fromDate) : undefined;
+  const list = useInfiniteList(from && cycleEnd ? (page, signal) => transactionsService.list({ instrumentId: id, nature: 'EXPENSE', status: 'ACTIVE', from, to: cycleEnd, page, size: 20 }, signal) : null, JSON.stringify([id, from, cycleEnd]));
   const { refetch: refreshResource } = resource;
   const { reset } = list;
   const refetch = useCallback(() => { refreshResource(); reset(); }, [refreshResource, reset]);
   return { ...resource, refetch, paginationError: list.error,
-    data: resource.data ? { ...resource.data, expenses: list.items.map((transaction) => ({ id: transaction.id, category: resource.data?.names.get(transaction.categoryId) ?? 'Gasto', merchant: transaction.merchant, date: transaction.economicDate, amount: transaction.amount })) } : null,
+    data: resource.data ? { ...resource.data, expenses: list.items.filter((transaction) => transaction.cycleClosingDate
+      ? transaction.cycleClosingDate === cycleEnd : transaction.economicDate >= (cycleStart ?? '')).map((transaction) => ({ id: transaction.id, category: resource.data?.names.get(transaction.categoryId) ?? 'Gasto', merchant: transaction.merchant, date: transaction.economicDate, amount: transaction.amount })) } : null,
     hasMore: list.hasMore, isLoadingMore: list.isLoading || list.isLoadingMore, loadMore: list.loadMore };
 }

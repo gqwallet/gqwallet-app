@@ -5,9 +5,10 @@
  * @packageDocumentation
  */
 import { useState } from 'react';
-import { Button, ChipGroup, Modal, SelectField, TextField, type SelectOption } from '@/components/ui';
+import { Button, ChipGroup, Modal, MonthPickerPanel, SelectField, TextField, type SelectOption } from '@/components/ui';
 import type { Currency } from '@/types/api';
 import type { Essentiality, MovementStatus, TransactionNature } from '@/types/transaction';
+import { MIN_DATE } from '@/utils/dateLimits';
 
 /** Filters edited by {@link HistoryFilterModal}. */
 export interface HistoryFilterValues {
@@ -41,8 +42,6 @@ export interface HistoryFilterModalProps {
   value: HistoryFilterValues;
   /** Filters applied by `Limpiar`. */
   defaults: HistoryFilterValues;
-  /** Month options. */
-  months: SelectOption[];
   /** Category options. */
   categories: SelectOption[];
   /** Account and card options. */
@@ -58,10 +57,10 @@ export interface HistoryFilterModalProps {
  *
  * @example
  * ```tsx
- * <HistoryFilterModal isOpen value={filters} defaults={DEFAULTS} months={months} categories={cats} instruments={inst} onApply={apply} onClose={close} />
+ * <HistoryFilterModal isOpen value={filters} defaults={DEFAULTS} categories={cats} instruments={inst} onApply={apply} onClose={close} />
  * ```
  */
-export function HistoryFilterModal({ isOpen, value, defaults, months, categories, instruments, onApply, onClose }: HistoryFilterModalProps) {
+export function HistoryFilterModal({ isOpen, value, defaults, categories, instruments, onApply, onClose }: HistoryFilterModalProps) {
   const [draft, setDraft] = useState(value);
   const [opened, setOpened] = useState(isOpen);
   if (isOpen !== opened) {
@@ -87,10 +86,13 @@ export function HistoryFilterModal({ isOpen, value, defaults, months, categories
     >
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="grid grid-cols-2 gap-2">
-          <TextField label="Desde" type="date" value={draft.from} onChange={(next) => setDraft((current) => ({ ...current, from: next, month: '' }))} />
-          <TextField label="Hasta" type="date" value={draft.to} onChange={(next) => setDraft((current) => ({ ...current, to: next, month: '' }))} />
+          <TextField label="Desde" type="date" min={MIN_DATE} value={draft.from} onChange={(next) => setDraft((current) => ({ ...current, from: next, month: '' }))} />
+          <TextField label="Hasta" type="date" min={MIN_DATE} value={draft.to} onChange={(next) => setDraft((current) => ({ ...current, to: next, month: '' }))} />
         </div>
-        <SelectField label="Mes" value={draft.month} options={months} placeholder="Rango personalizado" onChange={(next) => set('month', next)} />
+        <div className="flex flex-col gap-1.5">
+          <span className="text-label text-content-secondary">Mes</span>
+          <MonthPickerPanel value={draft.month} emptyLabel="Rango personalizado" onChange={(next) => set('month', next)} />
+        </div>
         <SelectField
           label="Moneda"
           value={draft.currency}

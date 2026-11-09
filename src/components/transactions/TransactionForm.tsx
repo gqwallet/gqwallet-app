@@ -6,17 +6,19 @@
  * @packageDocumentation
  */
 import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from 'react';
-import { Callout, Card, ChipGroup, PickerField, SelectField, TextField } from '@/components/ui';
+import { Callout, Card, ChipGroup, PickerField, SelectField, TextField, TimeField } from '@/components/ui';
 import { CategoryPickerModal } from '@/components/transactions/CategoryPickerModal';
 import type { Account } from '@/types/account';
 import type { Currency } from '@/types/api';
 import type { Card as CreditCard } from '@/types/card';
 import type {
-  Category, Essentiality, IncomeFrequency, IncomeSource, IncomeType, Mood, PaymentMethodKind, RegisterTransactionInput, Transaction, TransactionNature,
+  Category, Essentiality, IncomeFrequency, IncomeSource, IncomeType, Mood, PaymentMethodKind, RegisterTransactionFormInput, Transaction, TransactionNature,
 } from '@/types/transaction';
 import { formatAmount } from '@/utils/format';
 import { CURRENCY_OPTIONS, ESSENTIALITY_LABEL, INCOME_FREQUENCY_LABEL, INCOME_SOURCE_LABEL, INCOME_TYPE_LABEL, MOOD_LABEL, toOptions } from '@/utils/options';
 import { hasTwoDecimalsAtMost, parseAmount } from '@/utils/parse';
+import { limaPurchaseTime } from '@/utils/limaTime';
+import { MIN_DATE } from '@/utils/dateLimits';
 
 const DESCRIPTION_MAX = 120;
 const NONE = 'NONE';
@@ -42,7 +44,7 @@ export interface TransactionFormProps {
   /** Server error shown at the top. */
   serverError?: string | null;
   /** Called with valid values. */
-  onSubmit: (input: RegisterTransactionInput) => void;
+  onSubmit: (input: RegisterTransactionFormInput) => void;
   /** Suggests merchants for a prefix. */
   onSuggestMerchants: (prefix: string) => Promise<string[]>;
   /** Opens the categories page. */
@@ -87,6 +89,12 @@ export function TransactionForm(props: TransactionFormProps) {
     const cardOptions = isExpense ? cards.filter((card) => card.currency === currency).map((card) => ({ value: `CARD:${card.id}`, label: `${card.name} · ${card.currency}` })) : [];
     return [...ofCurrency, ...cardOptions];
   }, [accounts, cards, currency, isExpense]);
+  const selectedCard = isExpense ? cards.find((card) => instrument === `CARD:${card.id}` && card.currency === currency) : undefined;
+  const showPurchaseTime = Boolean(selectedCard?.billingCutoffTime && Number(date.slice(8, 10)) === Number(selectedCard.billingDate.slice(8, 10)));
+  const [purchaseTime, setPurchaseTime] = useState('');
+  useEffect(() => {
+    setPurchaseTime(showPurchaseTime ? limaPurchaseTime(date) : '');
+  }, [date, instrument, showPurchaseTime]);
   const hasInstruments = accounts.length + (isExpense ? cards.length : 0) > 0;
 
   useEffect(() => {
@@ -135,6 +143,7 @@ export function TransactionForm(props: TransactionFormProps) {
       paymentMethodKind: kind as PaymentMethodKind | null,
       instrumentId,
       cycleClosingDate: null,
+      purchaseTime: showPurchaseTime ? purchaseTime : '',
       description: description.trim() || null,
       merchant: isExpense ? merchant.trim() || null : null,
       essentiality: isExpense ? essentiality : null,
@@ -167,7 +176,7 @@ export function TransactionForm(props: TransactionFormProps) {
             onOpen={() => setIsPickerOpen(true)}
             error={errors.categoryId}
           />
-          <TextField label="Fecha económica" type="date" value={date} onChange={setDate} helper={initial ? undefined : 'Por defecto, hoy (hora de Lima).'} />
+          <TextField label="Fecha económica" type="date" min={MIN_DATE} value={date} onChange={setDate} helper={initial ? undefined : 'Por defecto, hoy (hora de Lima).'} />
           {hasInstruments ? (
             <SelectField
               label={isExpense ? 'Medio de pago' : 'Cuenta de destino'}
@@ -178,6 +187,9 @@ export function TransactionForm(props: TransactionFormProps) {
             />
           ) : (
             <SelectField label={isExpense ? 'Medio de pago' : 'Cuenta de destino'} value={NONE} options={[{ value: NONE, label: isExpense ? 'Sin medio de pago' : 'Sin cuenta de destino' }]} onChange={setInstrument} disabled />
+          )}
+          {showPurchaseTime && (
+            <TimeField label="Hora del consumo" value={purchaseTime} onChange={setPurchaseTime} helper={`Opcional. Después de las ${selectedCard?.billingCutoffTime} pasa al ciclo siguiente.`} />
           )}
           {isExpense ? (
             <TextField
