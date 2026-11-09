@@ -31,3 +31,10 @@ it.each([{ readOnly: true }, { disabled: true }])('does not edit when %o', async
   await userEvent.type(screen.getByLabelText('Correo'), 'x');
   expect(onChange).not.toHaveBeenCalled();
 });
+
+it('raises a typed date earlier than min to min when leaving the field', () => {
+  const onChange = vi.fn();
+  render(<TextField label="Fecha" type="date" min="2026-10-01" value="2026-09-15" onChange={onChange} />);
+  fireEvent.blur(screen.getByLabelText('Fecha'));
+  expect(onChange).toHaveBeenCalledWith('2026-10-01');
+});
