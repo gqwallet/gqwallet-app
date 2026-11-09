@@ -107,6 +107,14 @@ export const obligationsService = {
    */
   settle: (id: string, input: SettleDueInput) => apiClient.post<PaymentDue>(`/payment-dues/${id}/settlements`, input),
   /**
+   * Skips a pending due without creating an expense or finishing its fixed payment.
+   *
+   * @param id - Due identifier.
+   * @returns The voided due.
+   * @throws {@link ApiError} When the request fails or the due is no longer pending.
+   */
+  voidDue: (id: string) => apiClient.post<PaymentDue>(`/payment-dues/${id}/voids`),
+  /**
    * Fetches the monthly and annual totals of one currency (FR-032).
    *
    * @param currency - Currency.

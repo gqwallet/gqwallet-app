@@ -255,6 +255,42 @@ test('a new user manages her finances end to end', async ({ page }) => {
   });
 });
 
+test('a user skips a monthly due without recording an expense or finishing the fixed payment', async ({ page }) => {
+  await signUp(page, uniqueEmail('skip-due'));
+  await page.getByRole('button', { name: 'Omitir por ahora' }).click();
+  await page.goto('/pagos-fijos/nuevo');
+  await page.getByLabel('Descripción', { exact: true }).fill('Internet omitido');
+  await page.getByLabel('Categoría de gasto para el presupuesto', { exact: true }).selectOption({ label: 'Servicios' });
+  await page.getByLabel('Monto mensual', { exact: true }).fill('99');
+  await page.getByLabel('Día de cobro', { exact: true }).fill('28');
+  await page.getByRole('button', { name: 'Guardar pago fijo' }).click();
+  await expect(page.getByText('Pago fijo registrado')).toBeVisible();
+  await expect(page.getByText('Próximos vencimientos', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: /Internet omitido/ }).click();
+  await page.getByRole('dialog', { name: 'Confirmar pago de Internet omitido' }).getByRole('button', { name: 'Omitir este mes' }).click();
+  const confirmation = page.getByRole('dialog', { name: /¿Omitir el vencimiento de/ });
+  await expect(confirmation).toContainText('Internet omitido sigue activo los próximos meses.');
+  const response = page.waitForResponse((result) => result.url().endsWith('/voids') && result.request().method() === 'POST');
+  await confirmation.getByRole('button', { name: 'Omitir este mes' }).click();
+  const skipped = await response;
+  expect(skipped.ok()).toBeTruthy();
+  expect(skipped.request().postData()).toBeNull();
+  expect(await skipped.json()).toMatchObject({ status: 'VOIDED' });
+  await expect(page.getByText('Vencimiento omitido', { exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: /Internet omitido/ })).toHaveCount(0);
+  await expect(page.getByText('No tienes vencimientos pendientes', { exact: true })).toBeVisible();
+
+  await page.reload();
+  await expect(page.getByText('No tienes vencimientos pendientes', { exact: true })).toBeVisible();
+  await page.goto('/movimientos');
+  await expect(page.getByText('Aún no tienes movimientos', { exact: true })).toBeVisible();
+  await page.goto('/pagos-fijos/resumen');
+  await expect(page.getByRole('button', { name: /Internet omitido/ })).toBeVisible();
+  await page.getByRole('button', { name: /Internet omitido/ }).click();
+  await expect(page.getByRole('button', { name: 'Finalizar', exact: true })).toBeVisible();
+  await expect(page.getByText('Omitido', { exact: true })).toHaveCount(0);
+});
+
 test('a registered user cannot open the admin metrics (FR-013)', async ({ page }) => {
   await signUp(page, uniqueEmail('user'));
   await page.getByRole('button', { name: 'Omitir por ahora' }).click();

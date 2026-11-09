@@ -62,3 +62,18 @@ it.each(chargeKinds)('describes the pending history entry as a charge for %s', (
   expect(screen.getByText('Pendiente')).toBeInTheDocument();
   expect(screen.getByRole('heading', { name: 'Vencimientos' })).toBeInTheDocument();
 });
+
+it('labels voided history entries as skipped instead of pending charges', () => {
+  vi.mocked(useFixedPaymentForm).mockReturnValueOnce({
+    data: {
+      fixedPayment: { ...payment, kind: 'HOUSEHOLD_SERVICES' },
+      dues: [{ ...due, kind: 'HOUSEHOLD_SERVICES', status: 'VOIDED' }], categories: [], accounts: [], cards: [],
+    },
+    isLoading: false, error: null, register: vi.fn(), update, finish: vi.fn(), isSaving: false, saveError: null,
+  });
+  render(<MemoryRouter><FixedPaymentFormPage /></MemoryRouter>);
+  expect(screen.getByText('Omitido')).toBeInTheDocument();
+  expect(screen.getByText('Omitido · 28 oct. 2026')).toBeInTheDocument();
+  expect(screen.queryByText('Pendiente')).not.toBeInTheDocument();
+  expect(screen.queryByText(/Se cobra el/)).not.toBeInTheDocument();
+});

@@ -7,6 +7,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { apiClient } from '@/services/api-client';
 import type { RegisterFixedPaymentInput } from '@/types/obligation';
+import { ApiError } from '@/types/api';
 
 vi.mock('@/services/api-client', () => ({
   apiClient: { getCsv: vi.fn().mockResolvedValue({ content: 'csv', fileName: 'server.csv' }), get: vi.fn().mockResolvedValue([]), post: vi.fn().mockResolvedValue({}), put: vi.fn().mockResolvedValue({}), delete: vi.fn().mockResolvedValue(undefined) },
@@ -44,6 +45,17 @@ describe('obligationsService', () => {
   it('calls POST for finish', async () => {
     await obligationsService.finish('f1');
     expect(apiClient.post).toHaveBeenCalledWith('/fixed-payments/f1/finishes');
+  });
+  it('voids a due with a bodyless POST and returns the server resource', async () => {
+    const voided = { id: 'd1', status: 'VOIDED' };
+    vi.mocked(apiClient.post).mockResolvedValueOnce(voided);
+    await expect(obligationsService.voidDue('d1')).resolves.toEqual(voided);
+    expect(apiClient.post).toHaveBeenCalledWith('/payment-dues/d1/voids');
+  });
+  it('preserves the API error when a due cannot be voided', async () => {
+    const error = new ApiError(409);
+    vi.mocked(apiClient.post).mockRejectedValueOnce(error);
+    await expect(obligationsService.voidDue('d1')).rejects.toBe(error);
   });
   it('calls GET for getSummary', async () => {
     await obligationsService.getSummary('USD');

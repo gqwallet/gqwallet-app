@@ -62,12 +62,20 @@ export interface FixedPaymentsState {
   settleError: string | null;
   /** Clears the payment error. */
   resetSettle: () => void;
+  /** Skips a due; resolves the voided due or `null`. */
+  skip: (due: PaymentDue) => Promise<PaymentDue | null>;
+  /** Whether a skip request is in flight. */
+  isSkipping: boolean;
+  /** Skip error message. */
+  skipError: string | null;
+  /** Clears the skip error. */
+  resetSkip: () => void;
 }
 
 /**
  * Loads the pending dues and everything needed to confirm them.
  *
- * @returns Data and the settle action.
+ * @returns Data and the settle and skip actions.
  * @example
  * ```ts
  * const { data, settle } = useFixedPayments();
@@ -113,6 +121,13 @@ export function useFixedPayments(): FixedPaymentsState {
     },
     [submit, refetch],
   );
+  const skipWrite = useMutation((due: PaymentDue) => obligationsService.voidDue(due.id));
+  const { submit: submitSkip } = skipWrite;
+  const skip = useCallback(async (due: PaymentDue) => {
+    const skipped = await submitSkip(due);
+    if (skipped) refetch();
+    return skipped;
+  }, [submitSkip, refetch]);
   return {
     data,
     isLoading,
@@ -125,5 +140,13 @@ export function useFixedPayments(): FixedPaymentsState {
         : 'Ingresa un monto mayor a cero y un medio de pago de la misma moneda. El pago sigue pendiente.'
       : null,
     resetSettle: write.reset,
+    skip,
+    isSkipping: skipWrite.isSubmitting,
+    skipError: skipWrite.error
+      ? skipWrite.error.status === 409
+        ? 'Este vencimiento ya no está pendiente. Actualiza la página para ver su estado.'
+        : 'No pudimos omitir el vencimiento. Inténtalo de nuevo.'
+      : null,
+    resetSkip: skipWrite.reset,
   };
 }
