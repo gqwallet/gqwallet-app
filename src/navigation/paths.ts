@@ -40,6 +40,7 @@ export const PATHS = {
   categories: '/categorias',
   exports: '/exportar',
   profile: '/perfil',
+  netPosition: '/dashboard/posicion-neta',
   availableBalance: '/dashboard/disponible',
   consolidated: '/dashboard/vista-consolidada',
   exchangeRate: '/dashboard/tipo-de-cambio',

@@ -11,7 +11,7 @@ const startSession = vi.fn();
 vi.mock('@/context/AuthContext', () => ({
   useAuth: () => ({ user: { id: 'u1', email: 'ana@correo.pe', roles: [] }, profile: { id: 'p1', firstName: 'Ana', lastName: null, preferredCurrency: 'PEN', monthlyIncome: null, lifeCushion: null, roles: [] }, setProfile, startSession, isAdmin: false }),
 }));
-vi.mock('@/services/overview.service', () => ({ overviewService: { getDashboard: vi.fn(() => Promise.resolve({ available: 0, upcomingCards: [] })) } }));
+vi.mock('@/services/overview.service', () => ({ overviewService: { getDashboard: vi.fn(() => Promise.resolve({ accountsBalance: 0, cardsDebt: 0, netPosition: 0, upcomingCards: [] })) } }));
 vi.mock('@/services/obligations.service', () => ({ obligationsService: { getUpcoming: vi.fn(() => Promise.resolve({ overdue: [], today: [], tomorrow: [], inTwoToThreeDays: [], laterThisMonth: [] })), listDues: vi.fn(() => Promise.resolve([{ currency: 'PEN', status: 'PAID' }, { currency: 'USD', status: 'PENDING' }])) } }));
 vi.mock('@/services/budgets.service', () => ({ budgetsService: { getStatus: vi.fn(() => Promise.resolve({ lines: [] })) } }));
 vi.mock('@/services/cards.service', () => ({ cardsService: { list: vi.fn(() => Promise.resolve([])) } }));
@@ -33,16 +33,16 @@ describe('useDashboard', () => {
 
   it('preserves the dashboard cycle billing date rather than the card next billing date', async () => {
     vi.mocked(overviewService.getDashboard).mockResolvedValueOnce({
-      currency: 'PEN', available: 0, monthIncomes: 0, monthVariableExpenses: 0, monthFixedPayments: 0,
-      budgetUsage: null, upcomingDues: [], upcomingCards: [{
-        cardId: 'c1', name: 'Visa', currency: 'PEN', color: '#3333B2', amountDue: 250,
+      currency: 'PEN', accountsBalance: 0, cardsDebt: 0, netPosition: 0, monthIncomes: 0, monthIncomesCount: 0, monthOutflows: { accountExpenses: 0, fixedPaid: 0, cardPayments: 0, total: 0 }, pendingCommitments: { dues: 0, cards: 0, total: 0, count: 0 },
+      budgetUsage: { totalUsage: null, unbudgetedConsumption: 0 }, upcomingDues: [], upcomingCards: [{
+        cardId: 'c1', status: 'OVERDUE', name: 'Visa', currency: 'PEN', color: '#3333B2', amountDue: 250,
         paymentDueDate: '2026-11-20', billingDate: '2026-10-24',
       }],
     });
     vi.mocked(cardsService.list).mockResolvedValueOnce([{
       id: 'c1', name: 'Visa', bankName: 'BCP', bankId: null, customBankName: null, currency: 'PEN',
       creditLine: 1000, billingDate: '2026-11-24', billingCutoffTime: null, paymentDueDate: '2026-12-20',
-      color: '#3333B2', insurancePercentage: null,
+      color: '#3333B2', insurancePercentage: null, openingDebts: [],
     }]);
     const { result } = renderHook(() => useDashboard('PEN'));
     await waitFor(() => expect(result.current.data).not.toBeNull());

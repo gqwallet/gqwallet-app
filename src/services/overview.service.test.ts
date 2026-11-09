@@ -38,3 +38,9 @@ it('preserves CSV metadata from exportCashFlowCsv', async () => {
   await expect(overviewService.exportCashFlowCsv('2026-01-01', '2026-12-31', 'BOTH', signal)).resolves.toEqual({ content: 'csv', fileName: 'server.csv' });
   expect(apiClient.getCsv).toHaveBeenCalledWith('/cash-flows/me', { params: { from: '2026-01-01', to: '2026-12-31', currency: 'BOTH' }, signal });
 });
+
+it('requests the net position breakdown in the selected currency with cancellation', async () => {
+  const { signal } = new AbortController();
+  await overviewService.getNetPosition('USD', signal);
+  expect(apiClient.get).toHaveBeenCalledWith('/net-positions/me', { params: { currency: 'USD' }, signal });
+});

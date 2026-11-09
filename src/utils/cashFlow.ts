@@ -7,7 +7,7 @@
 import type { CashFlowRow } from '@/types/overview';
 
 /**
- * Drops the leading months that have no activity: no incomes, expenses, fixed payments,
+ * Drops the leading months that have no activity: no incomes, effective outflows, commitments,
  * flow or accumulated balance (an opening balance counts as activity).
  *
  * @param rows - The twelve months of the year, in order.
@@ -18,6 +18,6 @@ import type { CashFlowRow } from '@/types/overview';
  * ```
  */
 export function fromFirstActiveMonth(rows: CashFlowRow[]): CashFlowRow[] {
-  const first = rows.findIndex((row) => row.incomes !== 0 || row.variableExpenses !== 0 || row.fixedPayments !== 0 || row.flow !== 0 || row.accumulated !== 0);
+  const first = rows.findIndex((row) => [row.incomes, row.accountExpenses, row.fixedPaid, row.cardPayments, row.outflows, row.pendingCommitments, row.flow, row.accumulated].some((value) => Number(value) !== 0));
   return first === -1 ? [] : rows.slice(first);
 }
