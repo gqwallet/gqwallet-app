@@ -36,7 +36,7 @@ export interface TextFieldProps extends Omit<InputHTMLAttributes<HTMLInputElemen
  * <TextField label="Correo" type="email" value={email} onChange={setEmail} error={emailError} />
  * ```
  */
-export function TextField({ label, value, onChange, helper, error, prefix, trailingIcon, className, id, ...rest }: TextFieldProps) {
+export function TextField({ label, value, onChange, helper, error, prefix, trailingIcon, className, id, onBlur, ...rest }: TextFieldProps) {
   const autoId = useId();
   const inputId = id ?? autoId;
   const hintId = `${inputId}-hint`;
@@ -61,6 +61,11 @@ export function TextField({ label, value, onChange, helper, error, prefix, trail
           aria-describedby={hint ? hintId : undefined}
           className="h-full min-w-0 flex-1 bg-transparent text-body text-content-primary outline-none placeholder:text-content-muted"
           {...rest}
+          onBlur={(event) => {
+            // The native min only limits the calendar; a typed date earlier than min is raised to it.
+            if (rest.type === 'date' && typeof rest.min === 'string' && event.target.value && event.target.value < rest.min) onChange(rest.min);
+            onBlur?.(event);
+          }}
         />
         {trailingIcon && <Icon name={trailingIcon} className="text-content-muted" />}
       </div>
