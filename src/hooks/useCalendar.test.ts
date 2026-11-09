@@ -11,6 +11,7 @@ vi.mock('@/services/obligations.service', () => ({ obligationsService: { listDue
 vi.mock('@/services/cards.service', () => ({ cardsService: { list: vi.fn(() => Promise.resolve([{ id: 'c1', name: 'Visa Interbank', bankName: 'BCP', currency: 'PEN', creditLine: 1000, billingDate: '2026-06-10', paymentDueDate: '2026-06-28', color: '#3333B2', insurancePercentage: null }])), getNextBilling: vi.fn(() => Promise.resolve({ paymentDueDate: '2026-06-28', amountDue: 5 })) } }));
 vi.mock('@/services/platform.service', () => ({ platformService: { linkCalendar: vi.fn(() => Promise.resolve({ id: 'l1', status: 'ACTIVE', lastSyncedAt: null })), unlink: vi.fn(() => Promise.resolve(undefined)) } }));
 import { useCalendar } from '@/hooks/useCalendar';
+import { obligationsService } from '@/services/obligations.service';
 
 beforeEach(() => vi.clearAllMocks());
 
@@ -21,5 +22,15 @@ describe('useCalendar', () => {
     await waitFor(() => expect(result.current.data?.marks).toHaveLength(2));
     await act(async () => { await result.current.connect('code'); });
     expect(result.current.link?.id).toBe('l1');
+  });
+
+  it('keeps the supplied installment number for a previously paid purchase', async () => {
+    vi.mocked(obligationsService.listDues).mockResolvedValueOnce([{
+      id: 'd1', fixedPaymentId: 'f1', description: 'iPhone 16 Pro', kind: 'INSTALLMENT_PURCHASE',
+      dueDate: '2026-10-28', expectedAmount: 250, paidAmount: null, currency: 'PEN', installment: '14/24',
+      usualPaymentMethodKind: null, usualInstrumentId: null, status: 'PENDING',
+    }]);
+    const { result } = renderHook(() => useCalendar('2026-10'));
+    await waitFor(() => expect(result.current.data?.marks.find((mark) => mark.key === 'due-d1')?.installment).toBe('14/24'));
   });
 });
