@@ -26,6 +26,30 @@ function submit() {
 }
 
 describe('CardForm', () => {
+  it('places a payment day before the billing day in the following month', () => {
+    const onSubmit = vi.fn();
+    render(<CardForm id="card" banks={banks} defaultCurrency="PEN" today="2026-11-08" onSubmit={onSubmit} />);
+    fillRequiredFields();
+    fireEvent.change(screen.getByLabelText('Banco'), { target: { value: 'bcp-id' } });
+    fireEvent.change(screen.getByLabelText('Día de facturación'), { target: { value: '10' } });
+    fireEvent.change(screen.getByLabelText('Día de pago'), { target: { value: '5' } });
+    expect(screen.getByText('Se paga en el mes siguiente al corte.')).toBeInTheDocument();
+    submit();
+    expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ billingDate: '2026-11-10', paymentDueDate: '2026-12-05' }));
+  });
+
+  it('rejects a payment day equal to the billing day', () => {
+    const onSubmit = vi.fn();
+    render(<CardForm id="card" banks={banks} defaultCurrency="PEN" today="2026-11-08" onSubmit={onSubmit} />);
+    fillRequiredFields();
+    fireEvent.change(screen.getByLabelText('Banco'), { target: { value: 'bcp-id' } });
+    fireEvent.change(screen.getByLabelText('Día de facturación'), { target: { value: '10' } });
+    fireEvent.change(screen.getByLabelText('Día de pago'), { target: { value: '10' } });
+    submit();
+    expect(onSubmit).not.toHaveBeenCalled();
+    expect(screen.getByText('El día de pago no puede ser el mismo día de facturación.')).toBeInTheDocument();
+  });
+
   it('renders only the supplied country catalog plus the custom bank option', () => {
     const onSubmit = vi.fn();
     const { rerender } = render(<CardForm id="card" banks={banks} defaultCurrency="PEN" today="2026-06-03" onSubmit={onSubmit} />);

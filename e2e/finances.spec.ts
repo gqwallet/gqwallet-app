@@ -55,15 +55,15 @@ test('a new user manages her finances end to end', async ({ page }) => {
     await expect(page.getByText('Ya tienes una cuenta con este alias. Usa otro nombre.')).toBeVisible();
   });
 
-  await test.step('registers a card and validates its dates (FR-004)', async () => {
+  await test.step('registers a card and rejects the same billing and payment day (FR-004)', async () => {
     await page.goto('/tarjetas/nueva');
     await page.getByLabel('Nombre', { exact: true }).fill('Visa Interbank');
     await page.getByLabel('Banco', { exact: true }).selectOption({ label: 'Interbank' });
     await page.getByLabel('Línea de crédito', { exact: true }).fill('10000');
     await page.getByLabel('Día de facturación', { exact: true }).selectOption('12');
-    await page.getByLabel('Día de pago', { exact: true }).selectOption('5');
+    await page.getByLabel('Día de pago', { exact: true }).selectOption('12');
     await page.getByRole('button', { name: 'Guardar tarjeta' }).click();
-    await expect(page.getByText('La fecha de pago no puede ser anterior a la fecha de facturación.')).toBeVisible();
+    await expect(page.getByText('El día de pago no puede ser el mismo día de facturación.')).toBeVisible();
     await page.getByLabel('Día de pago', { exact: true }).selectOption('28');
     await page.getByRole('button', { name: 'Guardar tarjeta' }).click();
     await expect(page.getByText('Tarjeta registrada')).toBeVisible();

@@ -30,13 +30,13 @@ describe('useTransactionForm', () => {
     });
     expect(transactionsService.register).toHaveBeenCalledWith(expect.objectContaining({ cycleClosingDate: '2026-07-10' }));
   });
-  it('sends an expense made on the closing day to the next cycle', async () => {
+  it('keeps an expense made on the closing day in the cycle that closes that day', async () => {
     const { transactionsService } = await import('@/services/transactions.service');
     const { result } = renderHook(() => useTransactionForm());
     await waitFor(() => expect(result.current.lookups).not.toBeNull());
     await act(async () => {
       await result.current.register({ nature: 'EXPENSE', amount: 5, currency: 'PEN', categoryId: 'k1', economicDate: '2026-06-10', paymentMethodKind: 'CARD', instrumentId: 'c1', cycleClosingDate: null, description: null, merchant: null, essentiality: null, mood: null, incomeType: null, incomeSource: null, incomeFrequency: null });
     });
-    expect(transactionsService.register).toHaveBeenLastCalledWith(expect.objectContaining({ cycleClosingDate: '2026-07-10' }));
+    expect(transactionsService.register).toHaveBeenLastCalledWith(expect.objectContaining({ cycleClosingDate: '2026-06-10' }));
   });
 });
