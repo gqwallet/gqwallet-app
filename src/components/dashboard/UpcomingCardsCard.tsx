@@ -41,7 +41,9 @@ export function UpcomingCardsCard({ cards, action, onSelect }: UpcomingCardsCard
               key={card.cardId}
               icon="credit_card"
               title={card.name}
-              detail={`Paga hasta el ${formatShortDate(card.paymentDueDate)} · ${billed ? 'facturó' : 'factura'} el ${formatShortDate(card.billingDate)}`}
+              detail={card.amountDue > 0
+                ? `Paga hasta el ${formatShortDate(card.paymentDueDate)} · ${billed ? 'facturó' : 'factura'} el ${formatShortDate(card.billingDate)}`
+                : `Sin pagos pendientes · ${billed ? 'facturó' : 'factura'} el ${formatShortDate(card.billingDate)}`}
               amount={formatMoney(card.amountDue, card.currency)}
               meta="Total a pagar"
               onClick={() => onSelect(card.cardId)}
