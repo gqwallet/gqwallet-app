@@ -63,7 +63,7 @@ export function CardDetailPage() {
         <StatCard
           label="Total a pagar"
           value={money(nextBilling.amountDue)}
-          detail={`Ciclo ${formatShortDate(nextBilling.cycleStart)} – ${formatShortDate(nextBilling.billingDate)} · paga hasta el ${formatShortDate(nextBilling.paymentDueDate)}.`}
+          detail={`Ciclo ${formatShortDate(nextBilling.cycleStart)} – ${formatShortDate(nextBilling.billingDate)} · paga hasta el ${formatShortDate(nextBilling.paymentDueDate)}`}
           tone="warning"
         />
         <StatCard label="Línea utilizada" value={money(usage.used)} detail={`Consumos ${money(data.consumption)} − pagos ${money(Math.max(0, data.consumption - usage.used))}`} tone="neutral" />
