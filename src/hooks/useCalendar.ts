@@ -14,7 +14,7 @@ import { googleConsentUrl } from '@/services/googleAuth';
 import { platformService } from '@/services/platform.service';
 import type { ApiError, Currency } from '@/types/api';
 import type { Card } from '@/types/card';
-import type { PaymentDue } from '@/types/obligation';
+import type { FixedPaymentKind, PaymentDue } from '@/types/obligation';
 import type { CalendarLink } from '@/types/platform';
 import { monthRange, todayIso } from '@/utils/format';
 
@@ -32,6 +32,8 @@ export interface CalendarMark {
   date: string;
   /** Card billing, card payment or due. */
   kind: CalendarMarkKind;
+  /** Fixed-payment category for due marks, or `null` for cards. */
+  fixedPaymentKind: FixedPaymentKind | null;
   /** Title, e.g. the card or due name. */
   title: string;
   /** Card color as `#RRGGBB`, for card marks. */
@@ -127,6 +129,7 @@ export function useCalendar(period: string): CalendarState {
         key: `due-${due.id}`,
         date: due.dueDate,
         kind: 'DUE',
+        fixedPaymentKind: due.kind,
         title: due.description,
         color: null,
         status: dueStatus(due, today),
@@ -145,6 +148,7 @@ export function useCalendar(period: string): CalendarState {
           key: `card-${index}-${entry.date}`,
           date: entry.date,
           kind: entry.kind as CalendarMarkKind,
+          fixedPaymentKind: null,
           title: entry.title,
           color: entry.color,
           status: null,

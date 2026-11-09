@@ -8,6 +8,7 @@ import { useState } from 'react';
 import { BreakdownRow, Button, Callout, ChipGroup, Modal, TextField } from '@/components/ui';
 import type { PaymentDue, SettleDueInput } from '@/types/obligation';
 import type { PaymentMethodKind } from '@/types/transaction';
+import { chargesOnDay } from '@/utils/fixedPaymentKinds';
 import { formatMoney, formatShortDate } from '@/utils/format';
 import { FIXED_KIND_LABEL } from '@/utils/options';
 import { parseAmount } from '@/utils/parse';
@@ -66,6 +67,8 @@ export function SettleDueModal({ due, today, means, categoryName, isSaving, erro
   }
   if (!due) return null;
 
+  const isCharge = chargesOnDay(due.kind);
+  const dueNoun = isCharge ? 'cobro' : 'vencimiento';
   const usual = due.usualInstrumentId ? means.find((option) => option.id === due.usualInstrumentId) : undefined;
   const chosen = usual ?? means.find((option) => option.id === meansId);
   const money = (value: number) => formatMoney(value, due.currency);
@@ -74,7 +77,7 @@ export function SettleDueModal({ due, today, means, categoryName, isSaving, erro
 
   const handleConfirm = () => {
     if (showOther && paid.trim() && (paidValue === null || paidValue <= 0)) {
-      setPaidError('Ingresa un monto mayor a cero. El vencimiento sigue pendiente.');
+      setPaidError(`Ingresa un monto mayor a cero. El ${dueNoun} sigue pendiente.`);
       return;
     }
     if (!chosen) return;
@@ -87,7 +90,7 @@ export function SettleDueModal({ due, today, means, categoryName, isSaving, erro
       isOpen
       icon="task_alt"
       title={`Confirmar pago de ${due.description}`}
-      description={`Vencimiento del ${formatShortDate(due.dueDate)} · ${FIXED_KIND_LABEL[due.kind]}`}
+      description={`${isCharge ? 'Se cobra el' : 'Vencimiento del'} ${formatShortDate(due.dueDate)} · ${FIXED_KIND_LABEL[due.kind]}`}
       onClose={onClose}
       footer={
         <>
@@ -114,7 +117,7 @@ export function SettleDueModal({ due, today, means, categoryName, isSaving, erro
           inputMode="decimal"
           value={paid}
           onChange={setPaid}
-          helper={`Reemplaza al esperado solo en este vencimiento. ${due.description} seguirá en ${money(due.expectedAmount)} los próximos meses.`}
+          helper={`Reemplaza al esperado solo en este ${dueNoun}. ${due.description} seguirá en ${money(due.expectedAmount)} los próximos meses.`}
           error={paidError ?? error}
         />
       ) : (
@@ -122,7 +125,7 @@ export function SettleDueModal({ due, today, means, categoryName, isSaving, erro
           {chosen && (
             <Callout
               title="Al confirmar"
-              text={`Creamos un gasto de ${money(amount)}${categoryName ? ` en ${categoryName}` : ''}, pagado con ${chosen.name}, y el vencimiento pasa a «Pagado».`}
+              text={`Creamos un gasto de ${money(amount)}${categoryName ? ` en ${categoryName}` : ''}, pagado con ${chosen.name}, y el ${dueNoun} pasa a «Pagado».`}
             />
           )}
           {error && <Callout tone="danger" text={error} />}

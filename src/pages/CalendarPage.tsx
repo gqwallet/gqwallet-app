@@ -12,6 +12,7 @@ import { Badge, Button, Card, EmptyState, ListRow, Modal, MonthField, SelectFiel
 import { useToast } from '@/context/ToastContext';
 import { useCalendar, type CalendarMark } from '@/hooks/useCalendar';
 import { PATHS } from '@/navigation/paths';
+import { chargesOnDay } from '@/utils/fixedPaymentKinds';
 import { formatMoney, formatMonth, formatShortDate, monthOf, parseIsoDate, todayIso } from '@/utils/format';
 
 type Filter = 'ALL' | 'CARDS' | 'DUES';
@@ -29,6 +30,7 @@ function shortName(title: string): string {
 function labelOf(mark: CalendarMark): string {
   if (mark.kind === 'BILLING') return `${shortName(mark.title)} · facturación`;
   if (mark.kind === 'PAYMENT') return `${shortName(mark.title)} · pago`;
+  if (mark.fixedPaymentKind && chargesOnDay(mark.fixedPaymentKind)) return `${mark.title} · se cobra`;
   if (mark.status === 'OVERDUE') return `${mark.title} · vencido`;
   return mark.installment ? `${mark.title} ${mark.installment}` : mark.title;
 }
@@ -122,19 +124,22 @@ export function CalendarPage() {
               {marks.length === 0 ? (
                 <p className="text-body text-content-secondary">No hay fechas en este mes.</p>
               ) : (
-                marks.map((mark) => (
-                  <ListRow
-                    key={mark.key}
-                    icon={mark.kind === 'DUE' ? 'event' : 'credit_card'}
-                    title={mark.kind === 'DUE' ? mark.title : `${mark.title} · ${mark.kind === 'BILLING' ? 'facturación' : 'pago'}`}
-                    detail={`${formatShortDate(mark.date)} · ${mark.kind === 'DUE' ? 'pago fijo' : mark.kind === 'BILLING' ? 'cierre del ciclo' : mark.amount !== null && mark.currency ? `total ${formatMoney(mark.amount, mark.currency)}` : 'fecha de pago'}`}
-                    badge={
-                      mark.status ? <Badge label={mark.status === 'OVERDUE' ? 'Vencido' : mark.status === 'PAID' ? 'Pagado' : 'Pendiente'} tone={mark.status === 'OVERDUE' ? 'danger' : mark.status === 'PAID' ? 'success' : 'caution'} /> : undefined
-                    }
-                    amount={mark.amount !== null && mark.currency ? formatMoney(mark.amount, mark.currency) : undefined}
-                    onClick={() => navigate(mark.kind === 'DUE' ? PATHS.fixedPayments : PATHS.cards)}
-                  />
-                ))
+                marks.map((mark) => {
+                  const isCharge = mark.fixedPaymentKind !== null && chargesOnDay(mark.fixedPaymentKind);
+                  return (
+                    <ListRow
+                      key={mark.key}
+                      icon={mark.kind === 'DUE' ? 'event' : 'credit_card'}
+                      title={mark.kind === 'DUE' ? mark.title : `${mark.title} · ${mark.kind === 'BILLING' ? 'facturación' : 'pago'}`}
+                      detail={`${formatShortDate(mark.date)} · ${mark.kind === 'DUE' ? isCharge ? 'se cobra' : 'pago fijo' : mark.kind === 'BILLING' ? 'cierre del ciclo' : mark.amount !== null && mark.currency ? `total ${formatMoney(mark.amount, mark.currency)}` : 'fecha de pago'}`}
+                      badge={
+                        mark.status ? <Badge label={mark.status === 'OVERDUE' ? isCharge ? 'Cobro pendiente' : 'Vencido' : mark.status === 'PAID' ? 'Pagado' : 'Pendiente'} tone={mark.status === 'OVERDUE' ? 'danger' : mark.status === 'PAID' ? 'success' : 'caution'} /> : undefined
+                      }
+                      amount={mark.amount !== null && mark.currency ? formatMoney(mark.amount, mark.currency) : undefined}
+                      onClick={() => navigate(mark.kind === 'DUE' ? PATHS.fixedPayments : PATHS.cards)}
+                    />
+                  );
+                })
               )}
             </Card>
           </div>

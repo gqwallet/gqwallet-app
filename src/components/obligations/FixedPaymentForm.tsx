@@ -11,6 +11,7 @@ import type { Currency } from '@/types/api';
 import type { FixedPayment, FixedPaymentKind, RegisterFixedPaymentInput } from '@/types/obligation';
 import type { PaymentMethodKind } from '@/types/transaction';
 import { clampMonth } from '@/utils/dateLimits';
+import { allowsInstallments, chargesOnDay } from '@/utils/fixedPaymentKinds';
 import { formatAmount, formatMonth, monthOf } from '@/utils/format';
 import { installmentEndMonth } from '@/utils/installments';
 import { CURRENCY_OPTIONS, FIXED_KIND_LABEL, toOptions } from '@/utils/options';
@@ -76,8 +77,11 @@ export function FixedPaymentForm({ id, initial, initialMeans = '', categories, m
   const [usual, setUsual] = useState(initialMeans);
   const [errors, setErrors] = useState<Errors>({});
   const isEdit = Boolean(initial);
-  const total = installments.trim() ? Number(installments) : null;
-  const paid = total !== null ? Number(paidInstallments.trim() || '0') : null;
+  const supportsInstallments = allowsInstallments(kind);
+  const isCharge = chargesOnDay(kind);
+  const total = supportsInstallments && installments.trim() ? Number(installments) : null;
+  const hasValidTotal = total !== null && Number.isInteger(total) && total > 0;
+  const paid = hasValidTotal ? Number(paidInstallments.trim() || '0') : null;
   const endMonth = installmentEndMonth(startMonth, total, paid ?? 0);
 
   const handleSubmit = (event: FormEvent) => {
@@ -137,24 +141,26 @@ export function FixedPaymentForm({ id, initial, initialMeans = '', categories, m
         <SelectField label="Moneda" value={currency} options={CURRENCY_OPTIONS} onChange={(value) => setCurrency(value as Currency)} disabled={isEdit} />
         <TextField label="Monto mensual" inputMode="decimal" placeholder="0.00" value={amount} onChange={setAmount} error={errors.amount} />
         <TextField
-          label="Día de vencimiento"
+          label={isCharge ? 'Día de cobro' : 'Día de vencimiento'}
           inputMode="numeric"
           value={dueDay}
           onChange={setDueDay}
-          helper={isEdit ? undefined : 'Si el mes tiene menos días, vence el último día del mes.'}
+          helper={isEdit ? undefined : isCharge ? 'El día del mes en que te cobran. Si el mes tiene menos días, se cobra el último día.' : 'Si el mes tiene menos días, vence el último día del mes.'}
           error={errors.dueDay}
         />
         {!isEdit && <MonthField label="Mes de inicio" value={startMonth} onChange={setStartMonth} />}
-        <TextField
-          label="Número total de cuotas"
-          inputMode="numeric"
-          value={installments}
-          onChange={setInstallments}
-          disabled={isEdit}
-          helper={isEdit ? undefined : `Opcional. Numeramos de ${paid !== null && Number.isInteger(paid) && paid > 0 ? paid + 1 : 1}/${installments || 'N'} a ${installments || 'N'}/${installments || 'N'} y lo finalizamos tras la última.`}
-          error={errors.installments}
-        />
-        {total !== null && (
+        {supportsInstallments && (
+          <TextField
+            label="Número total de cuotas"
+            inputMode="numeric"
+            value={installments}
+            onChange={setInstallments}
+            disabled={isEdit}
+            helper={isEdit ? undefined : hasValidTotal ? `Opcional. Numeramos de ${paid !== null && Number.isInteger(paid) && paid > 0 ? paid + 1 : 1}/${total} a ${total}/${total} y lo finalizamos tras la última.` : 'Opcional. Indica un número entero mayor a cero.'}
+            error={errors.installments}
+          />
+        )}
+        {hasValidTotal && (
           <TextField
             label="Cuotas ya pagadas"
             inputMode="numeric"
