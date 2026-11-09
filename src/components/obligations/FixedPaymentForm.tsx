@@ -1,0 +1,159 @@
+/**
+ * Fixed payment fields (12.10, 12.11, 12.12): description, fixed category, budget category,
+ * currency, amount, due day, start month, installments and usual means.
+ *
+ * @author G0nz4loQu3dena
+ * @packageDocumentation
+ */
+import { useState, type FormEvent } from 'react';
+import { Callout, SelectField, TextField, type SelectOption } from '@/components/ui';
+import type { Currency } from '@/types/api';
+import type { FixedPayment, FixedPaymentKind, RegisterFixedPaymentInput } from '@/types/obligation';
+import type { PaymentMethodKind } from '@/types/transaction';
+import { formatAmount, formatMonth, monthOf, shiftMonth } from '@/utils/format';
+import { CURRENCY_OPTIONS, FIXED_KIND_LABEL, toOptions } from '@/utils/options';
+import { parseAmount } from '@/utils/parse';
+
+/** Account or card offered as usual means. */
+export interface MeansOption {
+  /** `ACCOUNT:id` or `CARD:id`. */
+  value: string;
+  /** Visible name. */
+  label: string;
+  /** Currency. */
+  currency: Currency;
+}
+
+/** Props of {@link FixedPaymentForm}. */
+export interface FixedPaymentFormProps {
+  /** Form id, so external buttons can submit it. */
+  id: string;
+  /** Fixed payment to edit; kind, currency, start and installments are then fixed. */
+  initial?: FixedPayment | null;
+  /** Usual means of the payment being edited, as `KIND:id`. */
+  initialMeans?: string;
+  /** Expense categories. */
+  categories: SelectOption[];
+  /** Accounts and cards. */
+  means: MeansOption[];
+  /** Default currency. */
+  defaultCurrency: Currency;
+  /** Today as ISO date. */
+  today: string;
+  /** Called with valid values. */
+  onSubmit: (input: RegisterFixedPaymentInput) => void;
+}
+
+interface Errors {
+  description?: string;
+  categoryId?: string;
+  amount?: string;
+  dueDay?: string;
+  installments?: string;
+}
+
+/**
+ * Renders and validates the fixed payment fields.
+ *
+ * @example
+ * ```tsx
+ * <FixedPaymentForm id="fp" categories={cats} means={means} defaultCurrency="PEN" today={today} onSubmit={save} />
+ * ```
+ */
+export function FixedPaymentForm({ id, initial, initialMeans = '', categories, means, defaultCurrency, today, onSubmit }: FixedPaymentFormProps) {
+  const [description, setDescription] = useState(initial?.description ?? '');
+  const [kind, setKind] = useState<FixedPaymentKind>(initial?.kind ?? 'HOUSEHOLD_SERVICES');
+  const [categoryId, setCategoryId] = useState(initial?.budgetCategoryId ?? '');
+  const [currency, setCurrency] = useState<Currency>(initial?.currency ?? defaultCurrency);
+  const [amount, setAmount] = useState(initial ? formatAmount(initial.amount) : '');
+  const [dueDay, setDueDay] = useState(String(initial?.dueDay ?? 1));
+  const [startMonth, setStartMonth] = useState(initial?.startMonth ?? monthOf(today));
+  const [installments, setInstallments] = useState(initial?.totalInstallments ? String(initial.totalInstallments) : '');
+  const [usual, setUsual] = useState(initialMeans);
+  const [errors, setErrors] = useState<Errors>({});
+  const isEdit = Boolean(initial);
+  const months = Array.from({ length: 13 }, (_, index) => shiftMonth(monthOf(today), index - 1)).map((month) => ({ value: month, label: formatMonth(month, true) }));
+  if (initial && !months.some((option) => option.value === initial.startMonth)) months.unshift({ value: initial.startMonth, label: formatMonth(initial.startMonth, true) });
+
+  const handleSubmit = (event: FormEvent) => {
+    event.preventDefault();
+    const value = parseAmount(amount);
+    const day = Number(dueDay);
+    const total = installments.trim() ? Number(installments) : null;
+    const next: Errors = {};
+    if (!description.trim()) next.description = 'Ingresa una descripción.';
+    if (!categoryId) next.categoryId = 'Elige la categoría de gasto que afectará tu presupuesto.';
+    if (value === null || value <= 0) next.amount = 'Ingresa un monto mayor a cero.';
+    if (!Number.isInteger(day) || day < 1 || day > 31) next.dueDay = 'Elige un día entre 1 y 31.';
+    if (total !== null && (!Number.isInteger(total) || total <= 0)) next.installments = 'Si indicas cuotas, deben ser mayores a cero.';
+    setErrors(next);
+    if (Object.keys(next).length || value === null) return;
+    const [meansKind, meansId] = usual ? usual.split(':') : [null, null];
+    onSubmit({
+      description: description.trim(),
+      kind,
+      budgetCategoryId: categoryId,
+      amount: value,
+      currency,
+      dueDay: day,
+      startMonth,
+      totalInstallments: total,
+      usualPaymentMethodKind: meansKind as PaymentMethodKind | null,
+      usualInstrumentId: meansId,
+    });
+  };
+
+  const hasErrors = Object.keys(errors).length > 0;
+  return (
+    <form id={id} noValidate onSubmit={handleSubmit} className="flex flex-col gap-4">
+      {hasErrors && <Callout tone="danger" title="No guardamos el pago fijo" text="Corrige los campos marcados para continuar." />}
+      <div className="grid gap-4 lg:grid-cols-2">
+        <TextField label="Descripción" value={description} onChange={setDescription} error={errors.description} />
+        <SelectField
+          label="Categoría fija"
+          value={kind}
+          options={toOptions(FIXED_KIND_LABEL)}
+          onChange={(value) => setKind(value as FixedPaymentKind)}
+          disabled={isEdit}
+          helper={isEdit ? undefined : 'Servicios del hogar, Suscripciones, Membresías, Deuda, Alquiler o Consumo en cuotas.'}
+        />
+        <SelectField
+          label="Categoría de gasto para el presupuesto"
+          value={categoryId}
+          options={categories}
+          placeholder="Elige una categoría"
+          onChange={setCategoryId}
+          error={errors.categoryId}
+        />
+        <SelectField label="Moneda" value={currency} options={CURRENCY_OPTIONS} onChange={(value) => setCurrency(value as Currency)} disabled={isEdit} />
+        <TextField label="Monto mensual" inputMode="decimal" placeholder="0.00" value={amount} onChange={setAmount} error={errors.amount} />
+        <TextField
+          label="Día de vencimiento"
+          inputMode="numeric"
+          value={dueDay}
+          onChange={setDueDay}
+          helper={isEdit ? undefined : 'Si el mes tiene menos días, vence el último día del mes.'}
+          error={errors.dueDay}
+        />
+        {!isEdit && <SelectField label="Mes de inicio" value={startMonth} options={months} onChange={setStartMonth} />}
+        <TextField
+          label="Número total de cuotas"
+          inputMode="numeric"
+          value={installments}
+          onChange={setInstallments}
+          disabled={isEdit}
+          helper={isEdit ? undefined : `Opcional. Numeramos de 1/${installments || 'N'} a ${installments || 'N'}/${installments || 'N'} y lo finalizamos tras la última.`}
+          error={errors.installments}
+        />
+        <SelectField
+          label="Medio de pago habitual"
+          value={usual}
+          placeholder="Sin medio habitual"
+          options={means.filter((option) => option.currency === currency)}
+          onChange={setUsual}
+          helper={isEdit ? undefined : 'Opcional. Se precarga al confirmar cada pago.'}
+        />
+      </div>
+    </form>
+  );
+}
