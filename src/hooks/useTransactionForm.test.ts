@@ -19,7 +19,7 @@ import { useTransactionForm } from '@/hooks/useTransactionForm';
 const card: Card = {
   id: 'c1', name: 'Visa', bankName: 'BCP', bankId: null, customBankName: 'BCP', currency: 'PEN',
   creditLine: 1000, billingDate: '2026-06-10', billingCutoffTime: '22:00', paymentDueDate: '2026-06-28',
-  color: '#3333B2', insurancePercentage: null,
+  color: '#3333B2', insurancePercentage: null, openingDebts: [],
 };
 const expense: RegisterTransactionFormInput = {
   nature: 'EXPENSE', amount: 5, currency: 'PEN', categoryId: 'k1', economicDate: '2026-06-10',

@@ -6,7 +6,6 @@
  */
 import { useCallback } from 'react';
 import { useMutation } from '@/hooks/useMutation';
-import { cardsService } from '@/services/cards.service';
 import { transactionsService } from '@/services/transactions.service';
 import type { Currency } from '@/types/api';
 
@@ -14,6 +13,8 @@ import type { Currency } from '@/types/api';
 export interface CardPaymentInput {
   /** Card paid. */
   cardId: string;
+  /** Confirmed cycle to pay. */
+  cycleClosingDate: string;
   /** Paying account. */
   sourceAccountId: string;
   /** Amount. */
@@ -35,7 +36,7 @@ export interface CardPaymentState {
 }
 
 /**
- * Registers a card payment as a transfer to the oldest cycle with a balance due.
+ * Registers a card payment as a transfer to the selected cycle.
  *
  * @returns Pay action and state.
  * @example
@@ -45,15 +46,13 @@ export interface CardPaymentState {
  */
 export function useCardPayment(): CardPaymentState {
   const { submit, isSubmitting, error } = useMutation(async (input: CardPaymentInput) => {
-    const cycles = await cardsService.listPaymentCycles(input.cardId);
-    const cycle = [...cycles].sort((a, b) => a.closingDate.localeCompare(b.closingDate)).find((item) => item.amountDue > 0);
     return transactionsService.registerTransfer({
       kind: 'CARD_PAYMENT',
       sourceAccountId: input.sourceAccountId,
       targetId: input.cardId,
       amount: input.amount,
       currency: input.currency,
-      cycleClosingDate: cycle?.closingDate ?? null,
+      cycleClosingDate: input.cycleClosingDate,
       economicDate: input.economicDate,
     });
   });

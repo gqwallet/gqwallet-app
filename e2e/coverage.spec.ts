@@ -8,6 +8,8 @@
 import { expect, test } from '@playwright/test';
 import { chooseCategory, signUp, uniqueEmail } from './helpers.ts';
 
+const API = (process.env.VITE_API_BASE_URL ?? 'http://localhost:8080').replace(/\/api\/v1\/?$/, '').replace(/\/$/, '') + '/api/v1';
+
 test('profile, cards, calendar and consolidated view', async ({ page }) => {
   await signUp(page, uniqueEmail('coverage'));
   await page.getByRole('button', { name: 'Omitir por ahora' }).click();
@@ -151,7 +153,7 @@ test('profile, cards, calendar and consolidated view', async ({ page }) => {
     await page.getByRole('button', { name: 'Volver al dashboard' }).click();
     for (const label of ['PEN · Soles', 'USD · Dólares']) {
       await page.getByRole('group', { name: 'Moneda' }).getByRole('button', { name: label }).click();
-      await expect(page.getByRole('button', { name: /Disponible al/ })).toBeVisible();
+      await expect(page.getByRole('button', { name: /Posición neta.*Ver desglose/ })).toBeVisible();
     }
     await page.goto('/dashboard/vista-consolidada');
     await page.getByRole('button', { name: 'Registrar tipo de cambio' }).click();
@@ -192,7 +194,7 @@ test('profile, cards, calendar and consolidated view', async ({ page }) => {
     await expect(page.getByText('Tarjeta registrada')).toBeVisible();
     await expect(page.getByText(`PEN · Facturación día ${billingDay} · corte 22:00 · Pago día ${billingDay === 28 ? 5 : 28}`)).toBeVisible();
 
-    const cyclesResponse = await page.request.get(`http://localhost:8080/api/v1/cards/${card.id}/billing-cycles`);
+    const cyclesResponse = await page.request.get(`${API}/cards/${card.id}/billing-cycles`);
     expect(cyclesResponse.ok()).toBe(true);
     const cycles: { closingDate: string }[] = await cyclesResponse.json();
     const nextClosingDate = cycles.map((cycle) => cycle.closingDate).sort().find((date) => date > today);

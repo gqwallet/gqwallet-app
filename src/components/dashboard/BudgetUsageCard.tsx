@@ -46,12 +46,13 @@ export function BudgetUsageCard({ budget, monthName, action }: BudgetUsageCardPr
   return (
     <Card title={`Uso del presupuesto de ${monthName}`} action={action}>
       <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-        <span className="text-subtitle">Total del mes</span>
+        <span className="text-subtitle">Con presupuesto</span>
         <span className="text-body-s text-content-secondary">
-          {formatMoney(budget.totalConsumption, budget.currency)} de {formatMoney(budget.totalLimit, budget.currency)} · {formatPercent(usage)}
+          {formatMoney(budget.budgetedConsumption, budget.currency)} de {formatMoney(budget.totalLimit, budget.currency)} · {formatPercent(usage)}
         </span>
       </div>
       <ProgressBar value={usage} tone={usage > 100 ? 'danger' : usage >= 75 ? 'warning' : 'success'} label="Uso total del presupuesto" />
+      <p className="mt-3 text-body-s text-content-muted">{formatMoney(budget.unbudgetedConsumption, budget.currency)} sin presupuesto</p>
       {review > 0 && (
         <Callout
           tone="warning"

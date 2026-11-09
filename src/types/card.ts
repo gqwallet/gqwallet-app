@@ -6,6 +6,17 @@
  */
 import type { Currency } from '@/types/api';
 
+/** Initial debt assigned to a confirmed billing cycle. */
+export interface OpeningDebt {
+  /** Positive amount. */
+  amount: number;
+  /** Confirmed closing date. */
+  closingDate: string;
+}
+
+/** Server state of a payment cycle. */
+export type PaymentCycleStatus = 'PENDING' | 'PARTIAL' | 'OVERDUE' | 'PAID' | 'OPEN';
+
 /** Registered credit card. */
 export interface Card {
   /** Card identifier. */
@@ -32,6 +43,8 @@ export interface Card {
   color: string;
   /** Optional credit-life insurance percentage, 0 to 100. */
   insurancePercentage: number | null;
+  /** Existing debt assigned to billing cycles. */
+  openingDebts: OpeningDebt[];
 }
 
 /** Data required to register a card. */
@@ -56,6 +69,8 @@ export interface RegisterCardInput {
   color: string;
   /** Optional insurance percentage. */
   insurancePercentage: number | null;
+  /** Existing debt assigned to billing cycles. */
+  openingDebts: OpeningDebt[];
 }
 
 /** Editable card fields; the currency is immutable. */
@@ -107,6 +122,14 @@ export interface NextBilling {
 
 /** Past or current payment cycle of a card. */
 export interface PaymentCycle {
+  /** First day of the cycle. */
+  cycleStart: string;
+  /** Total billed by the server. */
+  billed: number;
+  /** Payments applied by the server. */
+  paid: number;
+  /** Server-calculated cycle status. */
+  status: PaymentCycleStatus;
   /** Closing date (ISO date). */
   closingDate: string;
   /** Payment due date (ISO date). */

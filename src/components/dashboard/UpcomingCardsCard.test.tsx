@@ -10,7 +10,7 @@ import { UpcomingCardsCard } from '@/components/dashboard/UpcomingCardsCard';
 import type { DashboardCard } from '@/types/overview';
 
 const card: DashboardCard = {
-  cardId: 'c1', name: 'Visa', currency: 'PEN', color: '#3333B2', amountDue: 250,
+  cardId: 'c1', status: 'PENDING', name: 'Visa', currency: 'PEN', color: '#3333B2', amountDue: 250,
   paymentDueDate: '2026-11-20', billingDate: '2026-10-24',
 };
 

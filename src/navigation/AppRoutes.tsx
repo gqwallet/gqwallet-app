@@ -4,7 +4,7 @@
  * @author G0nz4loQu3dena
  * @packageDocumentation
  */
-import { Navigate, Route, Routes } from 'react-router';
+import { Navigate, Route, Routes, useLocation } from 'react-router';
 import { PublicOnly, RequireAuth, ShellLayout } from '@/navigation/guards';
 import { PATHS } from '@/navigation/paths';
 import { AccountDetailPage } from '@/pages/AccountDetailPage';
@@ -30,7 +30,7 @@ import { FixedPaymentFormPage } from '@/pages/FixedPaymentFormPage';
 import { FixedPaymentsPage } from '@/pages/FixedPaymentsPage';
 import { FixedPaymentsSummaryPage } from '@/pages/FixedPaymentsSummaryPage';
 import { NewAccountPage } from '@/pages/NewAccountPage';
-import { AvailableBalancePage } from '@/pages/AvailableBalancePage';
+import { NetPositionPage } from '@/pages/NetPositionPage';
 import { ConsolidatedPage } from '@/pages/ConsolidatedPage';
 import { DashboardPage } from '@/pages/DashboardPage';
 import { NewTransactionPage } from '@/pages/NewTransactionPage';
@@ -62,7 +62,8 @@ export function AppRoutes() {
         <Route path={PATHS.onboarding} element={<OnboardingPage />} />
         <Route element={<ShellLayout />}>
           <Route path={PATHS.dashboard} element={<DashboardPage />} />
-          <Route path={PATHS.availableBalance} element={<AvailableBalancePage />} />
+          <Route path={PATHS.netPosition} element={<NetPositionPage />} />
+        <Route path={PATHS.availableBalance} element={<NetPositionRedirect />} />
           <Route path={PATHS.consolidated} element={<ConsolidatedPage />} />
           <Route path={PATHS.exchangeRate} element={<ConsolidatedPage />} />
           <Route path={PATHS.transactions} element={<TransactionsPage />} />
@@ -99,4 +100,10 @@ export function AppRoutes() {
       <Route path="*" element={<Navigate to={PATHS.welcome} replace />} />
     </Routes>
   );
+}
+
+/** Preserves the currency query when following the legacy breakdown URL. */
+function NetPositionRedirect() {
+  const { search } = useLocation();
+  return <Navigate to={`${PATHS.netPosition}${search}`} replace />;
 }

@@ -100,7 +100,8 @@ export function useDashboard(currency: Currency): DashboardState {
         isEmpty:
           cards.length === 0 &&
           !hasDues &&
-          dashboard.available === 0 &&
+          Number(dashboard.accountsBalance) === 0 &&
+          Number(dashboard.cardsDebt) === 0 &&
           incomes.totalElements === 0 &&
           expenses.totalElements === 0 &&
           ofCurrency.length === 0,

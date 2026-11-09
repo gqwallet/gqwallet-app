@@ -6,7 +6,7 @@
  */
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
-import { PayCardModal } from '@/components/cards';
+import { PayCardModal, PendingCyclesList } from '@/components/cards';
 import { PageHeader } from '@/components/layout';
 import { BreakdownRow, Button, Callout, Card, EmptyState, ListRow, Spinner, StatCard, InfiniteScrollSentinel } from '@/components/ui';
 import { useToast } from '@/context/ToastContext';
@@ -14,12 +14,7 @@ import { useCardDetail } from '@/hooks/useCardDetail';
 import { useCardPayment } from '@/hooks/useCardPayment';
 import { PATHS, withId } from '@/navigation/paths';
 import { categoryIcon } from '@/utils/categoryIcons';
-import { formatMoney, formatPercent, formatShortDate, formatSignedMoney, nextDayOfMonth, parseIsoDate, toIsoDate, todayIso } from '@/utils/format';
-
-function shiftDay(iso: string): string {
-  const date = parseIsoDate(iso);
-  return toIsoDate(new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1));
-}
+import { formatMoney, formatPercent, formatShortDate, formatSignedMoney, parseIsoDate, todayIso } from '@/utils/format';
 
 /**
  * Shows a card from {@link useCardDetail} and pays it with {@link useCardPayment}.
@@ -35,17 +30,22 @@ export function CardDetailPage() {
   const { notify } = useToast();
   const { data, isLoading, error, refetch, hasMore, isLoadingMore, loadMore, paginationError } = useCardDetail(id);
   const { pay, isSaving, error: payError } = useCardPayment();
+  const [selectedClosingDate, setSelectedClosingDate] = useState<string>();
   const [isPayOpen, setIsPayOpen] = useState(false);
 
   if (isLoading && !data) return <Spinner />;
   if (error || !data) return <EmptyState icon="error" title="No encontramos esta tarjeta" action={<Button label="Volver a tarjetas" onClick={() => navigate(PATHS.cards)} />} />;
 
-  const { card, usage, nextBilling, expenses } = data;
+  const { card, usage, nextBilling, expenses, paymentCycles } = data;
   const money = (value: number) => formatMoney(value, card.currency);
+  const oldest = [...paymentCycles].sort((a, b) => a.closingDate.localeCompare(b.closingDate)).find((cycle) => Number(cycle.amountDue) > 0);
+  const today = todayIso();
+  const billed = paymentCycles.filter((cycle) => cycle.closingDate <= today && Number(cycle.amountDue) > 0);
+  const billedDue = billed.reduce((sum, cycle) => sum + Number(cycle.amountDue), 0);
+  const overdueCount = billed.filter((cycle) => cycle.status === 'OVERDUE').length;
+  const openingDebt = card.openingDebts.reduce((sum, debt) => sum + Number(debt.amount), 0);
   const insurance = card.insurancePercentage ?? 0;
   const billingDay = parseIsoDate(card.billingDate).getDate();
-  // The next billing after today: the projected one when still ahead, otherwise the following month.
-  const nextCycle = nextBilling.billingDate > todayIso() ? nextBilling.billingDate : nextDayOfMonth(billingDay, shiftDay(nextBilling.billingDate));
 
   return (
     <>
@@ -56,19 +56,20 @@ export function CardDetailPage() {
         onBack={() => navigate(PATHS.cards)}
         actions={[
           <Button key="edit" label="Editar" icon="edit" variant="secondary" onClick={() => navigate(withId(PATHS.editCard, card.id))} />,
-          <Button key="pay" label="Pagar tarjeta" icon="payments" disabled={nextBilling.amountDue <= 0} onClick={() => setIsPayOpen(true)} />,
+          <Button key="pay" label="Pagar tarjeta" icon="payments" disabled={!oldest} onClick={() => { setSelectedClosingDate(undefined); setIsPayOpen(true); }} />,
         ]}
       />
-      <div className="mb-4 grid gap-3 lg:mb-6 lg:grid-cols-3 lg:gap-4">
+      <div className="mb-4 grid grid-cols-2 items-stretch gap-3 lg:mb-6 lg:grid-cols-3 lg:gap-4">
         <StatCard
           label="Total a pagar"
-          value={money(nextBilling.amountDue)}
-          detail={`Ciclo ${formatShortDate(nextBilling.cycleStart)} – ${formatShortDate(nextBilling.billingDate)} · paga hasta el ${formatShortDate(nextBilling.paymentDueDate)}`}
+          value={money(billedDue)}
+          detail={billed.length === 0 ? 'Sin pagos pendientes' : `${billed.length} ${billed.length === 1 ? 'facturación' : 'facturaciones'}${overdueCount > 0 ? ` · ${overdueCount} ${overdueCount === 1 ? 'vencida' : 'vencidas'}` : ''}`}
           tone="warning"
         />
-        <StatCard label="Línea utilizada" value={money(usage.used)} detail={`Consumos ${money(data.consumption)} − pagos ${money(Math.max(0, data.consumption - usage.used))}`} tone="neutral" />
-        <StatCard label="Línea disponible" value={money(usage.available)} detail={`Línea total ${money(usage.creditLine)}${usage.creditBalance > 0 ? ` · saldo a favor ${money(usage.creditBalance)}` : ''}`} tone="success" />
+        <StatCard label="Línea utilizada" value={money(usage.used)} detail="Deuda pendiente calculada" tone="neutral" />
+        <StatCard className="col-span-2 lg:col-span-1" label="Línea disponible" value={money(usage.available)} detail={`Línea total ${money(usage.creditLine)}${usage.creditBalance > 0 ? ` · saldo a favor ${money(usage.creditBalance)}` : ''}`} tone="success" />
       </div>
+      <PendingCyclesList cycles={paymentCycles} currency={card.currency} onPay={(closingDate) => { setSelectedClosingDate(closingDate); setIsPayOpen(true); }} />
       <div className="grid gap-4 lg:grid-cols-[1fr_436px] lg:gap-6">
         <Card title="Gastos del ciclo actual">
           {expenses.length === 0 ? (
@@ -96,10 +97,11 @@ export function CardDetailPage() {
         </Card>
         <div className="flex flex-col gap-4 lg:gap-6">
           <Card title="Fechas fijas">
+            <BreakdownRow label="Deuda inicial" value={money(openingDebt)} />
             <BreakdownRow label="Facturación" value={`Día ${billingDay} de cada mes`} />
             <BreakdownRow label="Corte" value={card.billingCutoffTime || 'Fin del día'} />
             <BreakdownRow label="Pago" value={`Día ${parseIsoDate(card.paymentDueDate).getDate()} de cada mes`} />
-            <BreakdownRow label="Próxima facturación" value={formatShortDate(nextCycle, true)} />
+            <BreakdownRow label="Facturación del ciclo" value={formatShortDate(nextBilling.billingDate, true)} />
           </Card>
           <Callout
             title="Pagar la tarjeta no es un gasto"
@@ -111,7 +113,8 @@ export function CardDetailPage() {
         isOpen={isPayOpen}
         cardName={card.name}
         currency={card.currency}
-        suggestedAmount={nextBilling.amountDue}
+        cycles={paymentCycles}
+        initialClosingDate={selectedClosingDate}
         accounts={data.accounts}
         isSaving={isSaving}
         error={payError}

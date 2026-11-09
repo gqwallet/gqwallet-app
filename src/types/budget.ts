@@ -70,6 +70,10 @@ export interface BudgetStatus {
   totalLimit: number;
   /** Sum of the consumption. */
   totalConsumption: number;
+  /** Consumption in categories with a limit. */
+  budgetedConsumption: number;
+  /** Consumption in categories without a limit. */
+  unbudgetedConsumption: number;
   /** Total usage percentage. */
   totalUsage: number | null;
 }

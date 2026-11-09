@@ -6,8 +6,9 @@
  */
 import { useState } from 'react';
 import { Button, Callout, Modal, SelectField, TextField } from '@/components/ui';
+import type { PaymentCycle } from '@/types/card';
 import type { Currency } from '@/types/api';
-import { formatAmount, formatMoney, todayIso } from '@/utils/format';
+import { formatAmount, formatMoney, formatShortDate, todayIso } from '@/utils/format';
 import { parseAmount } from '@/utils/parse';
 import { MIN_DATE } from '@/utils/dateLimits';
 
@@ -25,6 +26,8 @@ export interface PayingAccountOption {
 
 /** Values submitted by {@link PayCardModal}. */
 export interface PayCardValues {
+  /** Selected billing closing date. */
+  cycleClosingDate: string;
   /** Paying account. */
   sourceAccountId: string;
   /** Amount. */
@@ -41,8 +44,10 @@ export interface PayCardModalProps {
   cardName: string;
   /** Currency of the line. */
   currency: Currency;
-  /** Suggested amount: the total due. */
-  suggestedAmount: number;
+  /** Server payment cycles. */
+  cycles: PaymentCycle[];
+  /** Optional cycle selected from the pending list. */
+  initialClosingDate?: string;
   /** Accounts in the card currency. */
   accounts: PayingAccountOption[];
   /** Whether it is saving. */
@@ -60,20 +65,24 @@ export interface PayCardModalProps {
  *
  * @example
  * ```tsx
- * <PayCardModal isOpen cardName="Visa Interbank" currency="PEN" suggestedAmount={1487.4} accounts={accounts} isSaving={false} error={null} onSubmit={pay} onClose={close} />
+ * <PayCardModal isOpen cardName="Visa Interbank" currency="PEN" cycles={cycles} accounts={accounts} isSaving={false} error={null} onSubmit={pay} onClose={close} />
  * ```
  */
-export function PayCardModal({ isOpen, cardName, currency, suggestedAmount, accounts, isSaving, error, onSubmit, onClose }: PayCardModalProps) {
+export function PayCardModal({ isOpen, cardName, currency, cycles, initialClosingDate, accounts, isSaving, error, onSubmit, onClose }: PayCardModalProps) {
+  const unpaid = [...cycles].filter((cycle) => Number(cycle.amountDue) > 0).sort((a, b) => a.closingDate.localeCompare(b.closingDate));
+  const initial = unpaid.find((cycle) => cycle.closingDate === initialClosingDate) ?? unpaid[0];
+  const [closingDate, setClosingDate] = useState(initial?.closingDate ?? '');
   const [sourceId, setSourceId] = useState(accounts[0]?.id ?? '');
-  const [amount, setAmount] = useState(formatAmount(suggestedAmount));
+  const [amount, setAmount] = useState(formatAmount(initial?.amountDue ?? 0));
   const [date, setDate] = useState(todayIso());
   const [amountError, setAmountError] = useState<string | null>(null);
   const [opened, setOpened] = useState(isOpen);
   if (opened !== isOpen) {
     setOpened(isOpen);
     if (isOpen) {
+      setClosingDate(initial?.closingDate ?? '');
       setSourceId(accounts[0]?.id ?? '');
-      setAmount(formatAmount(suggestedAmount));
+      setAmount(formatAmount(initial?.amountDue ?? 0));
       setAmountError(null);
     }
   }
@@ -84,7 +93,8 @@ export function PayCardModal({ isOpen, cardName, currency, suggestedAmount, acco
       setAmountError('Ingresa un importe mayor a cero.');
       return;
     }
-    onSubmit({ sourceAccountId: sourceId, amount: value, economicDate: date });
+    if (!unpaid.some((cycle) => cycle.closingDate === closingDate) || !accounts.some((account) => account.id === sourceId)) return;
+    onSubmit({ cycleClosingDate: closingDate, sourceAccountId: sourceId, amount: value, economicDate: date });
   };
 
   return (
@@ -97,7 +107,7 @@ export function PayCardModal({ isOpen, cardName, currency, suggestedAmount, acco
       footer={
         <>
           <Button label="Cancelar" variant="secondary" onClick={onClose} />
-          <Button label="Registrar pago" isLoading={isSaving} disabled={accounts.length === 0} onClick={handlePay} />
+          <Button label="Registrar pago" isLoading={isSaving} disabled={accounts.length === 0 || !unpaid.some((cycle) => cycle.closingDate === closingDate)} onClick={handlePay} />
         </>
       }
     >
@@ -112,7 +122,12 @@ export function PayCardModal({ isOpen, cardName, currency, suggestedAmount, acco
           helper={`Solo puedes pagar con una cuenta en la misma moneda de la línea (${currency}).`}
         />
       )}
-      <TextField label="Importe" inputMode="decimal" value={amount} onChange={setAmount} helper="Sugerimos el total a pagar de esta facturación." error={amountError ?? error} />
+      <SelectField label="Facturación" value={closingDate} options={unpaid.map((cycle) => ({ value: cycle.closingDate, label: `Factura el ${formatShortDate(cycle.closingDate, true)} · paga hasta ${formatShortDate(cycle.paymentDueDate, true)} · ${formatMoney(cycle.amountDue, currency)}` }))} onChange={(value) => {
+        setClosingDate(value);
+        setAmount(formatAmount(unpaid.find((cycle) => cycle.closingDate === value)?.amountDue ?? 0));
+        setAmountError(null);
+      }} />
+      <TextField label="Importe" inputMode="decimal" value={amount} onChange={setAmount} helper="Puedes pagar una parte; el saldo queda pendiente" error={amountError ?? error} />
       <TextField label="Fecha" type="date" min={MIN_DATE} value={date} onChange={setDate} />
     </Modal>
   );
