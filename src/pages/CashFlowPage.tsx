@@ -14,6 +14,7 @@ import { useCashFlow } from '@/hooks/useCashFlow';
 import { PATHS } from '@/navigation/paths';
 import type { Currency } from '@/types/api';
 import type { CashFlowRow } from '@/types/overview';
+import { fromFirstActiveMonth } from '@/utils/cashFlow';
 import { cn } from '@/utils/cn';
 import { formatAmount, formatMoney, MONTHS_LONG, todayIso } from '@/utils/format';
 import { CURRENCY_OPTIONS } from '@/utils/options';
@@ -59,6 +60,8 @@ export function CashFlowPage() {
   const anchor = isCurrentYear ? thisMonth : 12;
   const monthName = MONTHS_LONG[anchor - 1].toLowerCase();
   const total = data?.cashFlow.total;
+  // The matrix starts at the first month with activity: leading empty months add nothing.
+  const visible = fromFirstActiveMonth(rows);
 
   const handleExport = async () => {
     if (await exportCsv()) notify({ title: 'Archivo descargado', detail: `Flujo de caja ${year} en ${currency}.` });
@@ -81,7 +84,10 @@ export function CashFlowPage() {
       </div>
       {isLoading && !data && <Spinner />}
       {error && <EmptyState icon="error" title="No pudimos cargar el flujo de caja" />}
-      {data && rows.length > 0 && total && (
+      {data && rows.length > 0 && visible.length === 0 && (
+        <EmptyState icon="query_stats" title={`Sin movimientos en ${year}`} text="Registra un ingreso, un gasto o un pago fijo para ver tu flujo de caja." />
+      )}
+      {data && visible.length > 0 && total && (
         <>
           <div className="mb-4 grid grid-cols-2 gap-3 lg:mb-6 lg:grid-cols-3 lg:gap-4">
             <StatCard label={`Flujo acumulado a ${monthName}`} value={money(rows[anchor - 1].accumulated)} detail={`Saldo inicial ${money(data.opening.openingBalances)}`} />
@@ -97,9 +103,9 @@ export function CashFlowPage() {
               rowClassName={(row) => (row.key === 'flow' ? 'bg-surface-container text-subtitle' : row.isStrong ? 'text-subtitle' : undefined)}
               columns={[
                 { key: 'concept', header: 'Concepto', render: (row) => <span className="whitespace-nowrap">{row.label}</span> },
-                ...rows.map((month, index) => ({
+                ...visible.map((month) => ({
                   key: month.month,
-                  header: `${MONTHS_LONG[index].slice(0, 3)}${month.projection ? '*' : ''}`,
+                  header: `${MONTHS_LONG[Number(month.month.slice(5, 7)) - 1].slice(0, 3)}${month.projection ? '*' : ''}`,
                   isNumeric: true,
                   render: (row: ConceptRow) => cell(month[row.key]),
                 })),
@@ -107,7 +113,7 @@ export function CashFlowPage() {
               ]}
             />
             <p className="mt-3 text-caption text-content-muted">
-              {rows.some((month) => month.projection)
+              {visible.some((month) => month.projection)
                 ? `* Proyección: los meses posteriores a ${monthName} solo incluyen pagos fijos y movimientos ya registrados. `
                 : ''}
               Los valores negativos van entre paréntesis.
