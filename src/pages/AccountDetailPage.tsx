@@ -5,7 +5,7 @@
  * @packageDocumentation
  */
 import { useState } from 'react';
-import { useNavigate, useParams } from 'react-router';
+import { useNavigate, useParams, useSearchParams } from 'react-router';
 import { AccountForm } from '@/components/accounts';
 import { useBanks } from '@/hooks/useBanks';
 import { PageHeader } from '@/components/layout';
@@ -31,6 +31,8 @@ const FORM_ID = 'edit-account';
  */
 export function AccountDetailPage() {
   const { id = '' } = useParams();
+  const [params] = useSearchParams();
+  const returnPath = `${PATHS.accounts}${params.get('estado') === 'desactivadas' ? '?estado=desactivadas' : ''}`;
   const navigate = useNavigate();
   const { profile } = useAuth();
   const banks = useBanks(profile?.countryCode);
@@ -39,7 +41,7 @@ export function AccountDetailPage() {
   const [isDeactivateOpen, setIsDeactivateOpen] = useState(false);
 
   if (isLoading && !data) return <Spinner />;
-  if (error || !data) return <EmptyState icon="error" title="No encontramos esta cuenta" action={<Button label="Volver a cuentas" onClick={() => navigate(PATHS.accounts)} />} />;
+  if (error || !data) return <EmptyState icon="error" title="No encontramos esta cuenta" action={<Button label="Volver a cuentas" onClick={() => navigate(returnPath)} />} />;
 
   const { account, breakdown, recent } = data;
   const money = (value: number) => formatMoney(value, account.currency);
@@ -52,7 +54,7 @@ export function AccountDetailPage() {
   const handleDeactivate = async () => {
     if (await deactivate()) {
       notify({ title: 'Cuenta desactivada', detail: `${account.alias} ya no aparecerá en nuevos registros.` });
-      navigate(PATHS.accounts);
+      navigate(returnPath);
     }
   };
 
@@ -62,7 +64,7 @@ export function AccountDetailPage() {
         breadcrumb={`Cuentas / ${account.alias}`}
         title={account.alias}
         subtitle={`${ACCOUNT_TYPE_LABEL[account.type]} · ${account.bankName ?? 'Efectivo'} · ${account.currency}${isActive ? '' : ' · desactivada'}`}
-        onBack={() => navigate(PATHS.accounts)}
+        onBack={() => navigate(returnPath)}
         actions={
           isActive
             ? [

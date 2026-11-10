@@ -4,6 +4,7 @@
  * @author G0nz4loQu3dena
  * @packageDocumentation
  */
+import { InformationButton } from '@/components/ui/InformationButton';
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { PayCardModal, PendingCyclesList } from '@/components/cards';
@@ -96,7 +97,8 @@ export function CardDetailPage() {
           </div>
         </Card>
         <div className="flex flex-col gap-4 lg:gap-6">
-          <Card title="Fechas fijas">
+          <InformationButton topic="Pago de tarjeta" />
+        <Card title="Fechas fijas">
             <BreakdownRow label="Deuda inicial" value={money(openingDebt)} />
             <BreakdownRow label="Facturación" value={`Día ${billingDay} de cada mes`} />
             <BreakdownRow label="Corte" value={card.billingCutoffTime || 'Fin del día'} />

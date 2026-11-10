@@ -63,7 +63,7 @@ export function BudgetPage() {
 
   return (
     <>
-      <PageHeader
+      <PageHeader informationTopic="Presupuesto"
         title="Presupuesto"
         subtitle={`Límites por categoría para ${formatMonth(period, true).toLowerCase()} en ${currency === 'PEN' ? 'soles' : 'dólares'}.`}
         actions={[

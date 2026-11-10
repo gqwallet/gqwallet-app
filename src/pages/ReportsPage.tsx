@@ -60,7 +60,7 @@ export function ReportsPage() {
 
   return (
     <>
-      <PageHeader
+      <PageHeader informationTopic="Reportes"
         title="Reportes"
         subtitle={`${kind === 'EXPENSE' ? 'Gastos' : 'Ingresos'} de ${periodText} en ${currency === 'PEN' ? 'soles' : 'dólares'}. Ningún total mezcla monedas.`}
         actions={<Button label="Exportar CSV" icon="download" variant="secondary" isLoading={isExporting} onClick={handleExport} />}
@@ -112,7 +112,7 @@ export function ReportsPage() {
           {income && (
             <div className="grid gap-4 lg:grid-cols-2 lg:gap-6">
               <RankingTable title="Por categoría" labelHeader="Categoría" amountHeader="Ingreso" slices={income.byCategory} />
-              <ShareList title="Por tipo" slices={income.byType} labelOf={lookup(INCOME_TYPE_LABEL)} toneOf={() => 'success'} />
+              <ShareList informationTopic="Tipo de ingreso" title="Por tipo" slices={income.byType} labelOf={lookup(INCOME_TYPE_LABEL)} toneOf={() => 'success'} />
               <ShareList title="Por fuente" slices={income.bySource} labelOf={lookup(INCOME_SOURCE_LABEL)} toneOf={() => 'success'} />
               <ShareList title="Por frecuencia" slices={income.byFrequency} labelOf={lookup(INCOME_FREQUENCY_LABEL)} toneOf={() => 'success'} />
             </div>

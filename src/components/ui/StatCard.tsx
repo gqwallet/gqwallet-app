@@ -5,6 +5,7 @@
  * @packageDocumentation
  */
 import type { ReactNode } from 'react';
+import { InformationButton } from '@/components/ui/InformationButton';
 import { Icon } from '@/components/ui/Icon';
 import { cn } from '@/utils/cn';
 
@@ -31,6 +32,8 @@ const VALUE: Record<StatTone, string> = {
 export interface StatCardProps {
   /** Label above the value. */
   label: string;
+  /** Optional contextual explanation, independent of the card action. */
+  informationTopic?: string;
   /** Main figure. */
   value: string;
   /** Detail below the value. */
@@ -57,10 +60,10 @@ export interface StatCardProps {
  * <StatCard label="Ingresos de junio" value="S/ 7,500.00" detail="1 ingreso" tone="success" />
  * ```
  */
-export function StatCard({ label, value, detail, actionLabel, tone = 'primary', onClick, className }: StatCardProps) {
+export function StatCard({ label, value, detail, actionLabel, tone = 'primary', onClick, className, informationTopic }: StatCardProps) {
   const body = (
     <>
-      <span className="min-h-10 text-body-s leading-5 line-clamp-2 text-content-secondary">{label}</span>
+      <span className={cn("min-h-10 text-body-s leading-5 line-clamp-2 text-content-secondary", informationTopic && "pr-7")}>{label}</span>
       <span data-stat-value className={cn('text-amount-s whitespace-nowrap lg:text-amount', VALUE[tone])}>{value}</span>
       <span className="mt-auto min-h-5 pt-1 text-caption text-content-muted">
         {detail}
@@ -68,12 +71,13 @@ export function StatCard({ label, value, detail, actionLabel, tone = 'primary', 
       </span>
     </>
   );
-  const classes = cn('group flex h-full min-w-0 flex-col gap-1 rounded-lg border border-line-subtle p-4 text-left', SURFACE[tone], className);
-  return onClick ? (
+  const classes = cn('group flex h-full w-full min-w-0 flex-col gap-1 rounded-lg border border-line-subtle p-4 text-left', SURFACE[tone], className);
+  const card = onClick ? (
     <button data-stat-card type="button" onClick={onClick} className={cn(classes, 'transition-shadow hover:shadow-card focus-visible:outline-2 focus-visible:outline-primary')}>
       {body}
     </button>
   ) : (
     <div data-stat-card className={classes}>{body}</div>
   );
+  return informationTopic ? <div className="relative min-w-0">{card}<InformationButton topic={informationTopic} className="absolute top-1 right-1" /></div> : card;
 }

@@ -31,7 +31,7 @@ export function GoalsPage() {
 
   return (
     <>
-      <PageHeader
+      <PageHeader informationTopic="Metas"
         title="Metas de ahorro"
         subtitle="Tu progreso hacia cada meta, en su moneda."
         actions={[

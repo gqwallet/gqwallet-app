@@ -68,7 +68,7 @@ export function FixedPaymentsPage() {
 
   return (
     <>
-      <PageHeader
+      <PageHeader informationTopic="Pagos fijos"
         title="Pagos fijos"
         subtitle={`Vencimientos pendientes al ${formatWeekdayDate(today).toLowerCase()} ${today.slice(0, 4)}. Cada uno se muestra en su moneda.`}
         actions={[

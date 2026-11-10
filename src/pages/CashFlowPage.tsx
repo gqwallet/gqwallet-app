@@ -73,7 +73,7 @@ export function CashFlowPage() {
 
   return (
     <>
-      <PageHeader
+      <PageHeader informationTopic="Flujo de caja"
         title="Flujo de caja"
         subtitle={`Ingresos y salidas efectivas, mes a mes, en ${currency === 'PEN' ? 'soles' : 'dólares'}. Los pagos de tarjeta son salidas; los compromisos se muestran por separado.`}
         actions={[

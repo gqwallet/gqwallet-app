@@ -32,7 +32,7 @@ export function CardsPage() {
 
   return (
     <>
-      <PageHeader
+      <PageHeader informationTopic="Tarjetas"
         title="Tarjetas de crédito"
         subtitle="Línea, consumo y total a pagar de cada tarjeta en la moneda de su línea."
         actions={<Button label="Nueva tarjeta" icon="add" onClick={() => navigate(PATHS.newCard)} />}

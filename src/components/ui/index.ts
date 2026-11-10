@@ -33,3 +33,4 @@ export * from '@/components/ui/BreakdownRow';
 export * from '@/components/ui/BarChart';
 
 export { InfiniteScrollSentinel } from './InfiniteScrollSentinel';
+export * from '@/components/ui/InformationButton';

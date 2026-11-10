@@ -7,6 +7,7 @@
  */
 import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from 'react';
 import { Callout, Card, ChipGroup, PickerField, SelectField, TextField, TimeField } from '@/components/ui';
+import { InformationButton } from '@/components/ui/InformationButton';
 import { CategoryPickerModal } from '@/components/transactions/CategoryPickerModal';
 import type { Account } from '@/types/account';
 import type { Currency } from '@/types/api';
@@ -244,7 +245,7 @@ export function TransactionForm(props: TransactionFormProps) {
           </div>
         ) : (
           <div className="flex flex-col gap-4">
-            <Dimension label="Tipo de ingreso">
+            <Dimension label="Tipo de ingreso" informationTopic="Tipo de ingreso">
               <ChipGroup label="Tipo de ingreso" options={toOptions(INCOME_TYPE_LABEL)} value={incomeType} onChange={(next) => setIncomeType(next === incomeType ? null : next)} />
             </Dimension>
             <Dimension label="Fuente">
@@ -269,10 +270,10 @@ export function TransactionForm(props: TransactionFormProps) {
   );
 }
 
-function Dimension({ label, children }: { label: string; children: ReactNode }) {
+function Dimension({ label, children, informationTopic }: { label: string; children: ReactNode; informationTopic?: string }) {
   return (
     <div className="flex flex-col gap-1.5">
-      <span className="text-label text-content-secondary">{label}</span>
+      <div className="flex items-center justify-between"><span className="text-label text-content-secondary">{label}</span>{informationTopic && <InformationButton topic={informationTopic} />}</div>
       {children}
     </div>
   );

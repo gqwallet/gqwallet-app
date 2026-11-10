@@ -71,7 +71,7 @@ export function TransactionsPage() {
 
   return (
     <>
-      <PageHeader
+      <PageHeader informationTopic="Movimientos"
         title="Movimientos"
         subtitle={subtitle}
         actions={[

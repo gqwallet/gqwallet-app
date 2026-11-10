@@ -6,12 +6,15 @@
  */
 import type { ReactNode } from 'react';
 import { cn } from '@/utils/cn';
+import { InformationButton } from '@/components/ui/InformationButton';
 import { IconButton } from '@/components/ui';
 
 /** Props of {@link PageHeader}. */
 export interface PageHeaderProps {
   /** Page title; on small screens the mobile header already shows it. */
   title: string;
+  /** Information topic for this initial module. */
+  informationTopic?: string;
   /** Text below the title. */
   subtitle?: ReactNode;
   /** Buttons on the right (below on small screens). */
@@ -32,7 +35,7 @@ export interface PageHeaderProps {
  * <PageHeader title="Movimientos" subtitle="Junio 2026" actions={<Button label="Nuevo movimiento" icon="add" />} />
  * ```
  */
-export function PageHeader({ title, subtitle, actions, breadcrumb, onBack, className }: PageHeaderProps) {
+export function PageHeader({ title, subtitle, actions, breadcrumb, onBack, className, informationTopic }: PageHeaderProps) {
   return (
     <div className={cn('mb-4 flex flex-col gap-3 lg:mb-6 lg:flex-row lg:items-start lg:justify-between', className)}>
       <div className="flex items-start gap-2">
@@ -43,6 +46,7 @@ export function PageHeader({ title, subtitle, actions, breadcrumb, onBack, class
           {subtitle && <div className="text-body text-content-secondary">{subtitle}</div>}
         </div>
       </div>
+      {informationTopic && <span className="hidden lg:ml-auto lg:-mt-2 lg:block"><InformationButton topic={informationTopic} /></span>}
       {actions && <div className="flex flex-wrap gap-3 [&>*]:flex-1 lg:[&>*]:flex-none">{actions}</div>}
     </div>
   );
