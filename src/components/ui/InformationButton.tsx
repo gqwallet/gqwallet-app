@@ -22,7 +22,7 @@ export function InformationButton({ topic, className }: InformationButtonProps) 
   const body = INFORMATION[topic];
   if (!body) return null;
   return <>
-    <IconButton icon="info" size={16} label={`Información sobre ${topic}`} className={`size-11 ${className ?? ''}`} onClick={() => setIsOpen(true)} />
+    <IconButton icon="info" size={16} label={`Información sobre ${topic}`} className={`size-11 [&>.material-symbols-rounded]:opacity-60 hover:[&>.material-symbols-rounded]:opacity-100 focus-visible:[&>.material-symbols-rounded]:opacity-100 ${className ?? ''}`} onClick={() => setIsOpen(true)} />
     <Modal isOpen={isOpen} title={topic} isInformation onClose={() => setIsOpen(false)} footer={<Button label="Cerrar" className="min-h-11 w-full" onClick={() => setIsOpen(false)} />}>
       <p className="whitespace-pre-line text-body text-content-primary">{body}</p>
     </Modal>
