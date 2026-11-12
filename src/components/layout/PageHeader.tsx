@@ -37,12 +37,12 @@ export interface PageHeaderProps {
  */
 export function PageHeader({ title, subtitle, actions, breadcrumb, onBack, className, informationTopic }: PageHeaderProps) {
   return (
-    <div className={cn('mb-4 flex flex-col gap-3 lg:mb-6 lg:flex-row lg:items-start lg:justify-between', className)}>
-      <div className="flex items-start gap-2">
+    <div className={cn('mb-4 flex flex-col gap-3 lg:mb-6 lg:flex-row lg:items-start lg:justify-between', !subtitle && !onBack && !actions && 'hidden lg:flex', className)}>
+      <div className={cn("min-w-0 items-start gap-2", subtitle || onBack ? "flex" : "hidden lg:flex")}>
         {onBack && <IconButton icon="arrow_back" label="Volver" onClick={onBack} className="-ml-2" />}
-        <div className="flex flex-col gap-1">
+        <div className="min-w-0 flex flex-col gap-1">
           {breadcrumb && <p className="hidden text-caption text-content-muted lg:block">{breadcrumb}</p>}
-          <h1 className="hidden text-headline lg:block">{title}</h1>
+          <h1 className="hidden break-words text-headline lg:block">{title}</h1>
           {subtitle && <div className="text-body text-content-secondary">{subtitle}</div>}
         </div>
       </div>

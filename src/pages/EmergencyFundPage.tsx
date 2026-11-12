@@ -18,14 +18,14 @@ function FundCard({ fund, hasGoal, onRegisterFixed }: { fund: EmergencyFund; has
   const progress = fund.minimum > 0 ? (fund.saved / fund.minimum) * 100 : 0;
   if (!fund.hasFixedPayments) {
     return (
-      <Card title={word}>
+      <Card informationTopic="Fondo de emergencia" title={word}>
         <p className="mb-3 text-body text-content-secondary">No tienes pagos fijos activos en {fund.currency}: no hay un fondo recomendado que calcular.</p>
         <Button label="Registrar pago fijo" icon="add" variant="secondary" onClick={onRegisterFixed} />
       </Card>
     );
   }
   return (
-    <Card title={word}>
+    <Card informationTopic="Fondo de emergencia" title={word}>
       <BreakdownRow label="Pagos fijos mensuales" value={money(fund.monthlyFixed)} />
       <BreakdownRow label="Mínimo recomendado · 3 meses" value={money(fund.minimum)} />
       <BreakdownRow label="Ideal · 6 meses" value={money(fund.ideal)} />
@@ -69,7 +69,7 @@ export function EmergencyFundPage() {
   const hasAny = data ? data.pen.hasFixedPayments || data.usd.hasFixedPayments : false;
   return (
     <>
-      <PageHeader breadcrumb="Metas / Fondo de emergencia" title="Fondo de emergencia" subtitle="Cuánto deberías reservar según tus pagos fijos mensuales, por moneda." onBack={() => navigate(PATHS.goals)} />
+      <PageHeader breadcrumb="Metas / Fondo de emergencia" title="Fondo de emergencia"  onBack={() => navigate(PATHS.goals)} />
       {isLoading && !data && <Spinner />}
       {error && <EmptyState icon="error" title="No pudimos calcular tu fondo de emergencia" />}
       {data && !hasAny && (

@@ -10,6 +10,8 @@
 @import 'material-symbols/rounded.css';
 
 @theme {
+  --container-inline-form: 520px;
+  --spacing-dialog-action: 95px;
   --container-information: 480px;
   --radius-information: 16px;
   --color-*: initial;

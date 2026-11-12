@@ -36,7 +36,7 @@ export function DashboardPage() {
   const { data, isLoading, error, refetch } = useDashboard(currency);
   const today = todayIso();
   const month = MONTHS_LONG[Number(today.slice(5, 7)) - 1].toLowerCase();
-  const name = profile?.firstName ? `Hola, ${profile.firstName}` : 'Hola';
+  const name = profile?.firstName?.trim() ? `Hola, ${profile.firstName.trim()}` : 'Hola';
   const currencyWord = currency === 'PEN' ? 'soles' : 'dólares';
 
   if (isLoading && !data) return <Spinner />;
@@ -49,7 +49,6 @@ export function DashboardPage() {
   const currencyPicker = (
     <div className="mb-4 flex flex-col gap-2">
       <ChipGroup label="Moneda" options={CURRENCY_OPTIONS} value={currency} onChange={setCurrency} />
-      <p className="text-caption text-content-muted">Cada moneda se muestra por separado; nunca sumamos soles con dólares.</p>
     </div>
   );
   const stats = (
@@ -66,7 +65,7 @@ export function DashboardPage() {
   if (data.isEmpty) {
     return (
       <>
-        <PageHeader informationTopic="Dashboard" title={name} subtitle="Tu billetera está lista. Empecemos con lo básico." actions={newMovement} />
+        <PageHeader informationTopic="Dashboard" title={name} actions={newMovement} />
         {profile?.monthlyIncome === null && (
           <Callout
             icon="tune"

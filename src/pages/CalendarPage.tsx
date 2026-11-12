@@ -72,7 +72,6 @@ export function CalendarPage() {
     <>
       <PageHeader informationTopic="Calendario"
         title="Calendario"
-        subtitle="Fechas de tus tarjetas (por color) y vencimientos de tus pagos fijos."
         actions={isEmpty ? undefined : <Button label="Sincronizar con Google Calendar" icon="sync" variant="secondary" disabled={!isSyncAvailable} onClick={() => setIsSyncOpen(true)} />}
       />
       {isLoading && !data && <Spinner />}

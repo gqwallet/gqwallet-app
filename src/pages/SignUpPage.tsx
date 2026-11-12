@@ -45,7 +45,7 @@ export function SignUpPage() {
 
   return (
     <AuthLayout>
-      <AuthHeading title="Crea tu cuenta" description="Solo necesitas un correo y una contraseña." />
+      <AuthHeading title="Crea tu cuenta" />
       <form noValidate onSubmit={handleSubmit} className="flex flex-col gap-4">
         {errors.general && <Callout tone="danger" text={errors.general} />}
         <TextField label="Correo" type="email" autoComplete="email" value={email} onChange={setEmail} error={emailError} />

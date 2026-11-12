@@ -63,15 +63,15 @@ export interface StatCardProps {
 export function StatCard({ label, value, detail, actionLabel, tone = 'primary', onClick, className, informationTopic }: StatCardProps) {
   const body = (
     <>
-      <span className={cn("min-h-10 text-body-s leading-5 line-clamp-2 text-content-secondary", informationTopic && "pr-7")}>{label}</span>
-      <span data-stat-value className={cn('text-amount-s whitespace-nowrap lg:text-amount', VALUE[tone])}>{value}</span>
+      <span className={cn("min-h-10 text-body-s leading-5 [overflow-wrap:anywhere] text-content-secondary", informationTopic && "pr-9")}>{label}</span>
+      <span data-stat-value className={cn('text-amount-s [overflow-wrap:anywhere] lg:text-amount', VALUE[tone])}>{value}</span>
       <span className="mt-auto min-h-5 pt-1 text-caption text-content-muted">
         {detail}
         {actionLabel && <span className="inline-flex items-center text-primary group-hover:underline group-focus-visible:underline">{actionLabel}<Icon name="chevron_right" size={16} /></span>}
       </span>
     </>
   );
-  const classes = cn('group flex h-full w-full min-w-0 flex-col gap-1 rounded-lg border border-line-subtle p-4 text-left', SURFACE[tone], className);
+  const classes = cn('group flex h-full w-full min-w-0 flex-col gap-1 rounded-lg border border-line-subtle p-4 text-left', SURFACE[tone], !informationTopic && className);
   const card = onClick ? (
     <button data-stat-card type="button" onClick={onClick} className={cn(classes, 'transition-shadow hover:shadow-card focus-visible:outline-2 focus-visible:outline-primary')}>
       {body}
@@ -79,5 +79,5 @@ export function StatCard({ label, value, detail, actionLabel, tone = 'primary', 
   ) : (
     <div data-stat-card className={classes}>{body}</div>
   );
-  return informationTopic ? <div className="relative min-w-0">{card}<InformationButton topic={informationTopic} className="absolute top-1 right-1" /></div> : card;
+  return informationTopic ? <div className={cn("relative min-w-0", className)}>{card}<InformationButton topic={informationTopic} className="absolute top-0.5 right-0.5" /></div> : card;
 }

@@ -40,7 +40,7 @@ export function NewAccountPage() {
   };
   return (
     <>
-      <PageHeader breadcrumb="Cuentas / Nueva" title="Nueva cuenta" subtitle="Quedará disponible como medio de pago y como origen o destino de transferencias." />
+      <PageHeader breadcrumb="Cuentas / Nueva" title="Nueva cuenta"  />
       {error && <Callout tone="danger" text={error} className="mb-4" />}
       <Card title="Datos de la cuenta" className="lg:max-w-160">
         <AccountForm banks={banks.data ?? []} id={FORM_ID} defaultCurrency={profile?.preferredCurrency ?? 'PEN'} today={todayIso()} aliasError={aliasError} onSubmit={handleSubmit} />

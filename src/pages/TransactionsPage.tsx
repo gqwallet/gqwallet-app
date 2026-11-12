@@ -61,7 +61,7 @@ export function TransactionsPage() {
   const periodText = filters.month ? formatMonth(filters.month, true) : `${filters.from} – ${filters.to}`;
   const subtitle = isFiltered
     ? `Mostrando ${filters.status === 'VOIDED' ? 'movimientos anulados' : 'movimientos'}${filters.currency ? ` en ${filters.currency}` : ''} ${filters.month ? `de ${periodText.toLowerCase()}` : `entre ${periodText}`}${filters.text ? ` que contienen «${filters.text}»` : ''}.`
-    : 'Tu historial ordenado por fecha económica, de la más reciente a la más antigua.';
+    : undefined;
   const apply = (next: HistoryFilterValues) => {
     setFilters(next);
     setIsFilterOpen(false);

@@ -54,7 +54,7 @@ export function ExportPage() {
 
   return (
     <>
-      <PageHeader title="Exportar" subtitle="Descarga tu información en CSV para abrirla en cualquier hoja de cálculo." />
+      <PageHeader title="Exportar"  />
       <div className="mb-4 flex flex-col gap-1.5 lg:mb-6">
         <span className="text-label text-content-secondary">¿Qué quieres exportar?</span>
         <ChipGroup label="¿Qué quieres exportar?" options={ENTITIES} value={entity} onChange={setEntity} />

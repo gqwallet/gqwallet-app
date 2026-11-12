@@ -53,7 +53,7 @@ export function NewGoalPage() {
 
   return (
     <>
-      <PageHeader breadcrumb="Metas / Nueva" title="Nueva meta" subtitle="Recibirá aportes desde tus cuentas de la misma moneda." />
+      <PageHeader breadcrumb="Metas / Nueva" title="Nueva meta"  />
       <form noValidate onSubmit={handleSubmit} className="lg:max-w-160">
         <Card title="Datos de la meta">
           <div className="flex flex-col gap-4">

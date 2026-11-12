@@ -10,7 +10,7 @@ import { PageHeader } from '@/components/layout';
 import { Badge, Button, ChipGroup, Callout, Card, EmptyState, ListRow, Overline, Spinner } from '@/components/ui';
 import { useAccounts, type AccountSummary } from '@/hooks/useAccounts';
 import { PATHS, withId } from '@/navigation/paths';
-import { formatMoney, formatShortDate, todayIso } from '@/utils/format';
+import { formatMoney } from '@/utils/format';
 import { ACCOUNT_TYPE_LABEL } from '@/utils/options';
 
 const ICON: Record<AccountSummary['type'], string> = { DEBIT: 'account_balance', SAVINGS: 'savings', CASH: 'payments' };
@@ -28,7 +28,6 @@ export function AccountsPage() {
   const { accounts, isLoading, error, refetch } = useAccounts();
   const [params, setParams] = useSearchParams();
   const status = params.get("estado") === "desactivadas" ? "INACTIVE" : "ACTIVE";
-  const today = todayIso();
   const groups = [
     { label: 'Soles (PEN)', items: accounts?.filter((account) => account.status === status && account.currency === 'PEN') ?? [] },
     { label: 'Dólares (USD)', items: accounts?.filter((account) => account.status === status && account.currency === 'USD') ?? [] },
@@ -39,7 +38,6 @@ export function AccountsPage() {
     <>
       <PageHeader informationTopic="Cuentas"
         title="Cuentas"
-        subtitle={`Saldo calculado al ${formatShortDate(today, true)}: saldo inicial + ingresos − gastos ± transferencias.`}
         actions={[
           <Button key="transfer" label="Nueva transferencia" icon="swap_horiz" variant="secondary" onClick={() => navigate(PATHS.newTransfer)} />,
           <Button key="new" label="Nueva cuenta" icon="add" onClick={() => navigate(PATHS.newAccount)} />,

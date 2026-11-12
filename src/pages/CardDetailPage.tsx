@@ -61,14 +61,14 @@ export function CardDetailPage() {
         ]}
       />
       <div className="mb-4 grid grid-cols-2 items-stretch gap-3 lg:mb-6 lg:grid-cols-3 lg:gap-4">
-        <StatCard
+        <StatCard informationTopic="Total a pagar"
           label="Total a pagar"
           value={money(billedDue)}
           detail={billed.length === 0 ? 'Sin pagos pendientes' : `${billed.length} ${billed.length === 1 ? 'facturación' : 'facturaciones'}${overdueCount > 0 ? ` · ${overdueCount} ${overdueCount === 1 ? 'vencida' : 'vencidas'}` : ''}`}
           tone="warning"
         />
-        <StatCard label="Línea utilizada" value={money(usage.used)} detail="Deuda pendiente calculada" tone="neutral" />
-        <StatCard className="col-span-2 lg:col-span-1" label="Línea disponible" value={money(usage.available)} detail={`Línea total ${money(usage.creditLine)}${usage.creditBalance > 0 ? ` · saldo a favor ${money(usage.creditBalance)}` : ''}`} tone="success" />
+        <StatCard informationTopic="Línea utilizada" label="Línea utilizada" value={money(usage.used)} detail="Deuda pendiente calculada" tone="neutral" />
+        <StatCard informationTopic="Línea disponible" className="col-span-2 lg:col-span-1" label="Línea disponible" value={money(usage.available)} detail={`Línea total ${money(usage.creditLine)}${usage.creditBalance > 0 ? ` · saldo a favor ${money(usage.creditBalance)}` : ''}`} tone="success" />
       </div>
       <PendingCyclesList cycles={paymentCycles} currency={card.currency} onPay={(closingDate) => { setSelectedClosingDate(closingDate); setIsPayOpen(true); }} />
       <div className="grid gap-4 lg:grid-cols-[1fr_436px] lg:gap-6">

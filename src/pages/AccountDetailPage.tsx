@@ -76,7 +76,7 @@ export function AccountDetailPage() {
       />
       <div className="grid gap-4 lg:grid-cols-[1fr_436px] lg:gap-6">
         <div className="flex flex-col gap-4 lg:gap-6">
-          <Card title={`Saldo calculado al ${formatShortDate(todayIso(), true)}`}>
+          <Card informationTopic="Saldo en cuentas" title={`Saldo calculado al ${formatShortDate(todayIso(), true)}`}>
             <BreakdownRow label={`Saldo inicial · ${formatShortDate(account.openingBalanceAsOf, true)}`} value={money(breakdown.opening)} />
             <BreakdownRow label="Ingresos a la cuenta" value={`+ ${money(breakdown.incomes)}`} tone="income" />
             <BreakdownRow label="Gastos con la cuenta" value={`− ${money(breakdown.expenses)}`} />

@@ -40,7 +40,6 @@ export function ConsolidatedPage() {
       <PageHeader
         breadcrumb="Dashboard / Vista consolidada"
         title="Vista consolidada"
-        subtitle={`Tus ${target === 'PEN' ? 'dólares convertidos a soles' : 'soles convertidos a dólares'} solo como referencia.`}
         actions={hasRate ? [<Button key="rate" label="Actualizar tipo de cambio" icon="currency_exchange" variant="secondary" onClick={() => navigate(PATHS.exchangeRate)} />, back] : back}
       />
       {isLoading && !data && <Spinner />}
@@ -48,13 +47,13 @@ export function ConsolidatedPage() {
       {position && (
         <div className="mb-4 grid gap-3 lg:grid-cols-3 lg:gap-4">
           {position.penAvailable !== null && (
-            <StatCard label="Disponible en soles" value={formatMoney(position.penAvailable, 'PEN')} detail={target === 'PEN' || rate === null ? 'Valor original' : `Valor original · equivale a ${formatMoney(position.penAvailable / rate, 'USD')}`} tone="neutral" />
+            <StatCard informationTopic="Posición por moneda" label="Disponible en soles" value={formatMoney(position.penAvailable, 'PEN')} detail={target === 'PEN' || rate === null ? 'Valor original' : `Valor original · equivale a ${formatMoney(position.penAvailable / rate, 'USD')}`} tone="neutral" />
           )}
           {position.usdAvailable !== null && (
-            <StatCard label="Disponible en dólares" value={formatMoney(position.usdAvailable, 'USD')} detail={target === 'USD' || rate === null ? 'Valor original' : `Valor original · equivale a ${formatMoney(position.usdAvailable * rate, 'PEN')}`} tone="neutral" />
+            <StatCard informationTopic="Posición por moneda" label="Disponible en dólares" value={formatMoney(position.usdAvailable, 'USD')} detail={target === 'USD' || rate === null ? 'Valor original' : `Valor original · equivale a ${formatMoney(position.usdAvailable * rate, 'PEN')}`} tone="neutral" />
           )}
           {hasRate && position.consolidated !== null && (
-            <StatCard
+            <StatCard informationTopic="Total referencial"
               label={`Total referencial en ${targetWord}`}
               value={formatMoney(position.consolidated, target)}
               detail={`Referencial · TC ${rate} al ${formatShortDate(position.rateDate ?? '', true)}`}
@@ -81,7 +80,7 @@ export function ConsolidatedPage() {
             text={`Tipo de cambio ${position.rate} soles por dólar, registrado el ${formatShortDate(position.rateDate ?? '', true)}. Tus valores por moneda no cambian.`}
             className="mb-4"
           />}
-          <Card title={`Flujo de caja de ${MONTHS_LONG[data.flow.month - 1].toLowerCase()}${hasRate ? ' (referencial)' : ''}`}>
+          <Card informationTopic="Flujo mensual" title={`Flujo de caja de ${MONTHS_LONG[data.flow.month - 1].toLowerCase()}${hasRate ? ' (referencial)' : ''}`}>
             <BreakdownRow label="Flujo en soles" value={formatMoney(data.flow.pen, 'PEN')} />
             <BreakdownRow
               label="Flujo en dólares"

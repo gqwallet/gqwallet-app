@@ -64,7 +64,6 @@ export function NewTransactionPage() {
       <PageHeader
         breadcrumb="Movimientos / Nuevo"
         title="Nuevo movimiento"
-        subtitle={isExpense ? 'Registra un gasto. La fecha de registro se asigna automáticamente.' : 'Registra un ingreso y la cuenta donde lo recibiste.'}
       />
       <div className="mb-4 flex flex-col gap-1.5 lg:mb-6">
         <span className="text-label text-content-secondary">Tipo de movimiento</span>

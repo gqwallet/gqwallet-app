@@ -33,7 +33,6 @@ export function GoalsPage() {
     <>
       <PageHeader informationTopic="Metas"
         title="Metas de ahorro"
-        subtitle="Tu progreso hacia cada meta, en su moneda."
         actions={[
           <Button key="fund" label="Fondo de emergencia" icon="shield" variant="secondary" onClick={() => navigate(PATHS.emergencyFund)} />,
           <Button key="new" label="Nueva meta" icon="add" onClick={() => navigate(PATHS.newGoal)} />,

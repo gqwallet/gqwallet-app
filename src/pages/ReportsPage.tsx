@@ -62,7 +62,7 @@ export function ReportsPage() {
     <>
       <PageHeader informationTopic="Reportes"
         title="Reportes"
-        subtitle={`${kind === 'EXPENSE' ? 'Gastos' : 'Ingresos'} de ${periodText} en ${currency === 'PEN' ? 'soles' : 'dólares'}. Ningún total mezcla monedas.`}
+        subtitle={`${kind === 'EXPENSE' ? 'Gastos' : 'Ingresos'} de ${periodText} en ${currency === 'PEN' ? 'soles' : 'dólares'}.`}
         actions={<Button label="Exportar CSV" icon="download" variant="secondary" isLoading={isExporting} onClick={handleExport} />}
       />
       <ChipGroup label="Tipo de reporte" options={[{ value: 'EXPENSE', label: 'Gastos' }, { value: 'INCOME', label: 'Ingresos' }]} value={kind} onChange={setKind} className="mb-4" />
@@ -80,11 +80,11 @@ export function ReportsPage() {
       {report && count > 0 && (
         <>
           <div className="mb-4 grid grid-cols-2 gap-3 lg:mb-6 lg:grid-cols-5 lg:gap-4">
-            <StatCard label={kind === 'EXPENSE' ? 'Gasto total' : 'Ingreso total'} value={money(report.total)} tone={kind === 'EXPENSE' ? 'danger' : 'success'} className="col-span-2 lg:col-span-1" />
-            <StatCard label={kind === 'EXPENSE' ? 'Gasto promedio por transacción' : 'Ingreso promedio'} value={money(report.average)} tone="neutral" />
-            <StatCard label={kind === 'EXPENSE' ? 'Gasto máximo' : 'Ingreso máximo'} value={money(report.max)} tone="neutral" />
-            <StatCard label={kind === 'EXPENSE' ? 'Gasto mínimo' : 'Ingreso mínimo'} value={money(report.min)} tone="neutral" />
-            <StatCard label={kind === 'EXPENSE' ? 'Número de gastos' : 'Número de ingresos'} value={String(count)} tone="neutral" />
+            <StatCard informationTopic="Total del reporte" label={kind === 'EXPENSE' ? 'Gasto total' : 'Ingreso total'} value={money(report.total)} tone={kind === 'EXPENSE' ? 'danger' : 'success'} className="col-span-2 lg:col-span-1" />
+            <StatCard informationTopic="Promedio del reporte" label={kind === 'EXPENSE' ? 'Gasto promedio por transacción' : 'Ingreso promedio'} value={money(report.average)} tone="neutral" />
+            <StatCard informationTopic="Máximo del reporte" label={kind === 'EXPENSE' ? 'Gasto máximo' : 'Ingreso máximo'} value={money(report.max)} tone="neutral" />
+            <StatCard informationTopic="Mínimo del reporte" label={kind === 'EXPENSE' ? 'Gasto mínimo' : 'Ingreso mínimo'} value={money(report.min)} tone="neutral" />
+            <StatCard informationTopic="Cantidad del reporte" label={kind === 'EXPENSE' ? 'Número de gastos' : 'Número de ingresos'} value={String(count)} tone="neutral" />
           </div>
           <Card title="Evolución mensual" className="mb-4 lg:mb-6">
             <p className="-mt-2 mb-4 text-caption text-content-muted">Suma de {kind === 'EXPENSE' ? 'gastos' : 'ingresos'} por mes.</p>
