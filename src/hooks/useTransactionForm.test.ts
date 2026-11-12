@@ -84,3 +84,14 @@ describe('useTransactionForm', () => {
   });
 
 });
+
+it.each([
+  ['17:55', '2026-11-30'], ['18:00', '2026-11-30'], ['18:05', '2026-12-31'], [undefined, '2026-11-30'],
+])('applies the month-end cut-off for %s', async (purchaseTime, cycleClosingDate) => {
+  vi.mocked(cardsService.list).mockResolvedValue([{ ...card, billingDate: '2026-10-31', billingCutoffTime: '18:00' }]);
+  vi.mocked(cardsService.listBillingCycles).mockResolvedValue([{ closingDate: '2026-11-30' }, { closingDate: '2026-12-31' }] as Awaited<ReturnType<typeof cardsService.listBillingCycles>>);
+  const { result } = renderHook(() => useTransactionForm());
+  await waitFor(() => expect(result.current.lookups).not.toBeNull());
+  await act(async () => { await result.current.register({ ...expense, economicDate: '2026-11-30', purchaseTime }); });
+  expect(transactionsService.register).toHaveBeenLastCalledWith(expect.objectContaining({ cycleClosingDate }));
+});

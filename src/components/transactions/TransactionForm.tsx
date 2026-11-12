@@ -19,6 +19,7 @@ import { formatAmount } from '@/utils/format';
 import { CURRENCY_OPTIONS, ESSENTIALITY_LABEL, INCOME_FREQUENCY_LABEL, INCOME_SOURCE_LABEL, INCOME_TYPE_LABEL, MOOD_LABEL, toOptions } from '@/utils/options';
 import { hasTwoDecimalsAtMost, parseAmount } from '@/utils/parse';
 import { limaPurchaseTime } from '@/utils/limaTime';
+import { isBillingClosingDate } from '@/utils/billingClosingDate';
 import { MIN_DATE } from '@/utils/dateLimits';
 
 const DESCRIPTION_MAX = 120;
@@ -91,7 +92,7 @@ export function TransactionForm(props: TransactionFormProps) {
     return [...ofCurrency, ...cardOptions];
   }, [accounts, cards, currency, isExpense]);
   const selectedCard = isExpense ? cards.find((card) => instrument === `CARD:${card.id}` && card.currency === currency) : undefined;
-  const showPurchaseTime = Boolean(selectedCard?.billingCutoffTime && Number(date.slice(8, 10)) === Number(selectedCard.billingDate.slice(8, 10)));
+  const showPurchaseTime = Boolean(selectedCard?.billingCutoffTime && isBillingClosingDate(date, selectedCard.billingDate));
   const [purchaseTime, setPurchaseTime] = useState('');
   useEffect(() => {
     setPurchaseTime(showPurchaseTime ? limaPurchaseTime(date) : '');
