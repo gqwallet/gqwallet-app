@@ -51,7 +51,7 @@ export function HistoryList({ days, onSelect }: HistoryListProps) {
               badge={item.badge ? <Badge label={item.badge} tone={item.isVoided ? 'danger' : 'neutral'} /> : undefined}
               amount={amountOf(item)}
               amountTone={item.isVoided ? 'muted' : item.type === 'transfer' ? 'neutral' : item.isIncome ? 'income' : 'expense'}
-              meta={item.type === 'transfer' ? 'No cuenta en totales' : item.isVoided ? 'Anulado' : item.currency}
+              meta={item.type === 'transfer' ? 'No cuenta en totales' : item.isVoided ? 'Anulado' : undefined}
               onClick={() => onSelect(item)}
             />
           ))}
