@@ -5,6 +5,7 @@
  * @packageDocumentation
  */
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { sessionEvents } from '@/services/session-events';
 import { authService } from '@/services/auth.service';
 import { profilesService } from '@/services/profiles.service';
 import type { Profile } from '@/types/profile';
@@ -17,6 +18,8 @@ export type SessionStatus = 'checking' | 'authenticated' | 'anonymous';
 export interface AuthContextValue {
   /** Session status. */
   status: SessionStatus;
+  /** Whether the last authenticated session was rejected by the server. */
+  sessionExpired: boolean;
   /** Signed-in user identity (email and roles), when known. */
   user: AuthenticatedUser | null;
   /** Profile of the signed-in user. */
@@ -70,16 +73,28 @@ export interface AuthProviderProps {
  * ```
  */
 export function AuthProvider({ children }: AuthProviderProps) {
+  const [sessionExpired, setSessionExpired] = useState(false);
   const [status, setStatus] = useState<SessionStatus>('checking');
   const [profile, setProfile] = useState<Profile | null>(null);
   const [user, setUser] = useState<AuthenticatedUser | null>(null);
   const [isNewUser, setIsNewUser] = useState(false);
+
+  useEffect(() => sessionEvents.subscribe(() => {
+    rememberEmail(null);
+    setUser(null);
+    setProfile(null);
+    setIsNewUser(false);
+    setSessionExpired(true);
+    setStatus('anonymous');
+  }), []);
 
   useEffect(() => {
     const controller = new AbortController();
     profilesService
       .getMine(controller.signal)
       .then((loaded) => {
+        if (controller.signal.aborted) return;
+        sessionEvents.begin();
         setProfile(loaded);
         setUser({ id: loaded.id, email: recallEmail(), roles: loaded.roles });
         setStatus('authenticated');
@@ -87,24 +102,31 @@ export function AuthProvider({ children }: AuthProviderProps) {
       .catch(() => {
         if (!controller.signal.aborted) setStatus('anonymous');
       });
-    return () => controller.abort();
+    return () => { controller.abort(); sessionEvents.end(); };
   }, []);
 
   const startSession = useCallback(async (signedIn: AuthenticatedUser, isNew = false) => {
+    const generation = sessionEvents.begin();
+    setSessionExpired(false);
     rememberEmail(signedIn.email);
     setIsNewUser(isNew);
     setUser(signedIn);
     try {
-      setProfile(await profilesService.getMine());
+      const loaded = await profilesService.getMine();
+      if (generation !== sessionEvents.current()) return;
+      setProfile(loaded);
     } catch {
+      if (generation !== sessionEvents.current()) return;
       setProfile(null);
     }
-    setStatus('authenticated');
+    if (generation === sessionEvents.current()) setStatus('authenticated');
   }, []);
 
   const finishSetup = useCallback(() => setIsNewUser(false), []);
 
   const signOut = useCallback(async () => {
+    sessionEvents.end();
+    setSessionExpired(false);
     try {
       await authService.signOut();
     } finally {
@@ -118,6 +140,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const value = useMemo<AuthContextValue>(
     () => ({
       status,
+      sessionExpired,
       user,
       profile,
       isAdmin: (user?.roles ?? profile?.roles ?? []).includes('ADMINISTRATOR'),
@@ -127,7 +150,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setProfile,
       signOut,
     }),
-    [status, user, profile, isNewUser, startSession, finishSetup, signOut],
+    [status, sessionExpired, user, profile, isNewUser, startSession, finishSetup, signOut],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

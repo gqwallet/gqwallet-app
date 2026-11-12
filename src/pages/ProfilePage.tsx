@@ -27,7 +27,7 @@ export function ProfilePage() {
   } = useProfileEditor();
   return (
     <>
-      <PageHeader title="Perfil" subtitle="Tus datos personales y los parámetros que usamos en tus indicadores." />
+      <PageHeader title="Perfil"  />
       {hasErrors && <Callout tone="danger" title="No guardamos los cambios" text="Revisa el campo marcado; tu información anterior se conserva." className="mb-4" />}
       <div className="grid gap-4 lg:grid-cols-2 lg:gap-6">
         <form noValidate onSubmit={handlePersonal}>

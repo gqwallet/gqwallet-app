@@ -33,6 +33,7 @@ export function HistoryTotals({ totals }: HistoryTotalsProps) {
     <div className="mb-4 grid grid-cols-2 gap-3 lg:mb-6 lg:grid-cols-4 lg:gap-4">
       {totals.map((total) => (
         <StatCard
+          informationTopic={total.isIncome ? 'Ingresos del historial' : 'Gastos del historial'}
           key={total.label}
           label={total.label}
           value={formatMoney(total.total, total.currency)}

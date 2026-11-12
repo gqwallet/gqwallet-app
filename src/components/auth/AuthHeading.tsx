@@ -1,5 +1,5 @@
 /**
- * Title and description at the top of every public form.
+ * Title at the top of every public form.
  *
  * @author G0nz4loQu3dena
  * @packageDocumentation
@@ -9,8 +9,6 @@
 export interface AuthHeadingProps {
   /** Form title. */
   title: string;
-  /** Short explanation. */
-  description: string;
 }
 
 /**
@@ -18,14 +16,13 @@ export interface AuthHeadingProps {
  *
  * @example
  * ```tsx
- * <AuthHeading title={title} description={description} />
+ * <AuthHeading title={title} />
  * ```
  */
-export function AuthHeading({ title, description }: AuthHeadingProps) {
+export function AuthHeading({ title }: AuthHeadingProps) {
   return (
     <div className="mb-6 flex flex-col gap-3">
       <h1 className="text-headline">{title}</h1>
-      <p className="text-body text-content-secondary">{description}</p>
     </div>
   );
 }

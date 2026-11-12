@@ -45,9 +45,9 @@ export function GoalDetailPage() {
         actions={<Button label="Aportar" icon="add" onClick={() => setIsOpen(true)} />}
       />
       <div className="mb-4 grid grid-cols-2 gap-3 lg:mb-6 lg:grid-cols-3 lg:gap-4">
-        <StatCard label="Ahorrado" value={money(goal.contributed)} detail={`${totalContributions} ${totalContributions === 1 ? 'aporte' : 'aportes'}`} />
-        <StatCard label="Faltante" value={money(goal.remaining)} detail="Para llegar al objetivo" tone="neutral" />
-        <StatCard label="Progreso" value={formatPercent(goal.progress)} detail={goal.targetDate ? `Objetivo al ${formatShortDate(goal.targetDate, true)}` : 'Sin fecha objetivo'} tone="success" className="col-span-2 lg:col-span-1" />
+        <StatCard informationTopic="Ahorrado" label="Ahorrado" value={money(goal.contributed)} detail={`${totalContributions} ${totalContributions === 1 ? 'aporte' : 'aportes'}`} />
+        <StatCard informationTopic="Faltante" label="Faltante" value={money(goal.remaining)} detail="Para llegar al objetivo" tone="neutral" />
+        <StatCard informationTopic="Progreso" label="Progreso" value={formatPercent(goal.progress)} detail={goal.targetDate ? `Objetivo al ${formatShortDate(goal.targetDate, true)}` : 'Sin fecha objetivo'} tone="success" className="col-span-2 lg:col-span-1" />
       </div>
       <Card title="Aportes">
         {contributions.length === 0 ? (

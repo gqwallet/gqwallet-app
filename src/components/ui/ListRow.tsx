@@ -47,7 +47,7 @@ export interface ListRowProps {
 }
 
 /**
- * Renders a 64 px list row; with `onClick` it is a button and shows a chevron.
+ * Renders an adaptive list row; with `onClick` it is a button and shows a chevron.
  *
  * @example
  * ```tsx
@@ -62,21 +62,21 @@ export function ListRow({ title, detail, icon, leading, badge, amount, meta, amo
           <Icon name={icon} />
         </span>
       ))}
-      <span className="flex min-w-0 flex-1 flex-col">
-        <span className="text-subtitle text-content-primary">{title}</span>
-        {detail && <span className="text-body-s text-content-muted">{detail}</span>}
+      <span data-list-copy className="col-start-2 row-start-1 flex min-w-0 flex-col sm:flex-1">
+        <span className="text-subtitle text-content-primary [overflow-wrap:anywhere]">{title}</span>
+        {detail && <span className="text-body-s text-content-muted [overflow-wrap:anywhere]">{detail}</span>}
       </span>
-      {badge}
+      {badge && <span className="col-start-2 min-w-0 justify-self-start [overflow-wrap:anywhere] sm:max-w-[25%]">{badge}</span>}
       {(amount || meta) && (
-        <span className="flex shrink-0 flex-col items-end">
+        <span className="col-start-2 flex min-w-0 flex-col items-start [overflow-wrap:anywhere] sm:ml-auto sm:max-w-[45%] sm:items-end sm:text-right">
           {amount && <span className={cn('text-subtitle', AMOUNT[amountTone])}>{amount}</span>}
           {meta && <span className="text-caption text-content-muted">{meta}</span>}
         </span>
       )}
-      {onClick && <Icon name="chevron_right" className="text-content-muted" />}
+      {onClick && <Icon name="chevron_right" className="col-start-3 row-start-1 shrink-0 text-content-muted" />}
     </>
   );
-  const classes = cn('flex w-full items-center gap-3 py-3 text-left', className);
+  const classes = cn('grid w-full min-w-0 grid-cols-[2.5rem_minmax(0,1fr)_1.5rem] items-center gap-x-3 gap-y-1 py-3 text-left sm:flex sm:gap-3', className);
   return onClick ? (
     <button type="button" onClick={onClick} className={cn(classes, 'rounded-md px-1 transition-colors hover:bg-surface-container focus-visible:outline-2 focus-visible:outline-primary')}>
       {content}

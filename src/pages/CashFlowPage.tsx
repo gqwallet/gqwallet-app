@@ -73,9 +73,8 @@ export function CashFlowPage() {
 
   return (
     <>
-      <PageHeader
+      <PageHeader informationTopic="Flujo de caja"
         title="Flujo de caja"
-        subtitle={`Ingresos y salidas efectivas, mes a mes, en ${currency === 'PEN' ? 'soles' : 'dólares'}. Los pagos de tarjeta son salidas; los compromisos se muestran por separado.`}
         actions={[
           <Button key="debt" label="Carga de deuda" icon="trending_up" variant="secondary" onClick={() => navigate(PATHS.debtLoad)} />,
           <Button key="csv" label="Exportar CSV" icon="download" variant="soft" isLoading={isExporting} onClick={handleExport} />,
@@ -93,9 +92,9 @@ export function CashFlowPage() {
       {data && visible.length > 0 && total && (
         <>
           <div className="mb-4 grid grid-cols-2 items-stretch gap-3 lg:mb-6 lg:grid-cols-3 lg:gap-4">
-            <StatCard label={`Flujo acumulado a ${monthName}`} value={money(rows[anchor - 1].accumulated)} detail="Saldo real de cuentas" />
-            <StatCard label={`Flujo de ${monthName}`} value={money(rows[anchor - 1].flow)} detail={isCurrentYear ? 'Mes en curso' : 'Último mes del año'} tone={rows[anchor - 1].flow < 0 ? 'danger' : 'success'} />
-            <StatCard label="Acumulado proyectado a diciembre" value={money(rows[11].accumulated)} detail="Solo con lo ya registrado" tone="neutral" className="col-span-2 lg:col-span-1" />
+            <StatCard informationTopic="Flujo acumulado" label={`Flujo acumulado a ${monthName}`} value={money(rows[anchor - 1].accumulated)} detail="Saldo real de cuentas" />
+            <StatCard informationTopic="Flujo mensual" label={`Flujo de ${monthName}`} value={money(rows[anchor - 1].flow)} detail={isCurrentYear ? 'Mes en curso' : 'Último mes del año'} tone={rows[anchor - 1].flow < 0 ? 'danger' : 'success'} />
+            <StatCard informationTopic="Proyección anual" label="Acumulado proyectado a diciembre" value={money(rows[11].accumulated)} detail="Solo con lo ya registrado" tone="neutral" className="col-span-2 lg:col-span-1" />
           </div>
           <Card title={`Matriz mensual · ${currency} ${year}`}>
             <DataTable

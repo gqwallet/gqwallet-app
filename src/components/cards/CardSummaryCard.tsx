@@ -43,7 +43,7 @@ export function CardSummaryCard({ card, usage, nextBilling, paymentCycles, onOpe
   const billed = closingDate <= todayIso();
   const hasDue = Boolean(oldest);
   return (
-    <Card title={card.name}>
+    <Card informationTopic="Resumen de tarjeta" title={card.name}>
       <p className="-mt-2 mb-4 text-body-s text-content-secondary">
         {card.currency} · Facturación día {parseIsoDate(card.billingDate).getDate()}{card.billingCutoffTime ? ` · corte ${card.billingCutoffTime}` : ''} · Pago día {parseIsoDate(card.paymentDueDate).getDate()}
       </p>

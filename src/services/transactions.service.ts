@@ -136,6 +136,8 @@ export const transactionsService = {
    * @returns The deactivated category.
    * @throws {@link ApiError} When the request fails.
    */
+  /** Restores an owned category to the new-record selectors without changing history. */
+  reactivateCategory: (id: string) => apiClient.post<Category>(`/categories/${id}/reactivations`),
   deactivateCategory: (id: string) => apiClient.post<Category>(`/categories/${id}/deactivations`),
   /**
    * Lists transfers.

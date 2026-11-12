@@ -4,7 +4,7 @@
  * @author G0nz4loQu3dena
  * @packageDocumentation
  */
-import { useCallback } from 'react';
+import { useCallback, useRef } from 'react';
 import { useMutation } from '@/hooks/useMutation';
 import { useResource } from '@/hooks/useResource';
 import { transactionsService } from '@/services/transactions.service';
@@ -19,12 +19,14 @@ export interface CategoriesState {
   isLoading: boolean;
   /** Load error. */
   error: ApiError | null;
-  /** Creates a category; resolves it or `null`. */
-  create: (name: string) => Promise<Category | null>;
+  /** Creates a category of the requested nature (current nature by default). */
+  create: (name: string, kind?: TransactionNature) => Promise<Category | null>;
   /** Renames a category; resolves it or `null`. */
   rename: (id: string, name: string) => Promise<Category | null>;
   /** Deactivates a category; resolves it or `null`. */
   deactivate: (id: string) => Promise<Category | null>;
+  /** Reactivates a category; resolves it or `null`. */
+  reactivate: (id: string) => Promise<Category | null>;
   /** Whether a write is in flight. */
   isSaving: boolean;
   /** Message of the last write error, e.g. a duplicated name. */
@@ -49,17 +51,25 @@ export function useCategories(nature: TransactionNature): CategoriesState {
   const { data, isLoading, error, refetch } = useResource((signal) => transactionsService.listCategories(nature, signal), [nature]);
   const write = useMutation((run: () => Promise<Category>) => run());
   const { submit } = write;
+  const isWriting = useRef(false);
   const wrap = useCallback(
     async (run: () => Promise<Category>) => {
-      const result = await submit(run);
-      if (result) refetch();
-      return result;
+      if (isWriting.current) return null;
+      isWriting.current = true;
+      try {
+        const result = await submit(run);
+        if (result) refetch();
+        return result;
+      } finally {
+        isWriting.current = false;
+      }
     },
     [submit, refetch],
   );
-  const create = useCallback((name: string) => wrap(() => transactionsService.createCategory(name, nature)), [wrap, nature]);
+  const create = useCallback((name: string, kind: TransactionNature = nature) => wrap(() => transactionsService.createCategory(name, kind)), [wrap, nature]);
   const rename = useCallback((id: string, name: string) => wrap(() => transactionsService.renameCategory(id, name)), [wrap]);
   const deactivate = useCallback((id: string) => wrap(() => transactionsService.deactivateCategory(id)), [wrap]);
+  const reactivate = useCallback((id: string) => wrap(() => transactionsService.reactivateCategory(id)), [wrap]);
   const countMovements = useCallback(async (id: string) => {
     try {
       return (await transactionsService.list({ categoryId: id, size: 1 })).totalElements;
@@ -75,6 +85,7 @@ export function useCategories(nature: TransactionNature): CategoriesState {
     create,
     rename,
     deactivate,
+    reactivate,
     isSaving: write.isSubmitting,
     saveError: write.error ? (write.error.status === 409 ? 'Ya tienes una categoría con ese nombre. Usa otro nombre.' : 'No pudimos guardar la categoría. Inténtalo de nuevo.') : null,
     resetError: write.reset,

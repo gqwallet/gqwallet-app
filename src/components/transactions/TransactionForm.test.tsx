@@ -68,3 +68,8 @@ describe('TransactionForm purchase time', () => {
     expect(screen.queryByRole('group', { name: 'Hora del consumo' })).not.toBeInTheDocument();
   });
 });
+
+it('offers purchase time on a closing day adjusted to month end', () => {
+  render(<TransactionForm {...props()} today="2026-11-30" cards={[{ ...card, billingDate: '2026-10-31' }]} />);
+  expect(screen.getByRole('group', { name: 'Hora del consumo' })).toBeInTheDocument();
+});

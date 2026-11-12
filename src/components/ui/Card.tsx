@@ -5,6 +5,7 @@
  * @packageDocumentation
  */
 import type { ReactNode } from 'react';
+import { InformationButton } from '@/components/ui/InformationButton';
 import { cn } from '@/utils/cn';
 
 /** Props of {@link Card}. */
@@ -15,6 +16,8 @@ export interface CardProps {
   title?: string;
   /** Element on the right of the title, usually a ghost button. */
   action?: ReactNode;
+  /** Contextual explanation for this financial summary. */
+  informationTopic?: string;
   /** Layout utilities. */
   className?: string;
 }
@@ -27,12 +30,13 @@ export interface CardProps {
  * <Card title={title} action={<Button variant="ghost" label={actionLabel} />}>…</Card>
  * ```
  */
-export function Card({ children, title, action, className }: CardProps) {
+export function Card({ children, title, action, className, informationTopic }: CardProps) {
   return (
     <section className={cn('min-w-0 rounded-lg border border-line-subtle bg-surface-card p-4 shadow-card lg:p-6', className)}>
-      {(title || action) && (
+      {(title || action || informationTopic) && (
         <header className="mb-4 flex min-h-10 items-center justify-between gap-2">
-          {title && <h2 className="text-title">{title}</h2>}
+          {title && <h2 className="min-w-0 flex-1 text-title [overflow-wrap:anywhere]">{title}</h2>}
+          {informationTopic && <InformationButton topic={informationTopic} />}
           {action}
         </header>
       )}

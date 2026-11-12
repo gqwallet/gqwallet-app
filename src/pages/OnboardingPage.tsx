@@ -80,7 +80,6 @@ export function OnboardingPage() {
     <AuthLayout>
       <AuthHeading
         title="Configura tu billetera"
-        description="Usaremos estos datos como valores por defecto en tus registros y en tu dashboard. Puedes cambiarlos luego en tu perfil."
       />
       <form noValidate onSubmit={handleSubmit} className="flex flex-col gap-4">
         <div className="flex flex-col gap-1.5">

@@ -95,3 +95,19 @@ it.each([false, true])('clears local session on sign-out even when the request f
 it('requires its provider', () => {
   expect(() => renderHook(useAuth)).toThrow('useAuth must be used inside AuthProvider');
 });
+
+
+it('clears the profile and identity when an existing request expires the session', async () => {
+  const { sessionEvents } = await import('@/services/session-events');
+  const { result } = renderHook(useAuth, { wrapper });
+  await waitFor(() => expect(result.current.status).toBe('authenticated'));
+  act(() => sessionEvents.expire(sessionEvents.current()));
+  expect(result.current.status).toBe('anonymous');
+  expect(result.current.sessionExpired).toBe(true);
+  expect(result.current.user).toBeNull();
+  expect(result.current.profile).toBeNull();
+  expect(authService.signOut).not.toHaveBeenCalled();
+  await act(async () => result.current.startSession({ ...user, roles: ['REGISTERED_USER'] }));
+  expect(result.current.status).toBe('authenticated');
+  expect(result.current.sessionExpired).toBe(false);
+});

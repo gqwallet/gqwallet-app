@@ -5,6 +5,7 @@
  * @author G0nz4loQu3dena
  * @packageDocumentation
  */
+import { sessionEvents } from '@/services/session-events';
 import axios, { type AxiosRequestConfig, type AxiosResponse, isAxiosError } from 'axios';
 import { ApiError, type CsvFile, type ProblemDetail } from '@/types/api';
 import { API_PREFIX, API_URL } from '@/services/config';
@@ -46,6 +47,7 @@ function toApiError(error: unknown): ApiError {
 }
 
 async function send<TResponse>(config: AxiosRequestConfig, options: RequestOptions = {}): Promise<AxiosResponse<TResponse>> {
+  const generation = sessionEvents.current();
   try {
     const response = await http.request<TResponse>({
       ...config,
@@ -56,7 +58,9 @@ async function send<TResponse>(config: AxiosRequestConfig, options: RequestOptio
     });
     return response;
   } catch (error) {
-    throw toApiError(error);
+    const failure = toApiError(error);
+    if (failure.status === 401 && !config.url?.startsWith('/authentication/')) sessionEvents.expire(generation);
+    throw failure;
   }
 }
 

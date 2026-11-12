@@ -23,7 +23,7 @@ export function NetPositionPage() {
   const money = (value: number) => formatMoney(value, currency);
   return (
     <>
-      <PageHeader breadcrumb="Dashboard / Posición neta" title="Posición neta" subtitle="Saldo en cuentas menos deuda de tarjetas, en la misma moneda." actions={<Button label="Volver al dashboard" icon="arrow_back" variant="secondary" onClick={() => navigate(PATHS.dashboard)} />} />
+      <PageHeader breadcrumb="Dashboard / Posición neta" title="Posición neta"  actions={<Button label="Volver al dashboard" icon="arrow_back" variant="secondary" onClick={() => navigate(PATHS.dashboard)} />} />
       <SelectField label="Moneda" value={currency} options={CURRENCY_OPTIONS} onChange={(value) => setCurrency(value as Currency)} className="mb-4" />
       {isLoading && !data && <Spinner />}
       {error && <EmptyState icon="error" title="No pudimos cargar la posición neta" action={<Button label="Reintentar" onClick={refetch} />} />}
@@ -38,8 +38,8 @@ export function NetPositionPage() {
             <BreakdownRow label="Total de deuda" value={money(data.cardsDebt)} tone="total" />
           </Card>
         </div>
-        <StatCard label="Posición neta" value={money(data.netPosition)} className="mb-4" />
-        <Card title="Compromisos próximos" className="mb-4">
+        <StatCard informationTopic="Posición neta" label="Posición neta" value={money(data.netPosition)} className="mb-4" />
+        <Card informationTopic="Compromisos" title="Compromisos próximos" className="mb-4">
           <BreakdownRow label="Pagos fijos pendientes" value={money(data.commitments.dues)} />
           <BreakdownRow label="Facturaciones de tarjetas" value={money(data.commitments.cards)} />
           <BreakdownRow label={`${data.commitments.count} compromisos`} value={money(data.commitments.total)} tone="total" />
