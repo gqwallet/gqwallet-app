@@ -49,13 +49,13 @@ export interface DataTableProps<TRow> {
  */
 export function DataTable<TRow>({ caption, columns, rows, rowKey, footer, isWide = false, onRowClick, rowClassName }: DataTableProps<TRow>) {
   return (
-    <div className="-mx-4 overflow-x-auto px-4 lg:mx-0 lg:px-0">
+    <div role="region" aria-label={caption} tabIndex={0} className="max-w-full overflow-x-auto focus-visible:outline-2 focus-visible:outline-primary">
       <table className={cn('w-full border-collapse text-body', isWide && 'min-w-[640px]')}>
         <caption className="sr-only">{caption}</caption>
         <thead>
           <tr className="border-b border-line-subtle">
             {columns.map((column) => (
-              <th key={column.key} scope="col" className={cn('px-2 py-2 text-label whitespace-nowrap text-content-secondary', column.isNumeric ? 'text-right' : 'text-left')}>
+              <th key={column.key} scope="col" className={cn('px-4 py-3 text-label whitespace-nowrap text-content-secondary', column.isNumeric ? 'min-w-28 text-right' : 'min-w-36 text-left')}>
                 {column.header}
               </th>
             ))}
@@ -71,7 +71,7 @@ export function DataTable<TRow>({ caption, columns, rows, rowKey, footer, isWide
               onKeyDown={onRowClick ? (event) => (event.key === 'Enter' || event.key === ' ') && onRowClick(row) : undefined}
             >
               {columns.map((column) => (
-                <td key={column.key} className={cn('px-2 py-3 align-middle', column.isNumeric && 'text-right whitespace-nowrap')}>
+                <td key={column.key} className={cn('px-4 py-3 align-middle', column.isNumeric ? 'min-w-28 text-right whitespace-nowrap' : 'min-w-36 [overflow-wrap:anywhere]')}>
                   {column.render(row)}
                 </td>
               ))}
@@ -82,7 +82,7 @@ export function DataTable<TRow>({ caption, columns, rows, rowKey, footer, isWide
           <tfoot>
             <tr className="text-subtitle">
               {columns.map((column) => (
-                <td key={column.key} className={cn('px-2 py-3', column.isNumeric && 'text-right whitespace-nowrap')}>
+                <td key={column.key} className={cn('px-4 py-3', column.isNumeric ? 'min-w-28 text-right whitespace-nowrap' : 'min-w-36 [overflow-wrap:anywhere]')}>
                   {column.render(footer)}
                 </td>
               ))}

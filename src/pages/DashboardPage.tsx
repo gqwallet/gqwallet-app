@@ -36,7 +36,7 @@ export function DashboardPage() {
   const { data, isLoading, error, refetch } = useDashboard(currency);
   const today = todayIso();
   const month = MONTHS_LONG[Number(today.slice(5, 7)) - 1].toLowerCase();
-  const name = profile?.firstName ? `Hola, ${profile.firstName}` : 'Hola';
+  const name = profile?.firstName?.trim() ? `Hola, ${profile.firstName.trim()}` : 'Hola';
   const currencyWord = currency === 'PEN' ? 'soles' : 'dólares';
 
   if (isLoading && !data) return <Spinner />;
@@ -49,24 +49,23 @@ export function DashboardPage() {
   const currencyPicker = (
     <div className="mb-4 flex flex-col gap-2">
       <ChipGroup label="Moneda" options={CURRENCY_OPTIONS} value={currency} onChange={setCurrency} />
-      <p className="text-caption text-content-muted">Cada moneda se muestra por separado; nunca sumamos soles con dólares.</p>
     </div>
   );
   const stats = (
     <div className="mb-4 grid grid-cols-2 items-stretch gap-3 lg:mb-6 lg:grid-cols-3 lg:gap-4">
-      <StatCard label="Saldo en cuentas" value={formatMoney(dashboard.accountsBalance, currency)} tone="neutral" />
-      <StatCard label="Deuda de tarjetas" value={formatMoney(dashboard.cardsDebt, currency)} tone="warning" />
-      <StatCard label="Posición neta" value={formatMoney(dashboard.netPosition, currency)} actionLabel="Ver desglose" onClick={() => navigate(`${PATHS.netPosition}?moneda=${currency}`)} />
-      <StatCard label="Ingresos" value={formatMoney(dashboard.monthIncomes, currency)} detail={plural(dashboard.monthIncomesCount, 'ingreso', 'ingresos')} tone="success" />
-      <StatCard label="Salidas" value={formatMoney(dashboard.monthOutflows.total, currency)} detail={`Gastos desde cuentas ${formatMoney(dashboard.monthOutflows.accountExpenses, currency)} · Pagos fijos pagados ${formatMoney(dashboard.monthOutflows.fixedPaid, currency)} · Pagos de tarjeta ${formatMoney(dashboard.monthOutflows.cardPayments, currency)}`} tone="neutral" />
-      <StatCard label="Compromisos" value={formatMoney(dashboard.pendingCommitments.total, currency)} detail={`${dashboard.pendingCommitments.count} por vencer`} tone="warning" />
+      <StatCard informationTopic="Saldo en cuentas" label="Saldo en cuentas" value={formatMoney(dashboard.accountsBalance, currency)} tone="neutral" />
+      <StatCard informationTopic="Deuda de tarjetas" label="Deuda de tarjetas" value={formatMoney(dashboard.cardsDebt, currency)} tone="warning" />
+      <StatCard informationTopic="Posición neta" label="Posición neta" value={formatMoney(dashboard.netPosition, currency)} actionLabel="Ver desglose" onClick={() => navigate(`${PATHS.netPosition}?moneda=${currency}`)} />
+      <StatCard informationTopic="Ingresos" label="Ingresos" value={formatMoney(dashboard.monthIncomes, currency)} detail={plural(dashboard.monthIncomesCount, 'ingreso', 'ingresos')} tone="success" />
+      <StatCard informationTopic="Salidas" label="Salidas" value={formatMoney(dashboard.monthOutflows.total, currency)} detail={`Gastos desde cuentas ${formatMoney(dashboard.monthOutflows.accountExpenses, currency)} · Pagos fijos pagados ${formatMoney(dashboard.monthOutflows.fixedPaid, currency)} · Pagos de tarjeta ${formatMoney(dashboard.monthOutflows.cardPayments, currency)}`} tone="neutral" />
+      <StatCard informationTopic="Compromisos" label="Compromisos" value={formatMoney(dashboard.pendingCommitments.total, currency)} detail={`${dashboard.pendingCommitments.count} por vencer`} tone="warning" />
     </div>
   );
 
   if (data.isEmpty) {
     return (
       <>
-        <PageHeader title={name} subtitle="Tu billetera está lista. Empecemos con lo básico." actions={newMovement} />
+        <PageHeader informationTopic="Dashboard" title={name} actions={newMovement} />
         {profile?.monthlyIncome === null && (
           <Callout
             icon="tune"
@@ -104,7 +103,7 @@ export function DashboardPage() {
   const hasDues = Object.values(dues).some((list) => list.length > 0);
   return (
     <>
-      <PageHeader
+      <PageHeader informationTopic="Dashboard"
         title={name}
         subtitle={`Resumen de ${month} en ${currencyWord} al ${formatWeekdayDate(today).toLowerCase()} ${today.slice(0, 4)}.`}
         actions={[<Button key="transfer" label="Nueva transferencia" icon="swap_horiz" variant="secondary" onClick={() => navigate(PATHS.newTransfer)} />, newMovement]}

@@ -24,7 +24,7 @@ import { categoryIcon } from '@/utils/categoryIcons';
 export function CategoriesPage() {
   const { notify } = useToast();
   const [nature, setNature] = useState<TransactionNature>('EXPENSE');
-  const { categories, isLoading, error, create, rename, deactivate, isSaving, saveError, resetError, countMovements } = useCategories(nature);
+  const { categories, isLoading, error, create, rename, deactivate, reactivate, isSaving, saveError, resetError, countMovements } = useCategories(nature);
   const [isNewOpen, setIsNewOpen] = useState(false);
   const [editing, setEditing] = useState<Category | null>(null);
   const [counts, setCounts] = useState<Record<string, number>>({});
@@ -53,7 +53,6 @@ export function CategoriesPage() {
     <>
       <PageHeader
         title="Categorías"
-        subtitle="Usa las categorías iniciales o crea las tuyas. Desactivar no borra tu historial."
         actions={<Button label="Nueva categoría" icon="add" onClick={() => setIsNewOpen(true)} />}
       />
       <ChipGroup label="Naturaleza" options={[{ value: 'EXPENSE', label: 'Gasto' }, { value: 'INCOME', label: 'Ingreso' }]} value={nature} onChange={setNature} className="mb-4" />
@@ -91,12 +90,9 @@ export function CategoriesPage() {
         error={saveError}
         onClose={close}
         onCreate={async (name, kind) => {
-          const created = kind === nature ? await create(name) : null;
-          if (kind !== nature) {
-            setNature(kind);
-            return;
-          }
+          const created = await create(name, kind);
           if (created) {
+            setNature(created.nature);
             notify({ title: 'Categoría creada', detail: `${created.name} ya está disponible en tus registros.` });
             close();
           }
@@ -115,10 +111,16 @@ export function CategoriesPage() {
             close();
           }
         }}
+        onReactivate={async () => {
+          const updated = editing ? await reactivate(editing.id) : null;
+          if (updated && editing) {
+            setEditing((current) => current?.id === updated.id ? updated : current);
+          }
+        }}
         onDeactivate={async () => {
-          if (editing && (await deactivate(editing.id))) {
-            notify({ title: 'Categoría desactivada', detail: `${editing.name} ya no aparece en nuevos registros. Sus ${counts[editing.id] ?? 0} movimientos la conservan.` });
-            close();
+          const updated = editing ? await deactivate(editing.id) : null;
+          if (updated && editing) {
+            setEditing((current) => current?.id === updated.id ? updated : current);
           }
         }}
       />

@@ -15,6 +15,7 @@ import type { Account } from '@/types/account';
 import type { ApiError, Currency } from '@/types/api';
 import type { Card } from '@/types/card';
 import type { Category, RegisterTransactionFormInput, Transaction, TransactionFormInput, TransactionInput } from '@/types/transaction';
+import { isBillingClosingDate } from '@/utils/billingClosingDate';
 import { monthOf } from '@/utils/format';
 
 /** Lookups of the form. */
@@ -55,7 +56,7 @@ export interface TransactionFormState {
   suggestMerchants: (prefix: string) => Promise<string[]>;
 }
 
-// Select the first closing date on or after the economic date. Only on the card's billing day,
+// Select the first closing date on or after the economic date. Only on the card's effective monthly closing day,
 // a purchase strictly after its optional cut-off skips that day's cycle. Missing times keep that cycle.
 async function cycleFor(input: TransactionInput, purchaseTime: string | undefined, cards: Card[]): Promise<string | null> {
   if (input.paymentMethodKind !== 'CARD' || !input.instrumentId) return null;
@@ -63,7 +64,7 @@ async function cycleFor(input: TransactionInput, purchaseTime: string | undefine
   const cycles = [...(await cardsService.listBillingCycles(input.instrumentId))].sort((a, b) => a.closingDate.localeCompare(b.closingDate));
   const card = cards.find((item) => item.id === input.instrumentId);
   const afterCutoff = Boolean(card?.billingCutoffTime && purchaseTime && purchaseTime > card.billingCutoffTime
-    && Number(input.economicDate.slice(8, 10)) === Number(card.billingDate.slice(8, 10)));
+    && isBillingClosingDate(input.economicDate, card.billingDate));
   return (cycles.find((cycle) => afterCutoff ? cycle.closingDate > input.economicDate : cycle.closingDate >= input.economicDate)
     ?? (afterCutoff ? undefined : cycles[cycles.length - 1]))?.closingDate ?? null;
 }

@@ -86,11 +86,7 @@ export function FixedPaymentFormPage() {
       <PageHeader
         breadcrumb={payment ? `Pagos fijos / ${payment.description}` : 'Pagos fijos / Nuevo'}
         title={payment ? payment.description : 'Nuevo pago fijo'}
-        subtitle={
-          payment
-            ? `${FIXED_KIND_LABEL[payment.kind]} · ${formatMoney(payment.amount, payment.currency)} al mes${current ? ` · cuota ${current.replace('/', ' de ')}` : ''}`
-            : 'Generaremos un vencimiento cada mes mientras esté activo. Si empieza este mes, el primero aparece al guardar.'
-        }
+        subtitle={payment ? `${FIXED_KIND_LABEL[payment.kind]} · ${formatMoney(payment.amount, payment.currency)} al mes${current ? ` · cuota ${current.replace('/', ' de ')}` : ''}` : undefined}
         actions={payment && payment.status === 'ACTIVE' ? <Button label="Finalizar" icon="event_busy" variant="danger" onClick={() => setIsFinishOpen(true)} /> : undefined}
       />
       {saveError && <Callout tone="danger" text={saveError} className="mb-4" />}

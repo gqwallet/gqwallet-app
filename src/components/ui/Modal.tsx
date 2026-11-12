@@ -28,6 +28,10 @@ export interface ModalProps {
   icon?: string;
   /** Wider dialog for forms. */
   isWide?: boolean;
+  /** Keeps short form actions inline using the reference form dimensions. */
+  isInlineForm?: boolean;
+  /** Uses the compact information-panel design. */
+  isInformation?: boolean;
 }
 
 /**
@@ -38,14 +42,22 @@ export interface ModalProps {
  * <Modal isOpen={isOpen} title="Anular movimiento" onClose={close} footer={<Button label="Anular" variant="danger" />} />
  * ```
  */
-export function Modal({ isOpen, title, description, children, footer, onClose, icon, isWide = false }: ModalProps) {
+export function Modal({ isOpen, title, description, children, footer, onClose, icon, isWide = false, isInformation = false, isInlineForm = false }: ModalProps) {
   const titleId = useId();
   const panel = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!isOpen) return undefined;
+    const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     const handleKey = (event: KeyboardEvent) => {
       if (event.key === 'Escape') onClose();
+      if (event.key === 'Tab') {
+        const items = panel.current?.querySelectorAll<HTMLElement>('button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex="0"]');
+        const first = items?.[0]; const last = items?.[items.length - 1];
+        if (first && last && (event.shiftKey ? document.activeElement === first || document.activeElement === panel.current : document.activeElement === last || document.activeElement === panel.current)) {
+          event.preventDefault(); (event.shiftKey ? last : first).focus();
+        }
+      }
     };
     document.addEventListener('keydown', handleKey);
     panel.current?.focus();
@@ -54,12 +66,13 @@ export function Modal({ isOpen, title, description, children, footer, onClose, i
     return () => {
       document.removeEventListener('keydown', handleKey);
       document.body.style.overflow = overflow;
+      previousFocus?.focus({ preventScroll: true });
     };
   }, [isOpen, onClose]);
 
   if (!isOpen) return null;
   return createPortal(
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-scrim lg:items-center lg:p-6" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
+    <div className={`fixed inset-0 z-50 flex items-end justify-center ${isInformation ? 'bg-information-scrim' : 'bg-scrim'} lg:items-center lg:p-6`} onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
       <div
         ref={panel}
         role="dialog"
@@ -67,13 +80,14 @@ export function Modal({ isOpen, title, description, children, footer, onClose, i
         aria-labelledby={titleId}
         tabIndex={-1}
         className={cn(
-          'flex max-h-[90vh] w-full flex-col gap-4 overflow-y-auto rounded-t-xl bg-surface-card p-5 shadow-floating outline-none lg:rounded-xl lg:p-6',
-          isWide ? 'lg:max-w-[560px]' : 'lg:max-w-[440px]',
+          'flex max-h-[90vh] w-full flex-col gap-4 overflow-y-auto bg-surface-card shadow-floating outline-none',
+          isInformation ? 'gap-5 rounded-information p-6 lg:max-w-information' : isInlineForm ? 'rounded-t-xl p-4 pb-7 lg:rounded-xl lg:p-6' : 'rounded-t-xl p-5 lg:rounded-xl lg:p-6',
+          isInlineForm ? 'lg:max-w-inline-form' : isInformation ? '' : isWide ? 'lg:max-w-[560px]' : 'lg:max-w-[440px]',
         )}
       >
         <header className="flex items-start gap-3">
           {icon && (
-            <span className="flex size-9 shrink-0 items-center justify-center rounded-md bg-primary-container text-primary-on-container">
+            <span className={cn('flex shrink-0 items-center justify-center rounded-md bg-primary-container text-primary-on-container', isInlineForm ? 'size-11' : 'size-9')}>
               <Icon name={icon} />
             </span>
           )}
@@ -83,10 +97,10 @@ export function Modal({ isOpen, title, description, children, footer, onClose, i
             </h2>
             {description && <div className="text-body text-content-secondary">{description}</div>}
           </div>
-          <IconButton icon="close" label="Cerrar" size={20} onClick={onClose} className="-mt-2 -mr-2" />
+          {!isInformation && <IconButton icon="close" label="Cerrar" size={20} onClick={onClose} className="-mt-2 -mr-2" />}
         </header>
         {children}
-        {footer && <footer className="flex flex-col-reverse gap-2 lg:flex-row lg:justify-end">{footer}</footer>}
+        {footer && <footer className={cn('flex lg:justify-end', isInlineForm ? 'flex-row gap-3' : 'flex-col-reverse gap-2 lg:flex-row')}>{footer}</footer>}
       </div>
     </div>,
     document.body,

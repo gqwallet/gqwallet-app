@@ -30,7 +30,7 @@ export function MetricsPage() {
   if (!isAdmin || error?.status === 403) {
     return (
       <>
-        <PageHeader title="Métricas" subtitle="Esta sección no está disponible para tu cuenta." />
+        <PageHeader title="Métricas" />
         <Card>
           <EmptyState icon="lock" title="No tienes acceso a esta sección" text="El panel de métricas es solo para administradores de GQWallet." action={<Button label="Ir a mi dashboard" onClick={() => navigate(PATHS.dashboard)} />} />
         </Card>
@@ -41,7 +41,7 @@ export function MetricsPage() {
   const share = metrics && metrics.registeredUsers > 0 ? (metrics.activeUsers / metrics.registeredUsers) * 100 : 0;
   return (
     <>
-      <PageHeader title="Métricas de la plataforma" subtitle="Indicadores agregados. No incluyen datos financieros de ningún usuario." />
+      <PageHeader title="Métricas de la plataforma"  />
       {isLoading && !data && <Spinner />}
       {error && <EmptyState icon="error" title="No pudimos cargar las métricas" />}
       {data && metrics && (

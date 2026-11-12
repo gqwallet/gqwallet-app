@@ -77,7 +77,6 @@ export function CardFormPage() {
       <PageHeader
         breadcrumb={card ? `Tarjetas / ${card.name}` : 'Tarjetas / Nueva'}
         title={card ? `Editar ${card.name}` : 'Nueva tarjeta'}
-        subtitle={card ? 'Los cambios se reflejan en la tarjeta y en tu calendario.' : 'Registra tu tarjeta para controlar su línea y su total a pagar.'}
         actions={card ? <Button label="Eliminar tarjeta" icon="delete" variant="secondary" onClick={() => setIsDeleteOpen(true)} /> : undefined}
       />
       {error && <Callout tone="danger" text={error} className="mb-4" />}

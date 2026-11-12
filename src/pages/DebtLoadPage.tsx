@@ -53,7 +53,6 @@ export function DebtLoadPage() {
       <PageHeader
         breadcrumb="Flujo de caja / Carga de deuda"
         title="Carga de deuda"
-        subtitle="Pagos fijos de categoría Deuda ÷ ingresos del mes, comparados con tu umbral."
         onBack={() => navigate(PATHS.cashFlow)}
         actions={<Button label="Cambiar umbral" icon="tune" variant="secondary" onClick={() => { setDraft(String(threshold)); setDraftError(null); setIsThresholdOpen(true); }} />}
       />
@@ -65,7 +64,7 @@ export function DebtLoadPage() {
       {error && <EmptyState icon="error" title="No pudimos calcular la carga de deuda" />}
       {data && (
         <>
-          <Card title={`Serie de 12 meses · umbral ${formatPercent(data.threshold, 2)}`} className="mb-4">
+          <Card informationTopic="Carga de deuda" title={`Serie de 12 meses · umbral ${formatPercent(data.threshold, 2)}`} className="mb-4">
             <p className="-mt-2 mb-4 text-caption text-content-muted">% de los ingresos del mes</p>
             <BarChart
               label="Carga de deuda por mes"

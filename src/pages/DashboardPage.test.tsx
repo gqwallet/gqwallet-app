@@ -9,9 +9,11 @@ import { MemoryRouter, Route, Routes } from 'react-router';
 import { expect, it, vi } from 'vitest';
 import { DashboardPage } from '@/pages/DashboardPage';
 
-vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ profile: { firstName: 'Ana', preferredCurrency: 'PEN', monthlyIncome: 1000 } }) }));
+const greeting = vi.hoisted(() => ({ name: 'Ana', empty: false }));
+
+vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ profile: { firstName: greeting.name, preferredCurrency: 'PEN', monthlyIncome: 1000 } }) }));
 vi.mock('@/hooks/useDashboard', () => ({ useDashboard: () => ({ isLoading: false, error: null, refetch: vi.fn(), data: {
-  isEmpty: false,
+  isEmpty: greeting.empty,
   dashboard: {
     currency: 'PEN', accountsBalance: 1000, cardsDebt: 200, netPosition: 799, monthIncomes: 500, monthIncomesCount: 3,
     monthOutflows: { accountExpenses: 10, fixedPaid: 20, cardPayments: 30, total: 61 },
@@ -31,4 +33,19 @@ it('displays all six server totals without deriving balances or outflows and ope
   expect(screen.getByText('2 por vencer')).toBeVisible();
   fireEvent.click(screen.getByRole('button', { name: /Posición neta.*Ver desglose/ }));
   expect(screen.getByRole('heading', { name: 'Desglose abierto' })).toBeVisible();
+});
+
+
+it.each([
+  ['  Ana María  ', false, 'Hola, Ana María'],
+  ['', false, 'Hola'],
+  ['   ', true, 'Hola'],
+  ['Nombre'.repeat(25), true, `Hola, ${'Nombre'.repeat(25)}`],
+])('shows the profile greeting for name %s and empty dashboard %s', (name, empty, expected) => {
+  greeting.name = name;
+  greeting.empty = empty;
+  render(<MemoryRouter><DashboardPage /></MemoryRouter>);
+  const heading = screen.getByRole('heading', { name: expected });
+  expect(heading).toBeVisible();
+  expect(heading).toHaveClass('hidden', 'lg:block');
 });

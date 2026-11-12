@@ -38,7 +38,6 @@ export function FixedPaymentsSummaryPage() {
       <PageHeader
         breadcrumb="Pagos fijos / Resumen"
         title="Resumen de pagos fijos"
-        subtitle="Total mensual, anual proyectado y desglose por categoría fija."
         actions={[
           <Button key="dues" label="Próximos vencimientos" icon="event" variant="secondary" onClick={() => navigate(PATHS.fixedPayments)} />,
           <Button key="new" label="Nuevo pago fijo" icon="add" onClick={() => navigate(PATHS.newFixedPayment)} />,
@@ -50,9 +49,9 @@ export function FixedPaymentsSummaryPage() {
       {data && (
         <>
           <div className="mb-4 grid grid-cols-2 gap-3 lg:mb-6 lg:grid-cols-3 lg:gap-4">
-            <StatCard label="Total mensual" value={money(data.summary.monthlyTotal)} detail={data.active.length ? `Suma de ${data.active.length} pagos fijos activos` : undefined} tone="warning" />
-            <StatCard label="Total anual proyectado" value={money(data.summary.annualTotal)} detail={data.active.length ? '12 × total mensual' : undefined} tone="neutral" />
-            <StatCard label="Pagos fijos activos" value={String(data.active.length)} detail={withInstallments ? `${withInstallments} con cuotas` : undefined} tone="neutral" className="col-span-2 lg:col-span-1" />
+            <StatCard informationTopic="Total mensual" label="Total mensual" value={money(data.summary.monthlyTotal)} detail={data.active.length ? `Suma de ${data.active.length} pagos fijos activos` : undefined} tone="warning" />
+            <StatCard informationTopic="Total anual proyectado" label="Total anual proyectado" value={money(data.summary.annualTotal)} detail={data.active.length ? '12 × total mensual' : undefined} tone="neutral" />
+            <StatCard informationTopic="Pagos fijos activos" label="Pagos fijos activos" value={String(data.active.length)} detail={withInstallments ? `${withInstallments} con cuotas` : undefined} tone="neutral" className="col-span-2 lg:col-span-1" />
           </div>
           {data.active.length === 0 ? (
             <Card>

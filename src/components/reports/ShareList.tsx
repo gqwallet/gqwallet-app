@@ -4,6 +4,7 @@
  * @author G0nz4loQu3dena
  * @packageDocumentation
  */
+import { InformationButton } from '@/components/ui/InformationButton';
 import { Card, ProgressBar, type ProgressTone } from '@/components/ui';
 import type { ReportSlice } from '@/types/transaction';
 import { formatPercent } from '@/utils/format';
@@ -12,6 +13,8 @@ import { formatPercent } from '@/utils/format';
 export interface ShareListProps {
   /** Card title. */
   title: string;
+  /** Contextual explanation beside the title. */
+  informationTopic?: string;
   /** Slices. */
   slices: ReportSlice[];
   /** Turns a raw label into product language. */
@@ -30,9 +33,9 @@ export interface ShareListProps {
  * <ShareList title="Por medio de pago" slices={report.byPaymentMethod} />
  * ```
  */
-export function ShareList({ title, slices, labelOf = (label) => label, toneOf = () => 'primary', note }: ShareListProps) {
+export function ShareList({ title, slices, labelOf = (label) => label, toneOf = () => 'primary', note, informationTopic }: ShareListProps) {
   return (
-    <Card title={title}>
+    <Card title={title} action={informationTopic ? <InformationButton topic={informationTopic} /> : undefined}>
       {slices.length === 0 ? (
         <p className="text-body text-content-secondary">Sin datos en este periodo.</p>
       ) : (

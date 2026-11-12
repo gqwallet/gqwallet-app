@@ -68,9 +68,9 @@ export function FixedPaymentsPage() {
 
   return (
     <>
-      <PageHeader
+      <PageHeader informationTopic="Pagos fijos"
         title="Pagos fijos"
-        subtitle={`Vencimientos pendientes al ${formatWeekdayDate(today).toLowerCase()} ${today.slice(0, 4)}. Cada uno se muestra en su moneda.`}
+        subtitle={`Vencimientos pendientes al ${formatWeekdayDate(today).toLowerCase()} ${today.slice(0, 4)}.`}
         actions={[
           <Button key="summary" label="Ver resumen" icon="summarize" variant="secondary" onClick={() => navigate(PATHS.fixedPaymentsSummary)} />,
           <Button key="new" label="Nuevo pago fijo" icon="add" onClick={() => navigate(PATHS.newFixedPayment)} />,
@@ -82,7 +82,7 @@ export function FixedPaymentsPage() {
         <>
           <div className="mb-4 grid grid-cols-2 gap-3 lg:mb-6 lg:gap-4">
             {data.pending.map((total) => (
-              <StatCard
+              <StatCard informationTopic="Vencimientos pendientes"
                 key={total.currency}
                 label={`Pendiente en ${month} · ${total.currency}`}
                 value={formatMoney(total.amount, total.currency)}

@@ -62,7 +62,7 @@ export function NewCategoryModal({ isOpen, nature, isSaving, error, onCreate, on
         <span className="text-label text-content-secondary">Naturaleza</span>
         <ChipGroup label="Naturaleza" options={[{ value: 'EXPENSE', label: 'Gasto' }, { value: 'INCOME', label: 'Ingreso' }]} value={kind} onChange={setKind} />
       </div>
-      <TextField label="Nombre" value={name} onChange={setName} error={nameError ?? (error ? `Ya tienes una categoría de ${kind === 'EXPENSE' ? 'gasto' : 'ingreso'} con ese nombre.` : null)} />
+      <TextField label="Nombre" value={name} onChange={setName} error={nameError ?? (error?.startsWith('Ya tienes una categoría con ese nombre.') ? `Ya tienes una categoría de ${kind === 'EXPENSE' ? 'gasto' : 'ingreso'} con ese nombre.` : error)} />
     </Modal>
   );
 }
@@ -81,23 +81,26 @@ export interface EditCategoryModalProps {
   onRename: (name: string) => void;
   /** Called to deactivate. */
   onDeactivate: () => void;
+  /** Restores an inactive category to new records. */
+  onReactivate: () => void;
   /** Called to close. */
   onClose: () => void;
 }
 
 /**
- * Renders the rename form and the deactivate action.
+ * Renders the rename form and alternating category state action.
  *
  * @example
  * ```tsx
- * <EditCategoryModal category={category} movements={23} isSaving={false} error={null} onRename={rename} onDeactivate={off} onClose={close} />
+ * <EditCategoryModal category={category} movements={23} isSaving={false} error={null} onRename={rename} onDeactivate={off} onReactivate={on} onClose={close} />
  * ```
  */
-export function EditCategoryModal({ category, movements, isSaving, error, onRename, onDeactivate, onClose }: EditCategoryModalProps) {
+export function EditCategoryModal({ category, movements, isSaving, error, onRename, onDeactivate, onReactivate, onClose }: EditCategoryModalProps) {
   const [name, setName] = useState(category?.name ?? '');
   const isActive = category?.status === 'ACTIVE';
   return (
     <Modal
+      isInlineForm
       isOpen={category !== null}
       icon="edit"
       title={`Editar ${category?.name ?? ''}`}
@@ -105,14 +108,15 @@ export function EditCategoryModal({ category, movements, isSaving, error, onRena
       onClose={onClose}
       footer={
         <>
-          {isActive && <Button label="Desactivar" variant="danger" isLoading={isSaving} onClick={onDeactivate} />}
-          <Button label="Cancelar" variant="secondary" onClick={onClose} />
-          <Button label="Guardar" isLoading={isSaving} onClick={() => name.trim() && onRename(name.trim())} />
+          {/* Figma uses a soft reactivation action on mobile and primary on desktop. */}
+          <Button label={isActive ? 'Desactivar' : 'Reactivar'} variant={isActive ? 'danger' : 'soft'} className={`min-w-0 flex-1 px-2 lg:w-dialog-action lg:flex-none ${isActive ? '' : 'lg:bg-surface-inverse lg:text-content-on-primary lg:hover:bg-content-secondary'}`} isLoading={isSaving} onClick={isActive ? onDeactivate : onReactivate} />
+          <Button className="min-w-0 flex-1 px-2 lg:flex-none lg:px-4" label="Cancelar" variant="secondary" onClick={onClose} />
+          <Button className="min-w-0 flex-1 px-2 lg:flex-none lg:px-4" label="Guardar" isLoading={isSaving} onClick={() => name.trim() && onRename(name.trim())} />
         </>
       }
     >
       <TextField label="Nombre" value={name} onChange={setName} error={error} />
-      {isActive && <Callout title="Si la desactivas" text={`Dejará de ofrecerse en nuevos registros, pero sus ${movements} movimientos la conservan.`} />}
+      {isActive ? <Callout title="Si la desactivas" text={`Dejará de ofrecerse en nuevos registros, pero sus ${movements} movimientos la conservan.`} /> : <Callout title="Categoría desactivada" text="Al reactivarla volverá a aparecer en nuevos registros. Su historial se conserva." />}
     </Modal>
   );
 }

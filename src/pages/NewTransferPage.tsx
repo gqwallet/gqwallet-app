@@ -93,7 +93,7 @@ export function NewTransferPage() {
 
   return (
     <>
-      <PageHeader breadcrumb="Movimientos / Transferencia" title="Nueva transferencia" subtitle="Mueve dinero entre tus cuentas, aporta a una meta o paga una tarjeta." />
+      <PageHeader breadcrumb="Movimientos / Transferencia" title="Nueva transferencia"  />
       <div className="mb-4 flex flex-col gap-1.5 lg:mb-6">
         <span className="text-label text-content-secondary">Tipo de transferencia</span>
         <ChipGroup

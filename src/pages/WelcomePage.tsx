@@ -22,7 +22,7 @@ export function WelcomePage() {
   const navigate = useNavigate();
   return (
     <AuthLayout>
-      <AuthHeading title="Bienvenido a GQWallet" description="Tu billetera personal para registrar, planificar y entender tu dinero en soles y dólares." />
+      <AuthHeading title="Bienvenido a GQWallet" />
       <Callout
         icon="lock"
         title="Tus datos son solo tuyos"

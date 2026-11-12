@@ -5,12 +5,12 @@
  * @packageDocumentation
  */
 import { Fragment } from 'react';
-import { useNavigate } from 'react-router';
+import { useNavigate, useSearchParams } from 'react-router';
 import { PageHeader } from '@/components/layout';
-import { Badge, Button, Callout, Card, EmptyState, ListRow, Overline, Spinner } from '@/components/ui';
+import { Badge, Button, ChipGroup, Callout, Card, EmptyState, ListRow, Overline, Spinner } from '@/components/ui';
 import { useAccounts, type AccountSummary } from '@/hooks/useAccounts';
 import { PATHS, withId } from '@/navigation/paths';
-import { formatMoney, formatShortDate, todayIso } from '@/utils/format';
+import { formatMoney } from '@/utils/format';
 import { ACCOUNT_TYPE_LABEL } from '@/utils/options';
 
 const ICON: Record<AccountSummary['type'], string> = { DEBIT: 'account_balance', SAVINGS: 'savings', CASH: 'payments' };
@@ -26,33 +26,33 @@ const ICON: Record<AccountSummary['type'], string> = { DEBIT: 'account_balance',
 export function AccountsPage() {
   const navigate = useNavigate();
   const { accounts, isLoading, error, refetch } = useAccounts();
-  const today = todayIso();
+  const [params, setParams] = useSearchParams();
+  const status = params.get("estado") === "desactivadas" ? "INACTIVE" : "ACTIVE";
   const groups = [
-    { label: 'Soles (PEN)', items: accounts?.filter((account) => account.status === 'ACTIVE' && account.currency === 'PEN') ?? [] },
-    { label: 'Dólares (USD)', items: accounts?.filter((account) => account.status === 'ACTIVE' && account.currency === 'USD') ?? [] },
-    { label: 'Desactivadas', items: accounts?.filter((account) => account.status === 'INACTIVE') ?? [] },
+    { label: 'Soles (PEN)', items: accounts?.filter((account) => account.status === status && account.currency === 'PEN') ?? [] },
+    { label: 'Dólares (USD)', items: accounts?.filter((account) => account.status === status && account.currency === 'USD') ?? [] },
   ].filter((group) => group.items.length > 0);
   const negatives = accounts?.filter((account) => account.status === 'ACTIVE' && account.isNegative) ?? [];
 
   return (
     <>
-      <PageHeader
+      <PageHeader informationTopic="Cuentas"
         title="Cuentas"
-        subtitle={`Saldo calculado al ${formatShortDate(today, true)}: saldo inicial + ingresos − gastos ± transferencias.`}
         actions={[
           <Button key="transfer" label="Nueva transferencia" icon="swap_horiz" variant="secondary" onClick={() => navigate(PATHS.newTransfer)} />,
           <Button key="new" label="Nueva cuenta" icon="add" onClick={() => navigate(PATHS.newAccount)} />,
         ]}
       />
+      <ChipGroup label="Estado de cuentas" options={[{ value: 'ACTIVE', label: 'Activas' }, { value: 'INACTIVE', label: 'Desactivadas' }]} value={status} onChange={(value) => setParams(value === 'INACTIVE' ? { estado: 'desactivadas' } : {})} className="mb-4" />
       <Card className="mb-4">
         {isLoading && !accounts && <Spinner />}
         {error && <EmptyState icon="error" title="No pudimos cargar tus cuentas" action={<Button label="Reintentar" onClick={refetch} />} />}
-        {accounts && accounts.length === 0 && (
+        {accounts && groups.length === 0 && (
           <EmptyState
             icon="account_balance"
-            title="Aún no tienes cuentas"
+            title={status === "ACTIVE" ? "No tienes cuentas activas" : "No tienes cuentas desactivadas"}
             text="Registra tus cuentas de débito, ahorro o efectivo para ver su saldo calculado."
-            action={<Button label="Nueva cuenta" icon="add" onClick={() => navigate(PATHS.newAccount)} />}
+            action={status === "ACTIVE" ? <Button label="Nueva cuenta" icon="add" onClick={() => navigate(PATHS.newAccount)} /> : undefined}
           />
         )}
         {groups.map((group) => (
@@ -73,19 +73,19 @@ export function AccountsPage() {
                         : `${ACCOUNT_TYPE_LABEL[account.type]} · ${account.bankName}`
                   }
                   badge={
-                    isInactive ? <Badge label="Desactivada" tone="neutral" className="hidden sm:inline-flex" /> : account.isNegative ? <Badge label="Saldo negativo" tone="danger" className="hidden sm:inline-flex" /> : undefined
+                    isInactive ? <span className="hidden sm:inline-flex"><Badge label="Desactivada" tone="neutral" /></span> : account.isNegative ? <span className="hidden sm:inline-flex"><Badge label="Saldo negativo" tone="danger" /></span> : undefined
                   }
                   amount={formatMoney(account.balance, account.currency)}
                   amountTone={account.isNegative && !isInactive ? 'expense' : 'neutral'}
-                  meta={isInactive ? `Conserva ${account.movementCount} movimientos` : account.isNegative ? 'Saldo negativo' : 'Saldo calculado'}
-                  onClick={() => navigate(withId(PATHS.account, account.id))}
+                  meta={isInactive ? <><span className="sm:hidden">Desactivada</span><span className="hidden sm:block">Conserva {account.movementCount} movimientos</span></> : account.isNegative ? 'Saldo negativo' : 'Saldo calculado'}
+                  onClick={() => navigate(`${withId(PATHS.account, account.id)}${status === "INACTIVE" ? "?estado=desactivadas" : ""}`)}
                 />
               );
             })}
           </Fragment>
         ))}
       </Card>
-      {negatives.map((account) => (
+      {(status === 'ACTIVE' ? negatives : []).map((account) => (
         <Callout
           key={account.id}
           tone="warning"
