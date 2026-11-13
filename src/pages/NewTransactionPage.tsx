@@ -91,7 +91,7 @@ export function NewTransactionPage() {
             onSuggestMerchants={suggestMerchants}
             onManageCategories={() => navigate(PATHS.categories)}
           />
-          <div className="mt-4 flex flex-col-reverse gap-2 lg:mt-6 lg:flex-row lg:justify-end">
+          <div className="mt-4 flex gap-3 [&>*]:flex-1 lg:mt-6 lg:justify-end lg:[&>*]:flex-none">
             <Button label="Cancelar" variant="secondary" onClick={() => navigate(-1)} />
             <Button type="submit" form={FORM_ID} label={isExpense ? 'Guardar gasto' : 'Guardar ingreso'} icon="check" isLoading={isSaving} />
           </div>

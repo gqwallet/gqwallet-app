@@ -72,7 +72,7 @@ export function NewGoalPage() {
             {error && <Callout tone="danger" text={error} />}
           </div>
         </Card>
-        <div className="mt-4 flex flex-col-reverse gap-2 lg:mt-6 lg:flex-row lg:justify-end">
+        <div className="mt-4 flex gap-3 [&>*]:flex-1 lg:mt-6 lg:justify-end lg:[&>*]:flex-none">
           <Button label="Cancelar" variant="secondary" onClick={() => navigate(PATHS.goals)} />
           <Button type="submit" label="Crear meta" icon="check" isLoading={isSaving} />
         </div>

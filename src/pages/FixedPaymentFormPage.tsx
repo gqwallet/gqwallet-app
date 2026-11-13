@@ -102,7 +102,7 @@ export function FixedPaymentFormPage() {
             today={todayIso()}
             onSubmit={handleSubmit}
           />
-          <div className="mt-4 flex flex-col-reverse gap-2 lg:flex-row lg:justify-end">
+          <div className="mt-4 flex gap-3 [&>*]:flex-1 lg:mt-6 lg:justify-end lg:[&>*]:flex-none">
             <Button label="Cancelar" variant="secondary" onClick={() => navigate(-1)} />
             <Button type="submit" form={FORM_ID} label={payment ? 'Guardar cambios' : 'Guardar pago fijo'} icon="check" isLoading={isSaving && !isFinishOpen} />
           </div>

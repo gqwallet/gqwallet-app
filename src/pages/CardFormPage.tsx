@@ -81,7 +81,7 @@ export function CardFormPage() {
       />
       {error && <Callout tone="danger" text={error} className="mb-4" />}
       <CardForm banks={banks.data ?? []} id={FORM_ID} initial={card} billingCycles={detail.data?.billingCycles} hasMovements={movements > 0} defaultCurrency={profile?.preferredCurrency ?? 'PEN'} today={todayIso()} onSubmit={handleSubmit} />
-      <div className="mt-4 flex flex-col-reverse gap-2 lg:mt-6 lg:flex-row lg:justify-end">
+      <div className="mt-4 flex gap-3 [&>*]:flex-1 lg:mt-6 lg:justify-end lg:[&>*]:flex-none">
         <Button label="Cancelar" variant="secondary" onClick={() => navigate(-1)} />
         <Button type="submit" form={FORM_ID} label={card ? 'Guardar cambios' : 'Guardar tarjeta'} icon="check" isLoading={isSaving && !isDeleteOpen} />
       </div>
