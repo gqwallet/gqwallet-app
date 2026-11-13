@@ -52,14 +52,14 @@ export function TextField({ label, value, onChange, helper, error, prefix, trail
           error ? 'border-danger' : 'border-line-outline',
         )}
       >
-        {prefix && <span className="text-body text-content-primary">{prefix}</span>}
+        {prefix && <span className="text-[16px]/[22px] text-content-primary lg:text-body">{prefix}</span>}
         <input
           id={inputId}
           value={value}
           onChange={(event) => onChange(event.target.value)}
           aria-invalid={Boolean(error) || undefined}
           aria-describedby={hint ? hintId : undefined}
-          className="h-full min-w-0 flex-1 bg-transparent text-body text-content-primary outline-none placeholder:text-content-muted"
+          className="h-full min-w-0 flex-1 bg-transparent text-[16px]/[22px] text-content-primary lg:text-body outline-none placeholder:text-content-muted"
           {...rest}
           onBlur={(event) => {
             // The native min only limits the calendar; a typed date earlier than min is raised to it.
