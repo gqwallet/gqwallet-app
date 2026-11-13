@@ -33,6 +33,7 @@ export function GoalsPage() {
     <>
       <PageHeader informationTopic="Metas"
         title="Metas de ahorro"
+        stackActionsOnMobile
         actions={[
           <Button key="fund" label="Fondo de emergencia" icon="shield" variant="secondary" onClick={() => navigate(PATHS.emergencyFund)} />,
           <Button key="new" label="Nueva meta" icon="add" onClick={() => navigate(PATHS.newGoal)} />,
@@ -46,7 +47,7 @@ export function GoalsPage() {
         </Card>
       )}
       {data && data.goals.length > 0 && (
-        <div className="mb-4 grid gap-4 lg:mb-6 lg:grid-cols-3 lg:gap-6">
+        <div className="mb-4 grid items-start gap-4 lg:mb-6 lg:grid-cols-3 lg:gap-6">
           {data.goals.map((goal) => (
             <GoalCard
               key={goal.id}

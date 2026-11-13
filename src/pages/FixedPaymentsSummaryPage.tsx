@@ -7,7 +7,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { PageHeader } from '@/components/layout';
-import { Button, Card, ChipGroup, DataTable, EmptyState, ListRow, Spinner, StatCard } from '@/components/ui';
+import { Button, Card, ChipGroup, DataTable, EmptyState, ListRow, Spinner, StackedBar, StatCard } from '@/components/ui';
 import { useAuth } from '@/context/AuthContext';
 import { useFixedPaymentSummary } from '@/hooks/useFixedPaymentSummary';
 import { PATHS, withId } from '@/navigation/paths';
@@ -36,6 +36,7 @@ export function FixedPaymentsSummaryPage() {
   return (
     <>
       <PageHeader
+        showMobileBreadcrumb stackActionsOnMobile
         breadcrumb="Pagos fijos / Resumen"
         title="Resumen de pagos fijos"
         actions={[
@@ -43,15 +44,15 @@ export function FixedPaymentsSummaryPage() {
           <Button key="new" label="Nuevo pago fijo" icon="add" onClick={() => navigate(PATHS.newFixedPayment)} />,
         ]}
       />
-      <ChipGroup label="Moneda" options={CURRENCY_OPTIONS} value={currency} onChange={setCurrency} className="mb-4" />
+      <ChipGroup label="Moneda" options={CURRENCY_OPTIONS} value={currency} onChange={setCurrency} className="mb-4 lg:mb-6" />
       {isLoading && !data && <Spinner />}
       {error && <EmptyState icon="error" title="No pudimos cargar el resumen" />}
       {data && (
         <>
-          <div className="mb-4 grid grid-cols-2 gap-3 lg:mb-6 lg:grid-cols-3 lg:gap-4">
-            <StatCard informationTopic="Total mensual" label="Total mensual" value={money(data.summary.monthlyTotal)} detail={data.active.length ? `Suma de ${data.active.length} pagos fijos activos` : undefined} tone="warning" />
-            <StatCard informationTopic="Total anual proyectado" label="Total anual proyectado" value={money(data.summary.annualTotal)} detail={data.active.length ? '12 × total mensual' : undefined} tone="neutral" />
-            <StatCard informationTopic="Pagos fijos activos" label="Pagos fijos activos" value={String(data.active.length)} detail={withInstallments ? `${withInstallments} con cuotas` : undefined} tone="neutral" className="col-span-2 lg:col-span-1" />
+          <div className="mb-4 grid grid-cols-1 gap-3 lg:mb-6 lg:grid-cols-3 lg:gap-4">
+            <StatCard valueSize="large" informationTopic="Total mensual" label="Total mensual" value={money(data.summary.monthlyTotal)} detail={data.active.length ? `Suma de ${data.active.length} pagos fijos activos` : undefined} tone="warning" />
+            <StatCard valueSize="compact" informationTopic="Total anual proyectado" label="Total anual proyectado" value={money(data.summary.annualTotal)} detail={data.active.length ? '12 × total mensual' : undefined} tone="neutral" />
+            <StatCard valueSize="large" informationTopic="Pagos fijos activos" label="Pagos fijos activos" value={String(data.active.length)} detail={withInstallments ? `${withInstallments} con cuotas` : undefined} tone="neutral" />
           </div>
           {data.active.length === 0 ? (
             <Card>
@@ -63,9 +64,11 @@ export function FixedPaymentsSummaryPage() {
               />
             </Card>
           ) : (
-            <div className="grid gap-4 lg:grid-cols-2 lg:gap-6">
+            <div className="grid items-start gap-4 lg:grid-cols-2 lg:gap-6">
               <Card title="Desglose por categoría fija">
+                <div className="mb-4"><StackedBar label="Distribución de pagos fijos por categoría" segments={data.summary.byKind.map((row) => ({ label: FIXED_KIND_LABEL[row.kind], value: row.monthly, color: ({ HOUSEHOLD_SERVICES: '1', SUBSCRIPTIONS: '6', MEMBERSHIPS: '2', DEBT: '4', RENT: '3', INSTALLMENT_PURCHASE: '5' } as const)[row.kind] }))} showLegend /></div>
                 <DataTable
+                  showScrollHint
                   caption="Desglose por categoría fija"
                   rows={data.summary.byKind}
                   rowKey={(row) => row.kind}

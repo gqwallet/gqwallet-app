@@ -13,7 +13,7 @@ export interface CardProps {
   /** Card content. */
   children: ReactNode;
   /** Title rendered by a section header. */
-  title?: string;
+  title?: ReactNode;
   /** Element on the right of the title, usually a ghost button. */
   action?: ReactNode;
   /** Contextual explanation for this financial summary. */
@@ -32,9 +32,9 @@ export interface CardProps {
  */
 export function Card({ children, title, action, className, informationTopic }: CardProps) {
   return (
-    <section className={cn('min-w-0 rounded-lg border border-line-subtle bg-surface-card p-4 shadow-card lg:p-6', className)}>
+    <section className={cn('min-w-0 rounded-lg border border-line-subtle bg-surface-card p-4 shadow-card lg:px-6 lg:pb-6', title || action || informationTopic ? 'lg:pt-5' : 'lg:pt-6', className)}>
       {(title || action || informationTopic) && (
-        <header className="mb-4 flex min-h-10 items-center justify-between gap-2">
+        <header className={cn('mb-4 flex items-center justify-between gap-2', Boolean(action || informationTopic) && 'min-h-10')}>
           {title && <h2 className="min-w-0 flex-1 text-title [overflow-wrap:anywhere]">{title}</h2>}
           {informationTopic && <InformationButton topic={informationTopic} />}
           {action}

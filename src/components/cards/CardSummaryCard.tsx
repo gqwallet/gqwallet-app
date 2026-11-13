@@ -4,7 +4,7 @@
  * @author G0nz4loQu3dena
  * @packageDocumentation
  */
-import { BreakdownRow, Button, Card, ProgressBar } from '@/components/ui';
+import { BreakdownRow, Button, Card, CreditCardMark, ProgressBar } from '@/components/ui';
 import type { Card as CreditCard, CreditLineUsage, NextBilling, PaymentCycle } from '@/types/card';
 import { cardTone } from '@/utils/cardPalette';
 import { formatMoney, formatShortDate, parseIsoDate, todayIso } from '@/utils/format';
@@ -43,7 +43,7 @@ export function CardSummaryCard({ card, usage, nextBilling, paymentCycles, onOpe
   const billed = closingDate <= todayIso();
   const hasDue = Boolean(oldest);
   return (
-    <Card informationTopic="Resumen de tarjeta" title={card.name}>
+    <Card informationTopic="Resumen de tarjeta" title={<span className="inline-flex items-center"><CreditCardMark color={card.color} />{card.name}</span>}>
       <p className="-mt-2 mb-4 text-body-s text-content-secondary">
         {card.currency} · Facturación día {parseIsoDate(card.billingDate).getDate()}{card.billingCutoffTime ? ` · corte ${card.billingCutoffTime}` : ''} · Pago día {parseIsoDate(card.paymentDueDate).getDate()}
       </p>
@@ -57,9 +57,13 @@ export function CardSummaryCard({ card, usage, nextBilling, paymentCycles, onOpe
       <BreakdownRow label="Línea disponible" value={money(usage.available)} tone="income" />
       {usage.creditBalance > 0 && <BreakdownRow label="Saldo a favor" value={money(usage.creditBalance)} tone="income" />}
       <BreakdownRow label={`Total a pagar · ${billed ? 'facturó' : 'factura'} el ${formatShortDate(closingDate)}`} value={money(oldest?.amountDue ?? nextBilling.amountDue)} />
-      {oldest?.status === 'OVERDUE' && <p className="mt-2 text-body-s text-danger">Vencida · pagar</p>}
-      {oldest && Number(oldest.paid) > 0 && Number(oldest.amountDue) > 0 && <p className="mt-2 text-body-s text-tertiary">Parcial · falta {money(oldest.amountDue)}</p>}
-      <div className="mt-4 flex flex-wrap gap-3">
+      {(oldest?.status === 'OVERDUE' || (oldest && Number(oldest.paid) > 0 && Number(oldest.amountDue) > 0)) && (
+        <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1">
+          {oldest.status === 'OVERDUE' && <p className="text-body-s text-danger">Vencida · pagar</p>}
+          {Number(oldest.paid) > 0 && Number(oldest.amountDue) > 0 && <p className="text-body-s text-tertiary">Parcial · falta {money(oldest.amountDue)}</p>}
+        </div>
+      )}
+      <div className="mt-4 grid grid-cols-2 gap-3">
         {hasDue ? (
           <>
             <Button label="Ver detalle" icon="visibility" variant="soft" onClick={onOpen} />

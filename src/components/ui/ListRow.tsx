@@ -76,12 +76,12 @@ export function ListRow({ title, detail, icon, leading, badge, amount, meta, amo
       {onClick && <Icon name="chevron_right" className="col-start-3 row-start-1 shrink-0 text-content-muted" />}
     </>
   );
-  const classes = cn('grid w-full min-w-0 grid-cols-[2.5rem_minmax(0,1fr)_1.5rem] items-center gap-x-3 gap-y-1 py-3 text-left sm:flex sm:gap-3', className);
+  const classes = cn('grid w-full min-w-0 grid-cols-[2.5rem_minmax(0,1fr)_1.5rem] items-center gap-x-3 gap-y-1 py-3 text-left sm:flex sm:gap-3 lg:py-3.5', className);
   return onClick ? (
-    <button type="button" onClick={onClick} className={cn(classes, 'rounded-md px-1 transition-colors hover:bg-surface-container focus-visible:outline-2 focus-visible:outline-primary')}>
+    <button type="button" onClick={onClick} className={cn(classes, 'rounded-md px-1 transition-colors hover:bg-surface-container focus-visible:outline-2 focus-visible:outline-primary lg:px-4')}>
       {content}
     </button>
   ) : (
-    <div className={cn(classes, 'px-1')}>{content}</div>
+    <div className={cn(classes, 'px-1 lg:px-4')}>{content}</div>
   );
 }

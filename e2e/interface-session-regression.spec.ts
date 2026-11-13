@@ -121,13 +121,13 @@ test('category state alternates in place and preserves a pending rename', async 
     await expect(dialog.getByLabel('Nombre', { exact: true })).toHaveValue('Nombre pendiente');
     await expect(off).toHaveCount(0);
     await page.mouse.move(1, 1);
-    await expect(on).toHaveCSS('background-color', width >= 1024 ? 'rgb(26, 26, 26)' : 'rgb(238, 238, 250)');
+    await expect(on).toHaveCSS('background-color', width >= 1024 ? 'rgb(67, 56, 202)' : 'rgb(238, 240, 254)');
     if (width === 402 || width === 1440) await page.screenshot({ path: `/tmp/gqw-category-inactive-${width}.png` });
     await on.click();
     await expect(off).toBeVisible();
     expect(await off.boundingBox()).toEqual(bounds);
     await page.mouse.move(1, 1);
-    await expect(off).toHaveCSS('background-color', 'rgb(204, 51, 51)');
+    await expect(off).toHaveCSS('background-color', 'rgb(201, 42, 57)');
     if (width === 402 || width === 1440) await page.screenshot({ path: `/tmp/gqw-category-active-${width}.png` });
     await expect(dialog.getByLabel('Nombre', { exact: true })).toHaveValue('Nombre pendiente');
     await dialog.getByRole('button', { name: 'Cancelar', exact: true }).click();

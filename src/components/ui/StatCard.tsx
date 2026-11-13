@@ -15,9 +15,9 @@ export type StatTone = 'neutral' | 'primary' | 'success' | 'warning' | 'danger';
 const SURFACE: Record<StatTone, string> = {
   neutral: 'bg-surface-card',
   primary: 'bg-primary-container',
-  success: 'bg-secondary-container',
-  warning: 'bg-tertiary-container',
-  danger: 'bg-danger-container',
+  success: 'bg-surface-card',
+  warning: 'bg-surface-card',
+  danger: 'bg-surface-card',
 };
 
 const VALUE: Record<StatTone, string> = {
@@ -46,6 +46,10 @@ export interface StatCardProps {
    * @defaultValue `primary`
    */
   tone?: StatTone;
+  /** Reference dimensions for standard, report and cash-flow figures. */
+  size?: 'default' | 'report' | 'flow';
+  /** Responsive value typography used by the mobile summary variants. */
+  valueSize?: 'default' | 'compact' | 'large';
   /** Makes the whole card a button. */
   onClick?: () => void;
   /** Layout utilities. */
@@ -60,18 +64,18 @@ export interface StatCardProps {
  * <StatCard label="Ingresos de junio" value="S/ 7,500.00" detail="1 ingreso" tone="success" />
  * ```
  */
-export function StatCard({ label, value, detail, actionLabel, tone = 'primary', onClick, className, informationTopic }: StatCardProps) {
+export function StatCard({ label, value, detail, actionLabel, tone = 'primary', onClick, className, informationTopic, size = 'default', valueSize = 'default' }: StatCardProps) {
   const body = (
     <>
-      <span className={cn("min-h-10 text-body-s leading-5 [overflow-wrap:anywhere] text-content-secondary", informationTopic && "pr-9")}>{label}</span>
-      <span data-stat-value className={cn('text-amount-s [overflow-wrap:anywhere] lg:text-amount', VALUE[tone])}>{value}</span>
-      <span className="mt-auto min-h-5 pt-1 text-caption text-content-muted">
+      <span className={cn("min-h-10 text-body-s [overflow-wrap:anywhere] text-content-secondary", informationTopic && "pr-9")}>{label}</span>
+      <span data-stat-value className={cn('[overflow-wrap:anywhere]', valueSize === 'compact' ? 'text-title lg:text-amount' : valueSize === 'large' ? 'text-amount' : 'text-amount-s lg:text-amount', VALUE[tone])}>{value}</span>
+      <span className="block min-h-4 text-caption text-content-muted">
         {detail}
-        {actionLabel && <span className="inline-flex items-center text-primary group-hover:underline group-focus-visible:underline">{actionLabel}<Icon name="chevron_right" size={16} /></span>}
+        {actionLabel && <span className="flex items-center text-label text-primary underline">{actionLabel}<Icon name="chevron_right" size={16} /></span>}
       </span>
     </>
   );
-  const classes = cn('group flex h-full w-full min-w-0 flex-col gap-1 rounded-lg border border-line-subtle p-4 text-left', SURFACE[tone], !informationTopic && className);
+  const classes = cn('group flex h-full w-full min-w-0 flex-col gap-1 rounded-information border px-4 pt-4 pb-3 text-left shadow-stat', size === 'report' ? 'min-h-32 lg:min-h-stat-report' : size === 'flow' ? 'min-h-stat-compact lg:min-h-stat-flow' : valueSize === 'compact' ? 'min-h-stat-compact lg:min-h-stat' : 'min-h-stat-mobile lg:min-h-stat', tone === 'primary' ? 'border-primary-pale' : 'border-line-subtle', SURFACE[tone], !informationTopic && className);
   const card = onClick ? (
     <button data-stat-card type="button" onClick={onClick} className={cn(classes, 'transition-shadow hover:shadow-card focus-visible:outline-2 focus-visible:outline-primary')}>
       {body}

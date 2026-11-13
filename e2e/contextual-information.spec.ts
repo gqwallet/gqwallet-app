@@ -4,6 +4,7 @@
  * @packageDocumentation
  */
 import { test, expect, type Page, type Locator } from '@playwright/test';
+import { INFORMATION_TITLES } from '../src/utils/information.ts';
 import { signUp, uniqueEmail } from './helpers.ts';
 const API='http://localhost:8080/api/v1';
 const modules=[['DASHBOARD','Dashboard','/dashboard'],['MOVIMIENTOS','Movimientos','/movimientos'],['CUENTAS','Cuentas','/cuentas'],['TARJETAS','Tarjetas','/tarjetas'],['PAGOS FIJOS','Pagos fijos','/pagos-fijos'],['PRESUPUESTO','Presupuesto','/presupuesto'],['FLUJO DE CAJA','Flujo de caja','/flujo-de-caja'],['METAS','Metas','/metas'],['REPORTES','Reportes','/reportes'],['CALENDARIO','Calendario','/calendario']];
@@ -13,7 +14,7 @@ cases.push(
  {module:'DASHBOARD',title:'Ayudas de Indicadores - Ok - Ingresos salidas y compromisos',route:'/dashboard',topics:['Ingresos','Salidas','Compromisos'],kind:'help'},
  {module:'DASHBOARD',title:'Ayudas sin Datos - Ok - Indicadores alineados y ayudas disponibles',route:'/dashboard',topics:['Saldo en cuentas'],kind:'empty-dashboard'},
  {module:'MOVIMIENTOS',title:'Tipo de Ingreso - Ok - Explicación conserva los datos del formulario',route:'/movimientos/nuevo?tipo=ingreso',topics:['Tipo de ingreso'],kind:'income-form'},
- {module:'REPORTES',title:'Tipo de Ingreso - Ok - Explicación conserva los filtros del reporte',route:'/reportes',topics:['Tipo de ingreso'],kind:'income-report'},
+ {module:'REPORTES',title:'Tipo de Ingreso - Ok - Explicación conserva los filtros del reporte',route:'/reportes',topics:['Tipo de ingreso en reportes'],kind:'income-report'},
  {module:'TARJETAS',title:'Ayuda de Pago - Ok - Consultar explicación no modifica la facturación',route:'/tarjetas',topics:['Pago de tarjeta'],kind:'card'},
  ...['Activas por defecto','Alternar filtros conserva los saldos','Estado vacío sin cuentas activas','Estado vacío sin cuentas desactivadas','Detalle desactivado retorna al filtro de origen','Desactivar conserva saldo e historial','Cuenta desactivada no se ofrece en nuevos registros'].map((title,i)=>({module:'CUENTAS',title:`Filtro de Cuentas - ${i===6?'NO Ok':'Ok'} - ${title}`,route:'/cuentas',topics:[],kind:`accounts-${i}`}))
 );
@@ -59,8 +60,8 @@ for(const [index,c] of cases.entries()) test(c.title,async({page},info)=>{
   for(const topic of c.topics){
    const trigger=page.getByRole('button',{name:`Información sobre ${topic}`,exact:true}).filter({visible:true});
    await expect(trigger).toBeVisible();await shot(trigger);
-   const before=page.url();await trigger.click();const panel=page.getByRole('dialog',{name:topic,exact:true});await expect(panel).toBeVisible();
-   expect(await panel.evaluate(e=>getComputedStyle(e.parentElement!).backgroundColor)).toBe('rgba(26, 26, 26, 0.35)');await expect(panel.locator('p')).not.toBeEmpty();await shot(panel,topic);
+   const before=page.url();await trigger.click();const panel=page.getByRole('dialog',{name:INFORMATION_TITLES[topic] ?? topic,exact:true});await expect(panel).toBeVisible();
+   expect(await panel.evaluate(e=>getComputedStyle(e.parentElement!).backgroundColor)).toBe('rgba(18, 22, 42, 0.35)');await expect(panel.locator('p')).not.toBeEmpty();await shot(panel,INFORMATION_TITLES[topic] ?? topic);
    const box=await panel.boundingBox();expect(box).not.toBeNull();if(info.project.name==='desktop')expect(box!.width).toBe(480);else expect(Math.abs(box!.y+box!.height-874)).toBeLessThanOrEqual(1);
    await panel.getByRole('button',{name:'Cerrar',exact:true}).click();await expect(panel).toBeHidden();expect(page.url()).toBe(before);await expect(trigger).toBeFocused();
   }

@@ -57,9 +57,10 @@ async function assertKpiAlignment(page: Page, count: number, name: string, info:
     const top = Math.round(box.y);
     rows.set(top, [...(rows.get(top) ?? []), { height: box.height, valueY: value.y }]);
   }
-  const columns = info.project.name === 'mobile' ? 2 : name === 'budget' ? 4 : 3;
+  const columns = info.project.name === 'mobile' ? name === 'card-detail' ? 1 : 2 : name === 'budget' ? 4 : 3;
   expect(rows.size).toBe(Math.ceil(count / columns));
-  expect([...rows.values()].some((row) => row.length > 1)).toBeTruthy();
+  if (columns === 1) expect([...rows.values()].every((row) => row.length === 1)).toBeTruthy();
+  else expect([...rows.values()].some((row) => row.length > 1)).toBeTruthy();
   for (const row of rows.values()) {
     for (const item of row) {
       expect(Math.abs(item.valueY - row[0].valueY), `${name}: value alignment`).toBeLessThanOrEqual(1);
@@ -131,8 +132,8 @@ test('net position, breakdown, cash-basis outflows and budget split', async ({ p
   await expect(stat(page, 'Saldo en cuentas')).toContainText('S/ 950.00');
   await expect(stat(page, 'Deuda de tarjetas')).toContainText('S/ 200.00');
   await expect(stat(page, 'Posición neta')).toContainText('S/ 750.00');
-  await expect(stat(page, 'Salidas')).toContainText('S/ 50.00');
-  await expect(page.getByText('S/ 50.00 sin presupuesto', { exact: true })).toBeVisible();
+  await expect(stat(page, 'Salidas del mes')).toContainText('S/ 50.00');
+  await expect(page.getByText(/Sin presupuesto: S\/ 50.00/).first()).toBeVisible();
   await assertKpiAlignment(page, 6, 'dashboard', info);
   await page.getByRole('button', { name: /Posición neta.*Ver desglose/ }).click();
   await expect(page).toHaveURL(/dashboard\/posicion-neta\?moneda=PEN$/);
@@ -216,7 +217,7 @@ test('opening debt in two cycles, overdue partial payment and completion', async
   await page.getByRole('button', { name: 'Ver detalle', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Facturaciones pendientes' })).toBeVisible();
   await expect(page.getByText('Vencida', { exact: true })).toBeVisible();
-  await expect(page.getByText('Deuda inicial', { exact: true }).locator('..')).toContainText('S/ 180.00');
+  await expect(stat(page, 'Línea utilizada')).toContainText('Incluye deuda inicial S/ 180.00');
   await assertKpiAlignment(page, 3, 'card-detail', info);
 
   for (const [amount, remaining, totalPaid] of [['40', 60, 40], ['60', 0, 100]] as const) {

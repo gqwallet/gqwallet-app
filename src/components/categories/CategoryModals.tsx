@@ -109,7 +109,7 @@ export function EditCategoryModal({ category, movements, isSaving, error, onRena
       footer={
         <>
           {/* Figma uses a soft reactivation action on mobile and primary on desktop. */}
-          <Button label={isActive ? 'Desactivar' : 'Reactivar'} variant={isActive ? 'danger' : 'soft'} className={`min-w-0 flex-1 px-2 lg:w-dialog-action lg:flex-none ${isActive ? '' : 'lg:bg-surface-inverse lg:text-content-on-primary lg:hover:bg-content-secondary'}`} isLoading={isSaving} onClick={isActive ? onDeactivate : onReactivate} />
+          <Button label={isActive ? 'Desactivar' : 'Reactivar'} variant={isActive ? 'danger' : 'soft'} className={`min-w-0 flex-1 px-2 lg:w-dialog-action lg:flex-none ${isActive ? '' : 'lg:bg-primary lg:text-content-on-primary lg:hover:bg-primary-hover'}`} isLoading={isSaving} onClick={isActive ? onDeactivate : onReactivate} />
           <Button className="min-w-0 flex-1 px-2 lg:flex-none lg:px-4" label="Cancelar" variant="secondary" onClick={onClose} />
           <Button className="min-w-0 flex-1 px-2 lg:flex-none lg:px-4" label="Guardar" isLoading={isSaving} onClick={() => name.trim() && onRename(name.trim())} />
         </>

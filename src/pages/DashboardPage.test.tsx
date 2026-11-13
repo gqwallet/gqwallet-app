@@ -26,7 +26,7 @@ vi.mock('@/hooks/useDashboard', () => ({ useDashboard: () => ({ isLoading: false
 it('displays all six server totals without deriving balances or outflows and opens the breakdown', () => {
   render(<MemoryRouter initialEntries={['/dashboard']}><Routes><Route path="/dashboard" element={<DashboardPage />} /><Route path="/dashboard/posicion-neta" element={<h1>Desglose abierto</h1>} /></Routes></MemoryRouter>);
   expect(document.querySelectorAll('[data-stat-card]')).toHaveLength(6);
-  for (const [label, value] of [['Saldo en cuentas', 'S/ 1,000.00'], ['Deuda de tarjetas', 'S/ 200.00'], ['Posición neta', 'S/ 799.00'], ['Ingresos', 'S/ 500.00'], ['Salidas', 'S/ 61.00'], ['Compromisos', 'S/ 111.00']]) {
+  for (const [label, value] of [['Saldo en cuentas', 'S/ 1,000.00'], ['Deuda de tarjetas', 'S/ 200.00'], ['Posición neta', 'S/ 799.00'], ['Ingresos del mes', 'S/ 500.00'], ['Salidas del mes', 'S/ 61.00'], ['Compromisos', 'S/ 111.00']]) {
     expect(screen.getByText(label, { exact: true }).closest('[data-stat-card]')).toHaveTextContent(value);
   }
   expect(screen.getByText('3 ingresos')).toBeVisible();

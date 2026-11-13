@@ -6,6 +6,7 @@
  */
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
+import { CashFlowChart } from '@/components/overview';
 import { PageHeader } from '@/components/layout';
 import { Button, Card, ChipGroup, DataTable, EmptyState, Spinner, StatCard, YearChip } from '@/components/ui';
 import { useAuth } from '@/context/AuthContext';
@@ -80,7 +81,7 @@ export function CashFlowPage() {
           <Button key="csv" label="Exportar CSV" icon="download" variant="soft" isLoading={isExporting} onClick={handleExport} />,
         ]}
       />
-      <div className="mb-4 flex gap-2 overflow-x-auto [scrollbar-width:none]">
+      <div className="mb-4 flex gap-2 overflow-x-auto lg:mb-6 [scrollbar-width:none]">
         <YearChip title="Elige el año" value={year} onChange={setYear} />
         <ChipGroup label="Moneda" options={CURRENCY_OPTIONS} value={currency} onChange={setCurrency} className="mx-0 px-0" />
       </div>
@@ -92,12 +93,14 @@ export function CashFlowPage() {
       {data && visible.length > 0 && total && (
         <>
           <div className="mb-4 grid grid-cols-2 items-stretch gap-3 lg:mb-6 lg:grid-cols-3 lg:gap-4">
-            <StatCard informationTopic="Flujo acumulado" label={`Flujo acumulado a ${monthName}`} value={money(rows[anchor - 1].accumulated)} detail="Saldo real de cuentas" />
-            <StatCard informationTopic="Flujo mensual" label={`Flujo de ${monthName}`} value={money(rows[anchor - 1].flow)} detail={isCurrentYear ? 'Mes en curso' : 'Último mes del año'} tone={rows[anchor - 1].flow < 0 ? 'danger' : 'success'} />
-            <StatCard informationTopic="Proyección anual" label="Acumulado proyectado a diciembre" value={money(rows[11].accumulated)} detail="Solo con lo ya registrado" tone="neutral" className="col-span-2 lg:col-span-1" />
+            <StatCard size="flow" valueSize="compact" informationTopic="Flujo acumulado" label={`Flujo acumulado a ${monthName}`} value={money(rows[anchor - 1].accumulated)} detail="Saldo real de cuentas" />
+            <StatCard size="flow" valueSize="large" informationTopic="Flujo mensual" label={`Flujo de ${monthName}`} value={money(rows[anchor - 1].flow)} detail={isCurrentYear ? 'Mes en curso' : 'Último mes del año'} tone={rows[anchor - 1].flow < 0 ? 'danger' : 'success'} />
+            <StatCard size="flow" valueSize="compact" informationTopic="Proyección anual" label="Acumulado proyectado a diciembre" value={money(rows[11].accumulated)} detail="Solo con lo ya registrado" tone="neutral" className="col-span-2 lg:col-span-1" />
           </div>
+          <CashFlowChart rows={rows} currency={currency} year={year} />
           <Card title={`Matriz mensual · ${currency} ${year}`}>
             <DataTable
+                  showScrollHint
               caption={`Flujo de caja ${year}`}
               isWide
               rows={CONCEPTS}
@@ -107,7 +110,8 @@ export function CashFlowPage() {
                 { key: 'concept', header: 'Concepto', render: (row) => <span className="whitespace-nowrap">{row.label}</span> },
                 ...visible.map((month) => ({
                   key: month.month,
-                  header: `${MONTHS_LONG[Number(month.month.slice(5, 7)) - 1].slice(0, 3)}${month.projection ? ' · proyección' : ''}`,
+                  header: `${MONTHS_LONG[Number(month.month.slice(5, 7)) - 1].slice(0, 3)}${month.projection ? '*' : ''}`,
+                  ariaLabel: month.projection ? `${MONTHS_LONG[Number(month.month.slice(5, 7)) - 1].slice(0, 3)} · proyección` : undefined,
                   isNumeric: true,
                   render: (row: ConceptRow) => cell(month[row.key]),
                 })),

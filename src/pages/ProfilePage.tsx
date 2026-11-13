@@ -31,19 +31,19 @@ export function ProfilePage() {
       {hasErrors && <Callout tone="danger" title="No guardamos los cambios" text="Revisa el campo marcado; tu información anterior se conserva." className="mb-4" />}
       <div className="grid gap-4 lg:grid-cols-2 lg:gap-6">
         <form noValidate onSubmit={handlePersonal}>
-          <Card title="Datos personales">
+          <Card title="Datos personales" className="[&>header]:-mt-1 lg:[&>header]:mt-0">
             <div className="flex flex-col gap-4">
-              <SelectField label="País" value={countryCode} options={COUNTRY_OPTIONS} onChange={setCountryCode} />
-        <TextField label="Nombre" autoComplete="given-name" required maxLength={150} value={firstName} onChange={setFirstName} error={errors.firstName} />
+              <TextField label="Nombre" autoComplete="given-name" required maxLength={150} value={firstName} onChange={setFirstName} error={errors.firstName} />
               <TextField label="Apellido" autoComplete="family-name" required maxLength={150} value={lastName} onChange={setLastName} error={errors.lastName} />
-              <TextField label="Correo" type="email" value={email} onChange={() => undefined} readOnly helper="Es el correo con el que inicias sesión." />
+              <SelectField label="País" value={countryCode} options={COUNTRY_OPTIONS} onChange={setCountryCode} />
+              <TextField label="Correo" type="email" value={email} onChange={() => undefined} readOnly />
               <TextField label="Fecha de nacimiento (opcional)" type="date" autoComplete="bday" max={todayIso()} value={birthDate} onChange={setBirthDate} error={errors.birthDate} />
-              <Button type="submit" label="Guardar datos" icon="check" isLoading={isSaving} className="self-start" />
+              <Button type="submit" label="Guardar datos" icon="check" isLoading={isSaving} className="w-full lg:w-auto lg:self-start" />
             </div>
           </Card>
         </form>
         <form noValidate onSubmit={handleParameters}>
-          <Card title="Parámetros financieros">
+          <Card title="Parámetros financieros" className="[&>header]:-mt-1 lg:[&>header]:mt-0">
             <div className="flex flex-col gap-4">
               <div className="flex flex-col gap-1.5">
                 <span className="text-label text-content-secondary">Moneda principal</span>
@@ -52,7 +52,7 @@ export function ProfilePage() {
               <TextField label="Ingreso mensual de referencia" inputMode="decimal" prefix={currencySymbol(currency)} value={income} onChange={setIncome} error={errors.income} />
               <TextField label="Colchón de vida" inputMode="decimal" prefix={currencySymbol(currency)} value={cushion} onChange={setCushion} helper="No puede superar tu ingreso mensual." error={errors.cushion} />
               <TextField label="Umbral de carga de deuda" inputMode="decimal" value={debt} onChange={setDebt} helper="Por defecto 7 %. Se usa en tu serie de carga de deuda." error={errors.debt} trailingIcon="percent" />
-              <Button type="submit" label="Guardar parámetros" icon="check" isLoading={isSaving} className="self-start" />
+              <Button type="submit" label="Guardar parámetros" icon="check" variant="secondary" isLoading={isSaving} className="w-full lg:w-auto lg:self-start" />
             </div>
           </Card>
         </form>

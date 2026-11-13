@@ -21,7 +21,7 @@ import { PATHS } from '@/navigation/paths';
 export function WelcomePage() {
   const navigate = useNavigate();
   return (
-    <AuthLayout>
+    <AuthLayout showMobileHeadline>
       <AuthHeading title="Bienvenido a GQWallet" />
       <Callout
         icon="lock"

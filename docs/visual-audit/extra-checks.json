@@ -1,0 +1,86 @@
+[
+  {
+    "device": "desktop",
+    "name": "accounts",
+    "overflow": 0,
+    "errors": []
+  },
+  {
+    "device": "desktop",
+    "name": "transactions",
+    "overflow": 0,
+    "errors": []
+  },
+  {
+    "device": "desktop",
+    "name": "fixed-payments",
+    "overflow": 0,
+    "errors": []
+  },
+  {
+    "device": "desktop",
+    "name": "goals",
+    "overflow": 0,
+    "errors": []
+  },
+  {
+    "device": "desktop",
+    "name": "calendar",
+    "overflow": 0,
+    "errors": []
+  },
+  {
+    "device": "desktop",
+    "name": "profile",
+    "overflow": 0,
+    "errors": []
+  },
+  {
+    "device": "desktop",
+    "name": "card-detail",
+    "overflow": 0,
+    "errors": []
+  },
+  {
+    "device": "mobile",
+    "name": "accounts",
+    "overflow": 0,
+    "errors": []
+  },
+  {
+    "device": "mobile",
+    "name": "transactions",
+    "overflow": 0,
+    "errors": []
+  },
+  {
+    "device": "mobile",
+    "name": "fixed-payments",
+    "overflow": 0,
+    "errors": []
+  },
+  {
+    "device": "mobile",
+    "name": "goals",
+    "overflow": 0,
+    "errors": []
+  },
+  {
+    "device": "mobile",
+    "name": "calendar",
+    "overflow": 0,
+    "errors": []
+  },
+  {
+    "device": "mobile",
+    "name": "profile",
+    "overflow": 0,
+    "errors": []
+  },
+  {
+    "device": "mobile",
+    "name": "card-detail",
+    "overflow": 0,
+    "errors": []
+  }
+]

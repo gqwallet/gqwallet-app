@@ -5,7 +5,7 @@
  * @packageDocumentation
  */
 import type { ReactNode } from 'react';
-import { Callout, Card, ProgressBar } from '@/components/ui';
+import { Callout, Card, UsageSummary } from '@/components/ui';
 import type { BudgetStatus } from '@/types/budget';
 import { formatMoney, formatPercent } from '@/utils/format';
 
@@ -45,14 +45,9 @@ export function BudgetUsageCard({ budget, monthName, action }: BudgetUsageCardPr
   const usage = budget.totalUsage ?? 0;
   return (
     <Card title={`Uso del presupuesto de ${monthName}`} action={action}>
-      <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-        <span className="text-subtitle">Con presupuesto</span>
-        <span className="text-body-s text-content-secondary">
-          {formatMoney(budget.budgetedConsumption, budget.currency)} de {formatMoney(budget.totalLimit, budget.currency)} · {formatPercent(usage)}
-        </span>
-      </div>
-      <ProgressBar value={usage} tone={usage > 100 ? 'danger' : usage >= 75 ? 'warning' : 'success'} label="Uso total del presupuesto" />
-      <p className="mt-3 text-body-s text-content-muted">{formatMoney(budget.unbudgetedConsumption, budget.currency)} sin presupuesto</p>
+      <UsageSummary title="Con presupuesto" usage={budget.totalUsage} showBar
+        detail={`${formatMoney(budget.budgetedConsumption, budget.currency)} de ${formatMoney(budget.totalLimit, budget.currency)} · ${formatPercent(usage)}`}
+        note={`Sin presupuesto: ${formatMoney(budget.unbudgetedConsumption, budget.currency)} en ${budget.lines.filter(line => line.limit === null).length} categoría · total gastado ${formatMoney(budget.totalConsumption, budget.currency)}`} />
       {review > 0 && (
         <Callout
           tone="warning"
