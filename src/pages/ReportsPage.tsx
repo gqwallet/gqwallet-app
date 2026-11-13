@@ -68,7 +68,7 @@ export function ReportsPage() {
       <ChipGroup label="Tipo de reporte" options={[{ value: 'EXPENSE', label: 'Gastos' }, { value: 'INCOME', label: 'Ingresos' }]} value={kind} onChange={setKind} className="mb-4 lg:mb-6" />
       <div className="mb-4 grid grid-cols-2 gap-4 lg:mb-6">
         <MonthField label="Periodo" value={period} allowYear onChange={setPeriod} />
-        <SelectField label="Moneda" value={currency} options={CURRENCY_OPTIONS} onChange={(value) => setCurrency(value as Currency)} helper="Obligatoria. Por defecto, tu moneda principal." />
+        <SelectField label="Moneda" value={currency} options={CURRENCY_OPTIONS} onChange={(value) => setCurrency(value as Currency)} />
       </div>
       {isLoading && !report && <Spinner />}
       {error && <EmptyState icon="error" title="No pudimos generar el reporte" />}

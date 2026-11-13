@@ -24,7 +24,7 @@ it('displays split KPIs and subtotals from the API rather than summing visible c
   render(<BudgetPage />);
   expect(screen.getByText('Gastado con presupuesto').closest('[data-stat-card]')).toHaveTextContent('S/ 321.00');
   expect(screen.getByText('Gastado sin presupuesto').closest('[data-stat-card]')).toHaveTextContent('S/ 87.00');
-  expect(screen.getByText('Total gastado').closest('[data-stat-card]')).toHaveTextContent('S/ 408.00');
+  expect(screen.getAllByText('Total gastado')[0].closest('[data-stat-card]')).toHaveTextContent('S/ 408.00');
   const table = screen.getByRole('table', { name: /Presupuesto/ });
   expect(within(table).getByText('Con presupuesto')).toBeVisible();
   expect(within(table).getAllByText('Sin presupuesto', { exact: true })[0]).toBeVisible();
@@ -39,7 +39,7 @@ it('keeps unbudgeted consumption visible when there are no limits', () => {
   try {
     render(<BudgetPage />);
     expect(screen.getByText('Gastado sin presupuesto').closest('[data-stat-card]')).toHaveTextContent('S/ 87.00');
-    expect(screen.getByText('Total gastado').closest('[data-stat-card]')).toHaveTextContent('S/ 87.00');
+    expect(screen.getAllByText('Total gastado')[0].closest('[data-stat-card]')).toHaveTextContent('S/ 87.00');
     expect(screen.getByRole('table')).toBeVisible();
   } finally { Object.assign(status, previous); }
 });

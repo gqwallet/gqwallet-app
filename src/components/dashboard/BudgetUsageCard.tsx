@@ -1,5 +1,5 @@
 /**
- * Budget usage of the month on the dashboard: total bar and categories to review.
+ * Budget usage of the month on the dashboard: usage ring, total bar and categories to review.
  *
  * @author G0nz4loQu3dena
  * @packageDocumentation
@@ -43,11 +43,15 @@ export function BudgetUsageCard({ budget, monthName, action }: BudgetUsageCardPr
   if (over.length) parts.push(`${joinNames(over.map((line) => line.categoryName))} ${over.length === 1 ? 'superó' : 'superaron'} su límite`);
   const review = attention.length + over.length;
   const usage = budget.totalUsage ?? 0;
+  const unbudgeted = budget.lines.filter((line) => line.limit === null && line.consumption > 0).length;
   return (
     <Card title={`Uso del presupuesto de ${monthName}`} action={action}>
-      <UsageSummary title="Con presupuesto" usage={budget.totalUsage} showBar
+      <UsageSummary title="Con presupuesto" usage={budget.totalUsage}
         detail={`${formatMoney(budget.budgetedConsumption, budget.currency)} de ${formatMoney(budget.totalLimit, budget.currency)} · ${formatPercent(usage)}`}
-        note={`Sin presupuesto: ${formatMoney(budget.unbudgetedConsumption, budget.currency)} en ${budget.lines.filter(line => line.limit === null && line.consumption > 0).length} categoría · total gastado ${formatMoney(budget.totalConsumption, budget.currency)}`} />
+        breakdown={[
+          { label: 'Sin presupuesto', value: `${formatMoney(budget.unbudgetedConsumption, budget.currency)} · ${unbudgeted} ${unbudgeted === 1 ? 'categoría' : 'categorías'}` },
+          { label: 'Total gastado', value: formatMoney(budget.totalConsumption, budget.currency) },
+        ]} />
       {review > 0 && (
         <Callout
           tone="warning"

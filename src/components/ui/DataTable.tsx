@@ -19,6 +19,8 @@ export interface DataColumn<TRow> {
   render: (row: TRow) => ReactNode;
   /** Right-aligns numbers. */
   isNumeric?: boolean;
+  /** Minimum-width utility replacing the default of the column kind, e.g. `min-w-42` for a value with a bar. */
+  widthClassName?: string;
 }
 
 /** Props of {@link DataTable}. */
@@ -71,7 +73,7 @@ export function DataTable<TRow>({ caption, columns, rows, rowKey, footer, isWide
         <thead>
           <tr className="h-11 border-b border-line-subtle">
             {columns.map((column) => (
-              <th key={column.key} scope="col" aria-label={column.ariaLabel} className={cn('px-4 py-3 text-label whitespace-nowrap text-content-secondary', column.isNumeric ? 'text-right' : 'text-left', minimumWidth === 0 && (column.isNumeric ? 'min-w-32' : 'min-w-52'))}>
+              <th key={column.key} scope="col" aria-label={column.ariaLabel} className={cn('px-4 py-3 text-label whitespace-nowrap text-content-secondary', column.isNumeric ? 'text-right' : 'text-left', minimumWidth === 0 && (column.widthClassName ?? (column.isNumeric ? 'min-w-32' : 'min-w-52')))}>
                 {column.header}
               </th>
             ))}
@@ -87,7 +89,7 @@ export function DataTable<TRow>({ caption, columns, rows, rowKey, footer, isWide
               onKeyDown={onRowClick ? (event) => (event.key === 'Enter' || event.key === ' ') && onRowClick(row) : undefined}
             >
               {columns.map((column) => (
-                <td key={column.key} className={cn('px-4 align-middle', isCompact ? 'py-3.5' : 'py-3', column.isNumeric ? 'text-right whitespace-nowrap' : '[overflow-wrap:anywhere]', minimumWidth === 0 && (column.isNumeric ? 'min-w-32' : 'min-w-52'))}>
+                <td key={column.key} className={cn('px-4 align-middle', isCompact ? 'py-3.5' : 'py-3', column.isNumeric ? 'text-right whitespace-nowrap' : '[overflow-wrap:anywhere]', minimumWidth === 0 && (column.widthClassName ?? (column.isNumeric ? 'min-w-32' : 'min-w-52')))}>
                   {column.render(row)}
                 </td>
               ))}
@@ -98,7 +100,7 @@ export function DataTable<TRow>({ caption, columns, rows, rowKey, footer, isWide
           <tfoot>
             <tr className="text-subtitle">
               {columns.map((column) => (
-                <td key={column.key} className={cn('px-4 py-3', column.isNumeric ? 'text-right whitespace-nowrap' : '[overflow-wrap:anywhere]', minimumWidth === 0 && (column.isNumeric ? 'min-w-32' : 'min-w-52'))}>
+                <td key={column.key} className={cn('px-4 py-3', column.isNumeric ? 'text-right whitespace-nowrap' : '[overflow-wrap:anywhere]', minimumWidth === 0 && (column.widthClassName ?? (column.isNumeric ? 'min-w-32' : 'min-w-52')))}>
                   {column.render(footer)}
                 </td>
               ))}

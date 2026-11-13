@@ -14,13 +14,9 @@ export interface DonutChartProps {
   segments: ChartSegment[];
   /** Optional centered usage label. */
   centerLabel?: string;
-  /** Renders the compact 64 px usage ring instead of the 132 px report donut. */
+  /** Renders the compact 72 px usage ring instead of the 132 px report donut. */
   isCompact?: boolean;
-  /** Uses the smaller dashboard ring within the compact variant. */
-  isSmall?: boolean;
-  /** Expands a compact ring from 64 px on mobile to 72 px on desktop. */
-  isResponsive?: boolean;
-  /** Uses a 56 px embedded ring on mobile and a 64 px ring on desktop. */
+  /** Within the compact variant, uses the 64 px ring with a tighter centered label, for rings beside other content. */
   isEmbedded?: boolean;
 }
 
@@ -31,13 +27,13 @@ export interface DonutChartProps {
  * <DonutChart label="Uso" segments={segments} centerLabel="50 %" isCompact />
  * ```
  */
-export function DonutChart({ label, segments, centerLabel, isCompact = false, isSmall = false, isResponsive = false, isEmbedded = false }: DonutChartProps) {
+export function DonutChart({ label, segments, centerLabel, isCompact = false, isEmbedded = false }: DonutChartProps) {
   const total = segments.reduce((sum, segment) => sum + Math.max(0, segment.value), 0);
-  const graph = (size: number, className?: string) => {
+  const graph = (size: number) => {
     const radius = isCompact ? 50 - 400 / size : 41;
     const strokeWidth = isCompact ? 800 / size : 18;
     const circumference = 2 * Math.PI * radius;
-    return <svg viewBox="0 0 100 100" className={cn('size-full -rotate-90', className)} aria-hidden="true">
+    return <svg viewBox="0 0 100 100" className="size-full -rotate-90" aria-hidden="true">
       <circle cx="50" cy="50" r={radius} fill="none" className="stroke-surface-high" strokeWidth={strokeWidth} />
       {segments.map((segment, index) => {
         const length = total > 0 ? Math.max(0, segment.value) / total * circumference : 0;
@@ -47,9 +43,9 @@ export function DonutChart({ label, segments, centerLabel, isCompact = false, is
     </svg>;
   };
   return (
-    <figure role="img" aria-label={label} className={cn('relative shrink-0', isCompact ? isEmbedded ? 'size-14 lg:size-16' : isResponsive ? 'size-16 lg:size-chart-ring' : isSmall ? 'size-16' : 'size-chart-ring' : 'mx-auto size-chart-donut')}>
-      {isEmbedded ? <>{graph(56, 'lg:hidden')}{graph(64, 'hidden lg:block')}</> : isResponsive ? <>{graph(64, 'lg:hidden')}{graph(72, 'hidden lg:block')}</> : graph(isSmall ? 64 : 72)}
-      {centerLabel && <span className="absolute inset-0 flex items-center justify-center text-label">{centerLabel}</span>}
+    <figure role="img" aria-label={label} className={cn('relative shrink-0', isCompact ? isEmbedded ? 'size-16' : 'size-chart-ring' : 'mx-auto size-chart-donut')}>
+      {graph(isCompact && isEmbedded ? 64 : 72)}
+      {centerLabel && <span className={cn('absolute inset-0 flex items-center justify-center whitespace-nowrap tabular-nums', isEmbedded ? 'text-overline tracking-normal' : 'text-label')}>{centerLabel}</span>}
     </figure>
   );
 }
