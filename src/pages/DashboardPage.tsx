@@ -52,7 +52,7 @@ export function DashboardPage() {
     </div>
   );
   const stats = (
-    <div className="mb-4 grid grid-cols-2 items-stretch gap-3 lg:mb-6 lg:grid-cols-3 lg:gap-3">
+    <div className="mb-4 grid grid-cols-2 items-stretch gap-3 lg:mb-6 lg:grid-cols-3 lg:pr-0.5">
       <StatCard informationTopic="Saldo en cuentas" label="Saldo en cuentas" value={formatMoney(dashboard.accountsBalance, currency)} detail={data.accountCount === undefined ? undefined : plural(data.accountCount, 'cuenta activa', 'cuentas activas')} tone="neutral" />
       <StatCard informationTopic="Deuda de tarjetas" label="Deuda de tarjetas" value={formatMoney(dashboard.cardsDebt, currency)} detail={data.cardCount === undefined ? undefined : plural(data.cardCount, 'tarjeta', 'tarjetas')} tone="neutral" />
       <StatCard informationTopic="Posición neta" label="Posición neta" value={formatMoney(dashboard.netPosition, currency)} actionLabel="Ver desglose" onClick={() => navigate(`${PATHS.netPosition}?moneda=${currency}`)} />

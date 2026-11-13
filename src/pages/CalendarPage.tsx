@@ -97,7 +97,7 @@ export function CalendarPage() {
             <MonthField label="Mes" value={period} onChange={setPeriod} />
             <SelectField label="Mostrar" value={filter} options={FILTERS} onChange={(value) => setFilter(value as Filter)} />
           </div>
-          <Card title={formatMonth(period, true)} className="mb-4 [&>header]:-mt-1 lg:mb-6 lg:[&>header]:mt-0">
+          <Card title={formatMonth(period, true)} className="mb-4 lg:mb-6">
             <MonthGrid period={period} today={today} marks={marks.map((mark) => ({ key: mark.key, date: mark.date, label: labelOf(mark), color: mark.color, status: mark.status }))} />
           </Card>
           <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,var(--container-calendar-aside))_1fr] lg:gap-6">

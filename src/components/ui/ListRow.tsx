@@ -30,6 +30,8 @@ export interface ListRowProps {
   leading?: ReactNode;
   /** Badge or other element before the amount. */
   badge?: ReactNode;
+  /** Hides a desktop badge when the mobile amount metadata already carries its status. */
+  showMobileBadge?: boolean;
   /** Amount text. */
   amount?: string;
   /** Text below the amount. */
@@ -54,7 +56,7 @@ export interface ListRowProps {
  * <ListRow icon="wifi" title="Internet" detail={detail} amount="S/ 99.00" meta="PEN" onClick={open} />
  * ```
  */
-export function ListRow({ title, detail, icon, leading, badge, amount, meta, amountTone = 'neutral', onClick, className }: ListRowProps) {
+export function ListRow({ title, detail, icon, leading, badge, showMobileBadge = true, amount, meta, amountTone = 'neutral', onClick, className }: ListRowProps) {
   const content = (
     <>
       {leading ?? (icon && (
@@ -62,26 +64,26 @@ export function ListRow({ title, detail, icon, leading, badge, amount, meta, amo
           <Icon name={icon} />
         </span>
       ))}
-      <span data-list-copy className="col-start-2 row-start-1 flex min-w-0 flex-col sm:flex-1">
+      <span data-list-copy className="col-start-2 row-start-1 flex min-w-0 flex-col gap-1 sm:flex-1 sm:gap-0.5">
         <span className="text-subtitle text-content-primary [overflow-wrap:anywhere]">{title}</span>
         {detail && <span className="text-body-s text-content-muted [overflow-wrap:anywhere]">{detail}</span>}
       </span>
-      {badge && <span className="col-start-2 min-w-0 justify-self-start [overflow-wrap:anywhere] sm:max-w-[25%]">{badge}</span>}
-      {(amount || meta) && (
-        <span className="col-start-2 flex min-w-0 flex-col items-start [overflow-wrap:anywhere] sm:ml-auto sm:max-w-[45%] sm:items-end sm:text-right">
+      {badge && <span className={cn('col-start-2 min-w-0 justify-self-start [overflow-wrap:anywhere] sm:max-w-[25%]', !showMobileBadge && 'hidden sm:inline-flex')}>{badge}</span>}
+      {(amount || meta !== undefined) && (
+        <span className="col-start-2 flex min-w-0 flex-col items-start gap-0.5 [overflow-wrap:anywhere] sm:ml-auto sm:max-w-[45%] sm:items-end sm:text-right">
           {amount && <span className={cn('text-subtitle', AMOUNT[amountTone])}>{amount}</span>}
-          {meta && <span className="text-caption text-content-muted">{meta}</span>}
+          {meta !== undefined && <span className="min-h-4 text-caption text-content-muted">{meta}</span>}
         </span>
       )}
       {onClick && <Icon name="chevron_right" className="col-start-3 row-start-1 shrink-0 text-content-muted" />}
     </>
   );
-  const classes = cn('grid w-full min-w-0 grid-cols-[2.5rem_minmax(0,1fr)_1.5rem] items-center gap-x-3 gap-y-1 py-3 text-left sm:flex sm:gap-3 lg:py-3.5', className);
+  const classes = cn('grid w-full min-w-0 grid-cols-[2.5rem_minmax(0,1fr)_1.5rem] items-center gap-x-3 gap-y-1 py-3 text-left sm:flex sm:gap-3', className);
   return onClick ? (
-    <button type="button" onClick={onClick} className={cn(classes, 'rounded-md px-1 transition-colors hover:bg-surface-container focus-visible:outline-2 focus-visible:outline-primary lg:px-4')}>
+    <button data-list-row type="button" onClick={onClick} className={cn(classes, 'rounded-md px-1 transition-colors hover:bg-surface-container focus-visible:outline-2 focus-visible:outline-primary lg:px-4')}>
       {content}
     </button>
   ) : (
-    <div className={cn(classes, 'px-1 lg:px-4')}>{content}</div>
+    <div data-list-row className={cn(classes, 'px-1 lg:px-4')}>{content}</div>
   );
 }

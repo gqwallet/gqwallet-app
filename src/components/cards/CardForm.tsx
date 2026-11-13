@@ -5,9 +5,9 @@
  * @packageDocumentation
  */
 import { useState, type FormEvent } from 'react';
-import { Button, Callout, ChipGroup, SelectField, TextField, TimeField } from '@/components/ui';
+import { Button, Callout, Card, ChipGroup, IconButton, SelectField, TextField, TimeField } from '@/components/ui';
 import type { Currency } from '@/types/api';
-import type { BillingCycleOption, Card, RegisterCardInput } from '@/types/card';
+import type { BillingCycleOption, Card as CreditCard, RegisterCardInput } from '@/types/card';
 import type { Bank } from '@/types/catalog';
 import { CARD_COLORS } from '@/utils/cardPalette';
 import { formatAmount, formatShortDate, nextDayOfMonth, parseIsoDate } from '@/utils/format';
@@ -24,7 +24,7 @@ export interface CardFormProps {
   /** Active banks from the profile country. */
   banks: Bank[];
   /** Card to edit. */
-  initial?: Card | null;
+  initial?: CreditCard | null;
   /** Confirmed cycle options from the server when editing. */
   billingCycles?: BillingCycleOption[];
   /** Whether the card has movements, which locks its currency. */
@@ -96,8 +96,10 @@ export function CardForm({ id, banks, initial, billingCycles = [], hasMovements 
 
   const hasErrors = Object.keys(errors).length > 0;
   return (
-    <form id={id} noValidate onSubmit={handleSubmit} className="flex flex-col gap-4">
+    <form id={id} noValidate onSubmit={handleSubmit} className="flex flex-col gap-4 lg:gap-6">
       {hasErrors && <Callout tone="danger" title="No guardamos la tarjeta" text="Corrige los campos marcados para continuar." />}
+      <Card title="Datos de la tarjeta">
+      <div className="flex flex-col gap-4">
       <div className="grid gap-4 lg:grid-cols-2">
         <TextField label="Nombre" value={name} onChange={setName} error={errors.name} />
         <SelectField label="Banco" value={bank} options={bankOptions} onChange={setBank} error={errors.bank} />
@@ -117,7 +119,7 @@ export function CardForm({ id, banks, initial, billingCycles = [], hasMovements 
           value={paymentDay}
           options={DAYS}
           onChange={setPaymentDay}
-          helper={Number(paymentDay) < Number(billingDay) ? 'Se paga en el mes siguiente al corte.' : 'Se paga en el mismo mes del corte.'}
+          helper={Number(paymentDay) < Number(billingDay) ? 'Se paga en el mes siguiente al corte.' : undefined}
           error={errors.paymentDay}
         />
         <TimeField
@@ -128,22 +130,25 @@ export function CardForm({ id, banks, initial, billingCycles = [], hasMovements 
         />
         <TextField label="Seguro desgravamen (%)" inputMode="decimal" value={insurance} onChange={setInsurance} helper="Opcional. Entre 0 % y 100 %." error={errors.insurance} />
       </div>
-      <div className="flex flex-col gap-1.5">
+      <div className="flex flex-col gap-2">
         <span className="text-label text-content-secondary">Color para identificarla</span>
         <ChipGroup label="Color para identificarla" options={CARD_COLORS.map((option) => ({ value: option.hex, label: option.label }))} value={color} onChange={setColor} />
       </div>
-      <section aria-label="Deuda inicial (opcional)" className="flex flex-col gap-3 border-t border-line-subtle pt-4">
-        <h2 className="text-subtitle">Deuda inicial (opcional)</h2>
-        <p className="text-body-s text-content-muted">Registra solo deudas anteriores que aún no hayas registrado como consumos. No cuentan como gasto ni presupuesto.</p>
-        {debts.map((debt, index) => <div key={index} className="grid items-end gap-3 lg:grid-cols-[1fr_2fr_auto]">
+      {!initial && <Callout icon="event" title="Fechas fijas" text="La fecha de facturación y la de pago se repiten cada mes y se muestran en tu calendario." />}
+      </div>
+      </Card>
+      <Card title="Deuda inicial (opcional)">
+      <div className="flex flex-col gap-4">
+        {debts.map((debt, index) => <div key={index} className="relative grid items-start gap-3 lg:grid-cols-2 lg:gap-4">
           <TextField label={`Monto ${index + 1}`} inputMode="decimal" value={debt.amount} onChange={(value) => setDebts((rows) => rows.map((row, i) => i === index ? { ...row, amount: value } : row))} />
-          <SelectField label={`Facturación ${index + 1}`} value={debt.closingDate} placeholder="Confirma la facturación" options={cycles.map((cycle) => ({ value: cycle.closingDate, label: `Factura el ${formatShortDate(cycle.closingDate, true)} · paga hasta ${formatShortDate(cycle.paymentDueDate, true)}` }))} onChange={(value) => setDebts((rows) => rows.map((row, i) => i === index ? { ...row, closingDate: value } : row))} />
-          <Button label={`Quitar facturación ${index + 1}`} icon="delete" variant="ghost" onClick={() => setDebts((rows) => rows.filter((_, i) => i !== index))} />
+          <SelectField label={`Facturación ${index + 1}`} value={debt.closingDate} placeholder="Confirma la facturación" options={cycles.map((cycle) => ({ value: cycle.closingDate, label: `${cycle.closingDate <= today ? 'Facturó' : 'Factura'} el ${formatShortDate(cycle.closingDate, true)} · paga hasta ${formatShortDate(cycle.paymentDueDate, true)}` }))} helper={debt.closingDate && debt.closingDate <= today ? 'Confirma el ciclo y vencimiento de tu estado de cuenta.' : 'Compras que aún no se facturaron.'} onChange={(value) => setDebts((rows) => rows.map((row, i) => i === index ? { ...row, closingDate: value } : row))} />
+          <IconButton label={`Quitar facturación ${index + 1}`} icon="close" size={16} className="absolute -top-3 -right-3" onClick={() => setDebts((rows) => rows.filter((_, i) => i !== index))} />
         </div>)}
         {errors.openingDebts && <p role="alert" className="text-caption text-danger">{errors.openingDebts}</p>}
-        <Button label="Agregar otra facturación" icon="add" variant="soft" disabled={cycles.length === 0} onClick={() => setDebts((rows) => [...rows, { amount: '', closingDate: defaultClosingDate }])} />
-      </section>
-      {!initial && <Callout icon="event" title="Fechas fijas" text="La fecha de facturación y la de pago se repiten cada mes y se muestran en tu calendario." />}
+        <Button label="Agregar otra facturación" icon="add" variant="secondary" className="self-start" disabled={cycles.length === 0} onClick={() => setDebts((rows) => [...rows, { amount: '', closingDate: defaultClosingDate }])} />
+        <Callout icon="info" title="No es un gasto" text="Aumenta la deuda y reduce tu línea disponible, sin cambiar tus gastos del mes ni tu presupuesto. Cada monto queda pagable en su facturación." />
+      </div>
+      </Card>
     </form>
   );
 }

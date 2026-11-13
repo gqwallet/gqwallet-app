@@ -44,7 +44,7 @@ export function AccountsPage() {
         ]}
       />
       <ChipGroup label="Estado de cuentas" options={[{ value: 'ACTIVE', label: 'Activas' }, { value: 'INACTIVE', label: 'Desactivadas' }]} value={status} onChange={(value) => setParams(value === 'INACTIVE' ? { estado: 'desactivadas' } : {})} className="mb-4 lg:mb-6" />
-      <Card className="mb-4 lg:mb-6">
+      <Card className="mb-4 lg:mb-6 lg:pt-6">
         {isLoading && !accounts && <Spinner />}
         {error && <EmptyState icon="error" title="No pudimos cargar tus cuentas" action={<Button label="Reintentar" onClick={refetch} />} />}
         {accounts && groups.length === 0 && (

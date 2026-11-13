@@ -47,7 +47,7 @@ export function BudgetUsageCard({ budget, monthName, action }: BudgetUsageCardPr
     <Card title={`Uso del presupuesto de ${monthName}`} action={action}>
       <UsageSummary title="Con presupuesto" usage={budget.totalUsage} showBar
         detail={`${formatMoney(budget.budgetedConsumption, budget.currency)} de ${formatMoney(budget.totalLimit, budget.currency)} · ${formatPercent(usage)}`}
-        note={`Sin presupuesto: ${formatMoney(budget.unbudgetedConsumption, budget.currency)} en ${budget.lines.filter(line => line.limit === null).length} categoría · total gastado ${formatMoney(budget.totalConsumption, budget.currency)}`} />
+        note={`Sin presupuesto: ${formatMoney(budget.unbudgetedConsumption, budget.currency)} en ${budget.lines.filter(line => line.limit === null && line.consumption > 0).length} categoría · total gastado ${formatMoney(budget.totalConsumption, budget.currency)}`} />
       {review > 0 && (
         <Callout
           tone="warning"

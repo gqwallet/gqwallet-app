@@ -55,12 +55,12 @@ export function ExportPage() {
   return (
     <>
       <PageHeader title="Exportar"  />
-      <div className="mb-4 flex flex-col gap-1.5 lg:mb-6">
+      <div className="mb-4 flex flex-col gap-2 lg:mb-6">
         <span className="text-label text-content-secondary">¿Qué quieres exportar?</span>
         <ChipGroup label="¿Qué quieres exportar?" options={ENTITIES} value={entity} onChange={setEntity} />
         <p className="text-caption text-content-muted">Pagos fijos y vencimientos se descargan como dos archivos.</p>
       </div>
-      <Card title="Filtros" className="mb-4">
+      <Card title="Filtros" className="mb-4 lg:mb-6">
         <div className="grid gap-4 lg:grid-cols-3">
           <TextField label="Desde" type="date" min={MIN_DATE} value={from} onChange={setFrom} error={isRangeValid ? null : 'La fecha inicial debe ser anterior a la final.'} />
           <TextField label="Hasta" type="date" min={MIN_DATE} value={to} onChange={setTo} />

@@ -78,17 +78,19 @@ export function BudgetPage() {
       {isLoading && !data && <Spinner />}
       {error && <EmptyState icon="error" title="No pudimos cargar el presupuesto" />}
       {status && totalRow && <>
-            <div className="mb-4 grid grid-cols-2 items-stretch gap-3 lg:mb-6 lg:grid-cols-4 lg:gap-4">
+            <div className="mb-4 grid grid-cols-2 items-stretch gap-3 lg:mb-6 lg:grid-cols-4">
               <StatCard informationTopic="Límite total" label="Límite total" value={money(status.totalLimit)} detail={`${withLimit} categorías con límite`} tone="neutral" />
               <StatCard informationTopic="Gastado con presupuesto" label="Gastado con presupuesto" value={money(status.budgetedConsumption)} detail={`Uso ${formatPercent(usage)}`} tone={usage > 100 ? 'danger' : 'success'} />
-              <StatCard informationTopic="Gastado sin presupuesto" label="Gastado sin presupuesto" value={money(status.unbudgetedConsumption)} detail={<>{status.lines.filter((line) => line.limit === null).length} categoría<span className="hidden lg:inline"> sin límite</span></>} tone="warning" />
+              <StatCard informationTopic="Gastado sin presupuesto" label="Gastado sin presupuesto" value={money(status.unbudgetedConsumption)} detail={<>{status.lines.filter((line) => line.limit === null && line.consumption > 0).length} categoría<span className="hidden lg:inline"> sin límite</span></>} tone="warning" />
               <StatCard informationTopic="Total gastado" label="Total gastado" value={money(status.totalConsumption)} detail={<>Incluye pagos fijos<span className="hidden lg:inline"> con categoría</span></>} tone="neutral" />
             </div>
             <Card className="mb-4 lg:mb-6"><UsageSummary title={`Uso del presupuesto de ${monthName}`} usage={status.totalUsage}
               detail={`${money(status.budgetedConsumption)} de ${money(status.totalLimit)} con presupuesto`}
-              note={`Sin presupuesto: ${money(status.unbudgetedConsumption)} en ${status.lines.filter(line => line.limit === null).length} categoría · total gastado ${money(status.totalConsumption)}`} /></Card>
+              note={`Sin presupuesto: ${money(status.unbudgetedConsumption)} en ${status.lines.filter(line => line.limit === null && line.consumption > 0).length} categoría · total gastado ${money(status.totalConsumption)}`} /></Card>
             <Card title="Por categoría" className="mb-4">
               <DataTable
+                showScrollHint
+                mobileScrollHintOnly
                 caption={`Presupuesto de ${monthName}`}
                 isWide
                 rows={[

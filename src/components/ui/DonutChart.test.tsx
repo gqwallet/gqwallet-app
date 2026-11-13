@@ -21,7 +21,7 @@ it('preserves the server percentage above the limit while clamping the visual fi
   render(<UsageSummary title="Presupuesto" usage={150} detail="Consumo registrado" note="Referencia" showBar />);
   expect(screen.getByText('150.0 %')).toBeVisible();
   expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '100');
-  const paths = screen.getByRole('img', { name: 'Presupuesto' }).querySelectorAll('circle');
+  const paths = screen.getByRole('img', { name: 'Presupuesto' }).querySelector('svg')!.querySelectorAll('circle');
   expect(paths).toHaveLength(2);
   expect(paths[1]).toHaveAttribute('stroke', 'var(--color-chart-negative)');
 });

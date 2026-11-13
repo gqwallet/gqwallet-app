@@ -127,7 +127,7 @@
   --container-calendar-aside: 362px;
   --spacing-chart-ring: 72px;
   --spacing-chart-donut: 132px;
-  --spacing-chart-height: 184px;
+  --spacing-chart-height: 186px;
   --spacing-chart-bars: 146px;
   --spacing-chart-bar: calc((100% - 8px) / 2);
   --spacing-chart-line-mobile: 100px;
@@ -153,7 +153,6 @@ body {
   font-size: var(--text-body);
   line-height: var(--text-body--line-height);
   -webkit-font-smoothing: antialiased;
-  font-variant-numeric: tabular-nums;
 }
 
 .material-symbols-rounded {

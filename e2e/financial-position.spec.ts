@@ -240,7 +240,8 @@ test('opening debt in two cycles, overdue partial payment and completion', async
       expect(Number(previous?.paid)).toBe(totalPaid);
       await expect(page.getByText('Pagado S/ 40.00 de S/ 100.00', { exact: true })).toBeVisible();
       await page.goto('/tarjetas');
-      await expect(page.getByText('Parcial · falta S/ 60.00', { exact: true })).toBeVisible();
+      await expect(page.getByText('Vencida · pagar', { exact: true })).toBeVisible();
+      await expect(page.getByText('S/ 60.00', { exact: true })).toBeVisible();
       await page.getByRole('button', { name: 'Ver detalle', exact: true }).click();
     } else {
       expect(Number(previous?.amountDue ?? 0)).toBe(0);
@@ -251,6 +252,10 @@ test('opening debt in two cycles, overdue partial payment and completion', async
       await page.getByRole('dialog').getByRole('button', { name: 'Cancelar' }).click();
     }
   }
+  await page.getByRole('button', { name: 'Historial de facturaciones', exact: true }).click();
+  const history = page.getByRole('dialog', { name: 'Historial de facturaciones', exact: true });
+  await expect(history.getByRole('row', { name: /Pagada/ })).toContainText('S/ 100.00');
+  await history.getByRole('button', { name: 'Cerrar historial' }).click();
   await page.getByRole('button', { name: 'Editar', exact: true }).click();
   await expect(page.getByLabel('Monto 1', { exact: true })).toHaveValue('100.00');
   await expect(page.getByLabel('Facturación 1', { exact: true })).toHaveValue(closed!);

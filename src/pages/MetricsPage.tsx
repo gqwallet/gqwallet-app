@@ -47,15 +47,16 @@ export function MetricsPage() {
       {data && metrics && (
         <>
           <div className="mb-4 grid grid-cols-2 gap-3 lg:mb-6 lg:max-w-150 lg:gap-4">
-            <StatCard label="Usuarios registrados" value={COUNT.format(metrics.registeredUsers)} detail="Cuentas creadas en total" />
+            <StatCard size="flow" label="Usuarios registrados" value={COUNT.format(metrics.registeredUsers)} detail="Cuentas creadas en total" />
             <StatCard
+              size="flow"
               label={`Usuarios activos · ${metrics.activeWindowDays} días`}
               value={COUNT.format(metrics.activeUsers)}
               detail={`Con al menos un movimiento · ${formatPercent(share)}`}
               tone="success"
             />
           </div>
-          <Card title="Movimientos registrados por día" className="mb-4">
+          <Card title="Movimientos registrados por día" className="mb-4 lg:mb-6">
             <BarChart label="Movimientos registrados por día" data={data.daily.map((day) => ({ label: formatShortDate(day.date).replace('.', ''), value: day.count, valueLabel: COUNT.format(day.count), tone: 'primary' }))} />
           </Card>
           <Callout icon="lock" title="Privacidad" text="Solo ves conteos agregados. Las cuentas, tarjetas, movimientos y datos personales de cada usuario no son accesibles desde este panel." />

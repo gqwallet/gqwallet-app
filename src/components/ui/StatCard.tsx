@@ -75,7 +75,7 @@ export function StatCard({ label, value, detail, actionLabel, tone = 'primary', 
       </span>
     </>
   );
-  const classes = cn('group flex h-full w-full min-w-0 flex-col gap-1 rounded-information border px-4 pt-4 pb-3 text-left shadow-stat', size === 'report' ? 'min-h-32 lg:min-h-stat-report' : size === 'flow' ? 'min-h-stat-compact lg:min-h-stat-flow' : valueSize === 'compact' ? 'min-h-stat-compact lg:min-h-stat' : 'min-h-stat-mobile lg:min-h-stat', tone === 'primary' ? 'border-primary-pale' : 'border-line-subtle', SURFACE[tone], !informationTopic && className);
+  const classes = cn('group flex h-full w-full min-w-0 flex-col gap-1 rounded-information border px-4 pt-4 pb-3 text-left shadow-stat', size === 'report' ? 'min-h-stat-report' : size === 'flow' ? 'min-h-stat-compact lg:min-h-stat-flow' : valueSize === 'compact' ? 'min-h-stat-compact lg:min-h-stat' : 'min-h-stat-mobile lg:min-h-stat', tone === 'primary' ? 'border-primary-pale' : 'border-line-subtle', SURFACE[tone], !informationTopic && className);
   const card = onClick ? (
     <button data-stat-card type="button" onClick={onClick} className={cn(classes, 'transition-shadow hover:shadow-card focus-visible:outline-2 focus-visible:outline-primary')}>
       {body}

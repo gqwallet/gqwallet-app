@@ -6,7 +6,7 @@
  */
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
-import { PayCardModal, PendingCyclesList } from '@/components/cards';
+import { PayCardModal, PendingCyclesList, StatementHistoryModal } from '@/components/cards';
 import { PageHeader } from '@/components/layout';
 import { BreakdownRow, Button, Card, EmptyState, ListRow, Spinner, StatCard, InfiniteScrollSentinel } from '@/components/ui';
 import { useToast } from '@/context/ToastContext';
@@ -15,6 +15,7 @@ import { useCardPayment } from '@/hooks/useCardPayment';
 import { PATHS, withId } from '@/navigation/paths';
 import { categoryIcon } from '@/utils/categoryIcons';
 import { formatMoney, formatPercent, formatShortDate, formatSignedMoney, parseIsoDate, todayIso } from '@/utils/format';
+import { summarizeClosedStatements } from '@/utils/paymentCycles';
 
 /**
  * Shows a card from {@link useCardDetail} and pays it with {@link useCardPayment}.
@@ -32,6 +33,7 @@ export function CardDetailPage() {
   const { pay, isSaving, error: payError } = useCardPayment();
   const [selectedClosingDate, setSelectedClosingDate] = useState<string>();
   const [isPayOpen, setIsPayOpen] = useState(false);
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
 
   if (isLoading && !data) return <Spinner />;
   if (error || !data) return <EmptyState icon="error" title="No encontramos esta tarjeta" action={<Button label="Volver a tarjetas" onClick={() => navigate(PATHS.cards)} />} />;
@@ -40,9 +42,7 @@ export function CardDetailPage() {
   const money = (value: number) => formatMoney(value, card.currency);
   const oldest = [...paymentCycles].sort((a, b) => a.closingDate.localeCompare(b.closingDate)).find((cycle) => Number(cycle.amountDue) > 0);
   const today = todayIso();
-  const billed = paymentCycles.filter((cycle) => cycle.closingDate <= today && Number(cycle.amountDue) > 0);
-  const billedDue = billed.reduce((sum, cycle) => sum + Number(cycle.amountDue), 0);
-  const overdueCount = billed.filter((cycle) => cycle.status === 'OVERDUE').length;
+  const { amountDue: billedDue, count: billedCount, overdueCount } = summarizeClosedStatements(paymentCycles, today);
   const openingDebt = card.openingDebts.reduce((sum, debt) => sum + Number(debt.amount), 0);
   const insurance = card.insurancePercentage ?? 0;
   const billingDay = parseIsoDate(card.billingDate).getDate();
@@ -62,7 +62,7 @@ export function CardDetailPage() {
         <StatCard informationTopic="Total a pagar"
           label="Total a pagar"
           value={money(billedDue)}
-          detail={billed.length === 0 ? 'Sin pagos pendientes' : `${billed.length} ${billed.length === 1 ? 'facturación' : 'facturaciones'}${overdueCount > 0 ? ` · ${overdueCount} ${overdueCount === 1 ? 'vencida' : 'vencidas'}` : ''}`}
+          detail={billedCount === 0 ? 'Sin pagos pendientes' : `${billedCount} ${billedCount === 1 ? 'facturación' : 'facturaciones'}${overdueCount > 0 ? ` · ${overdueCount} ${overdueCount === 1 ? 'vencida' : 'vencidas'}` : ''}`}
           tone="warning"
           valueSize="large"
         />
@@ -103,10 +103,14 @@ export function CardDetailPage() {
             <BreakdownRow label="Corte" value={card.billingCutoffTime || 'Fin del día'} />
             <BreakdownRow label="Pago" value={`Día ${parseIsoDate(card.paymentDueDate).getDate()} de cada mes`} />
             <BreakdownRow label="Próxima facturación" value={formatShortDate(nextBilling.billingDate, true)} />
-            <Button label="Editar" icon="edit" variant="secondary" className="mt-4" onClick={() => navigate(withId(PATHS.editCard, card.id))} />
+            <div className="mt-4 flex flex-wrap gap-3">
+              <Button label="Editar" icon="edit" variant="secondary" onClick={() => navigate(withId(PATHS.editCard, card.id))} />
+              <Button label="Historial de facturaciones" icon="history" variant="ghost" onClick={() => setIsHistoryOpen(true)} />
+            </div>
           </Card>
         </div>
       </div>
+      <StatementHistoryModal isOpen={isHistoryOpen} cycles={paymentCycles} currency={card.currency} onClose={() => setIsHistoryOpen(false)} />
       <PayCardModal
         isOpen={isPayOpen}
         cardName={card.name}

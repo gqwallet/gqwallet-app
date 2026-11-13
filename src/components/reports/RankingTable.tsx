@@ -35,7 +35,8 @@ export function RankingTable({ title, labelHeader, amountHeader, slices }: Ranki
         <p className="text-body text-content-secondary">Sin datos en este periodo.</p>
       ) : (
         <DataTable
-                  showScrollHint
+          layout="ranking"
+          showScrollHint
           caption={title}
           rows={slices.slice(0, 10)}
           rowKey={(slice) => slice.label}

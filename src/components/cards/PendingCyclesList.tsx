@@ -23,7 +23,7 @@ export interface PendingCyclesListProps {
 /** Lists unpaid cycles in payment order, including overdue and open cycles. */
 export function PendingCyclesList({ cycles, currency, onPay }: PendingCyclesListProps) {
   const pending = [...cycles].filter((cycle) => Number(cycle.amountDue) > 0).sort((a, b) => a.closingDate.localeCompare(b.closingDate));
-  return <Card title="Facturaciones pendientes" className="mb-4 [&>header]:-mt-1 lg:mb-6 lg:[&>header]:mt-0">
+  return <Card title="Facturaciones pendientes" className="mb-4 lg:mb-6">
     {pending.length === 0 && <p className="text-body-s text-content-muted">Sin pagos pendientes</p>}
     {pending.map((cycle) => <div key={cycle.closingDate} className="flex flex-wrap items-center gap-x-3 gap-y-2 px-1 py-3 sm:flex-nowrap">
       <div className="flex min-w-0 basis-full flex-col gap-0.5 sm:flex-1 sm:basis-auto">

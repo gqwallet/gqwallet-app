@@ -51,7 +51,7 @@ export function UpcomingCardsCard({ cards, usages, action, onSelect }: UpcomingC
               meta="Total a pagar"
               onClick={() => onSelect(card.cardId)}
             />
-            {usages?.[card.cardId] && <div className="mt-3"><div className="mb-1.5 flex items-center justify-between gap-2"><span className="text-subtitle">Línea utilizada</span><span className="text-body-s text-content-secondary">{formatMoney(usages[card.cardId].used, card.currency)} de {formatMoney(usages[card.cardId].creditLine, card.currency)}</span></div><ProgressBar label={`Línea utilizada de ${card.name}`} value={usages[card.cardId].creditLine > 0 ? usages[card.cardId].used / usages[card.cardId].creditLine * 100 : 0} /></div>}
+            {usages?.[card.cardId] && <div className="mt-4"><div className="mb-1.5 flex items-center justify-between gap-2"><span className="text-subtitle">Línea utilizada</span><span className="text-body-s text-content-secondary">{formatMoney(usages[card.cardId].used, card.currency)} de {formatMoney(usages[card.cardId].creditLine, card.currency)}</span></div><ProgressBar label={`Línea utilizada de ${card.name}`} value={usages[card.cardId].creditLine > 0 ? usages[card.cardId].used / usages[card.cardId].creditLine * 100 : 0} /></div>}
             </div>
           );
         })

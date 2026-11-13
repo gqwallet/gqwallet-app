@@ -9,7 +9,7 @@ import { useNavigate, useParams } from 'react-router';
 import { CardForm } from '@/components/cards';
 import { useBanks } from '@/hooks/useBanks';
 import { PageHeader } from '@/components/layout';
-import { Button, Callout, Card, EmptyState, Modal, Spinner } from '@/components/ui';
+import { Button, Callout, EmptyState, Modal, Spinner } from '@/components/ui';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/context/ToastContext';
 import { useCardDetail } from '@/hooks/useCardDetail';
@@ -80,9 +80,7 @@ export function CardFormPage() {
         actions={card ? <Button label="Eliminar tarjeta" icon="delete" variant="secondary" onClick={() => setIsDeleteOpen(true)} /> : undefined}
       />
       {error && <Callout tone="danger" text={error} className="mb-4" />}
-      <Card title="Datos de la tarjeta">
-        <CardForm banks={banks.data ?? []} id={FORM_ID} initial={card} billingCycles={detail.data?.billingCycles} hasMovements={movements > 0} defaultCurrency={profile?.preferredCurrency ?? 'PEN'} today={todayIso()} onSubmit={handleSubmit} />
-      </Card>
+      <CardForm banks={banks.data ?? []} id={FORM_ID} initial={card} billingCycles={detail.data?.billingCycles} hasMovements={movements > 0} defaultCurrency={profile?.preferredCurrency ?? 'PEN'} today={todayIso()} onSubmit={handleSubmit} />
       <div className="mt-4 flex flex-col-reverse gap-2 lg:mt-6 lg:flex-row lg:justify-end">
         <Button label="Cancelar" variant="secondary" onClick={() => navigate(-1)} />
         <Button type="submit" form={FORM_ID} label={card ? 'Guardar cambios' : 'Guardar tarjeta'} icon="check" isLoading={isSaving && !isDeleteOpen} />

@@ -39,13 +39,13 @@ export interface PageHeaderProps {
  * <PageHeader title="Movimientos" subtitle="Junio 2026" actions={<Button label="Nuevo movimiento" icon="add" />} />
  * ```
  */
-export function PageHeader({ title, subtitle, actions, breadcrumb, onBack, className, informationTopic, showMobileBreadcrumb = false, stackActionsOnMobile = false }: PageHeaderProps) {
+export function PageHeader({ title, subtitle, actions, breadcrumb, onBack, className, informationTopic, showMobileBreadcrumb = Boolean(breadcrumb), stackActionsOnMobile = false }: PageHeaderProps) {
   return (
-    <div className={cn('mb-4 flex flex-col gap-3 lg:mb-6 lg:flex-row lg:items-center lg:gap-4 lg:justify-between', !subtitle && !onBack && !actions && 'hidden lg:flex', className)}>
+    <div className={cn('mb-4 flex flex-col gap-3 lg:mb-6 lg:flex-row lg:items-center lg:gap-4 lg:justify-between', breadcrumb && 'lg:min-h-12', !subtitle && !onBack && !actions && !showMobileBreadcrumb && 'hidden lg:flex', className)}>
       <div className={cn("min-w-0 flex-1 items-start gap-2", subtitle || onBack || showMobileBreadcrumb ? "flex" : "hidden lg:flex")}>
-        {onBack && <IconButton icon="arrow_back" label="Volver" onClick={onBack} className="-ml-2" />}
+        {onBack && !breadcrumb && <IconButton icon="arrow_back" label="Volver" onClick={onBack} className="-ml-2" />}
         <div className={cn('min-w-0 flex flex-1 flex-col', showMobileBreadcrumb ? 'gap-3 lg:gap-1' : 'gap-1')}>
-          {breadcrumb && <p className={cn('text-caption text-content-muted', !showMobileBreadcrumb && 'hidden lg:block')}>{breadcrumb}</p>}
+          {breadcrumb && (onBack ? <button type="button" aria-label="Volver" onClick={onBack} className={cn('self-start rounded-sm text-left text-caption text-content-muted hover:underline focus-visible:outline-2 focus-visible:outline-primary', !showMobileBreadcrumb && 'hidden lg:block')}>{breadcrumb}</button> : <p className={cn('text-caption text-content-muted', !showMobileBreadcrumb && 'hidden lg:block')}>{breadcrumb}</p>)}
           <div className="hidden items-center justify-between gap-2 lg:flex"><h1 className="hidden break-words text-headline lg:block">{title}</h1>{informationTopic && <InformationButton topic={informationTopic} />}</div>
           {subtitle && <div className="text-body text-content-secondary">{subtitle}</div>}
         </div>

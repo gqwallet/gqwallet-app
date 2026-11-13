@@ -79,7 +79,7 @@ export function ReportsPage() {
       )}
       {report && count > 0 && (
         <>
-          <div className="mb-4 grid grid-cols-2 gap-3 lg:mb-6 lg:grid-cols-5 lg:gap-4">
+          <div className="mb-4 grid grid-cols-2 gap-3 lg:mb-6 lg:grid-cols-5 lg:pr-1">
             <StatCard size="report" informationTopic="Total del reporte" label={kind === 'EXPENSE' ? 'Gasto total' : 'Ingreso total'} value={money(report.total)} tone={kind === 'EXPENSE' ? 'danger' : 'success'} />
             <StatCard size="report" informationTopic="Promedio del reporte" label={kind === 'EXPENSE' ? 'Gasto promedio por transacción' : 'Ingreso promedio'} value={money(report.average)} tone="neutral" />
             <StatCard size="report" informationTopic="Máximo del reporte" label={kind === 'EXPENSE' ? 'Gasto máximo' : 'Ingreso máximo'} value={money(report.max)} tone="neutral" />
@@ -96,7 +96,7 @@ export function ReportsPage() {
                 <RankingTable title="Top 10 categorías" labelHeader="Categoría" amountHeader="Gasto" slices={expense.topCategories} />
                 <RankingTable title="Top 10 comercios" labelHeader="Comercio" amountHeader="Gasto" slices={expense.topMerchants.map((slice) => ({ ...slice, label: slice.label === 'UNKNOWN' ? 'Sin comercio' : slice.label }))} />
               </div>
-              <div className="grid items-start gap-4 lg:grid-cols-3 lg:gap-6">
+              <div className="grid items-start gap-4 lg:grid-cols-3 lg:gap-6 lg:pr-0.5">
                 <ShareList title="Por medio de pago" showDonut slices={expense.byPaymentMethod} labelOf={(label) => label} toneOf={() => 'primary'} />
                 <ShareList title="Esencial vs. no esencial" showDonut slices={expense.byEssentiality} labelOf={lookup({ True: 'Esencial', False: 'No esencial', UNKNOWN: ESSENTIALITY_LABEL.UNKNOWN })} toneOf={(label) => ESSENTIAL_TONE[label] ?? 'primary'} />
                 <ShareList

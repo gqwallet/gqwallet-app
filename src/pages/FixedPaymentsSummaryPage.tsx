@@ -49,7 +49,7 @@ export function FixedPaymentsSummaryPage() {
       {error && <EmptyState icon="error" title="No pudimos cargar el resumen" />}
       {data && (
         <>
-          <div className="mb-4 grid grid-cols-1 gap-3 lg:mb-6 lg:grid-cols-3 lg:gap-4">
+          <div className="mb-4 grid grid-cols-1 gap-3 lg:mb-6 lg:grid-cols-3 lg:pr-0.5">
             <StatCard valueSize="large" informationTopic="Total mensual" label="Total mensual" value={money(data.summary.monthlyTotal)} detail={data.active.length ? `Suma de ${data.active.length} pagos fijos activos` : undefined} tone="warning" />
             <StatCard valueSize="compact" informationTopic="Total anual proyectado" label="Total anual proyectado" value={money(data.summary.annualTotal)} detail={data.active.length ? '12 × total mensual' : undefined} tone="neutral" />
             <StatCard valueSize="large" informationTopic="Pagos fijos activos" label="Pagos fijos activos" value={String(data.active.length)} detail={withInstallments ? `${withInstallments} con cuotas` : undefined} tone="neutral" />
@@ -68,6 +68,7 @@ export function FixedPaymentsSummaryPage() {
               <Card title="Desglose por categoría fija">
                 <div className="mb-4"><StackedBar label="Distribución de pagos fijos por categoría" segments={data.summary.byKind.map((row) => ({ label: FIXED_KIND_LABEL[row.kind], value: row.monthly, color: ({ HOUSEHOLD_SERVICES: '1', SUBSCRIPTIONS: '6', MEMBERSHIPS: '2', DEBT: '4', RENT: '3', INSTALLMENT_PURCHASE: '5' } as const)[row.kind] }))} showLegend /></div>
                 <DataTable
+                  layout="summary"
                   showScrollHint
                   caption="Desglose por categoría fija"
                   rows={data.summary.byKind}
@@ -91,6 +92,7 @@ export function FixedPaymentsSummaryPage() {
                       title={payment.description}
                       detail={[FIXED_KIND_LABEL[payment.kind], `día ${payment.dueDay}`, extra].filter(Boolean).join(' · ')}
                       amount={money(payment.amount)}
+                      meta=""
                       onClick={() => navigate(withId(PATHS.editFixedPayment, payment.id))}
                     />
                   );

@@ -37,7 +37,7 @@ export function SignInPage() {
   return (
     <AuthLayout>
       <AuthHeading title="Inicia sesión" description="Ingresa con tu correo y contraseña." />
-      {sessionExpired && <Callout title="Tu sesión terminó" text="Inicia sesión nuevamente." className="mb-4" />}
+      {sessionExpired && <Callout title="Tu sesión venció." text="Inicia sesión nuevamente." className="mb-4" />}
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         {hasFailed && (
           <Callout tone="danger" title="No pudimos iniciar sesión" text="El correo o la contraseña no son correctos. Revisa tus datos e inténtalo de nuevo." />

@@ -31,7 +31,7 @@ export function ProfilePage() {
       {hasErrors && <Callout tone="danger" title="No guardamos los cambios" text="Revisa el campo marcado; tu información anterior se conserva." className="mb-4" />}
       <div className="grid gap-4 lg:grid-cols-2 lg:gap-6">
         <form noValidate onSubmit={handlePersonal}>
-          <Card title="Datos personales" className="[&>header]:-mt-1 lg:[&>header]:mt-0">
+          <Card title="Datos personales">
             <div className="flex flex-col gap-4">
               <TextField label="Nombre" autoComplete="given-name" required maxLength={150} value={firstName} onChange={setFirstName} error={errors.firstName} />
               <TextField label="Apellido" autoComplete="family-name" required maxLength={150} value={lastName} onChange={setLastName} error={errors.lastName} />
@@ -43,7 +43,7 @@ export function ProfilePage() {
           </Card>
         </form>
         <form noValidate onSubmit={handleParameters}>
-          <Card title="Parámetros financieros" className="[&>header]:-mt-1 lg:[&>header]:mt-0">
+          <Card title="Parámetros financieros">
             <div className="flex flex-col gap-4">
               <div className="flex flex-col gap-1.5">
                 <span className="text-label text-content-secondary">Moneda principal</span>

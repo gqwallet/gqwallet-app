@@ -85,7 +85,7 @@ test('a protected 401 redirects once, while 403 preserves the session', async ({
   await page.route('**/api/v1/accounts', (route) => route.fulfill({ status: 401, json: { status: 401 } }));
   await page.getByRole('button', { name: 'Reintentar', exact: true }).click();
   await expect(page).toHaveURL(/\/iniciar-sesion$/);
-  await expect(page.getByText('Tu sesión terminó', { exact: true })).toHaveCount(1);
+  await expect(page.getByText('Tu sesión venció.', { exact: true })).toHaveCount(1);
   await expect(page.getByText('Inicia sesión nuevamente.', { exact: true })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Abrir menú' })).toHaveCount(0);
 });

@@ -36,7 +36,7 @@ export function GoalCard({ goal, coverageMonths, minimum, onOpen, onContribute }
   const isFund = goal.emergencyFund && minimum !== undefined && minimum > 0;
   const fundProgress = isFund ? (goal.contributed / minimum) * 100 : 0;
   return (
-    <Card informationTopic="Resumen de meta" title={goal.name} className="[&>header]:-mt-1 [&>header]:min-h-11 [&>header]:items-start lg:[&>header]:mt-0">
+    <Card informationTopic="Resumen de meta" title={goal.name} className="[&>header]:min-h-11 [&>header]:items-start">
       <p className="mb-4 text-body-s text-content-secondary">
         {goal.currency} · {goal.emergencyFund ? 'marcada como fondo de emergencia' : goal.targetDate ? `objetivo al ${formatShortDate(goal.targetDate, true)}` : 'sin fecha objetivo'}
       </p>

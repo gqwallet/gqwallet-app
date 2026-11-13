@@ -56,7 +56,7 @@ export function ShareList({ title, slices, labelOf = (label) => label, toneOf = 
           ))}
         </div>
       )}
-      {note && <p className="mt-3 text-caption text-content-muted">{note}</p>}
+      {note && <p className="mt-4 text-caption text-content-muted">{note}</p>}
     </Card>
   );
 }

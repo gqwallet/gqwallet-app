@@ -26,7 +26,7 @@ export function CashFlowChart({ rows, currency, year }: CashFlowChartProps) {
   const range = Math.max(1, Math.max(...balances) - low);
   const points = rows.map((row, index) => ({ x: 40 + index * 84, y: 108 - (row.accumulated - low) / range * 96 }));
   return <Card className="mb-4 lg:mb-6">
-    <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+    <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
       <h2 className="text-title">Ingresos y salidas por mes<span className="hidden lg:inline"> · {currency} {year}</span></h2>
       <div className="flex flex-wrap gap-4 text-caption text-content-secondary">
         {([['positive', 'Ingresos'], ['1', 'Salidas efectivas'], ['projection', 'Proyección*']] as const).map(([color, label]) => <span key={color} className="inline-flex items-center gap-1"><span className="size-2.5 rounded-sm" style={{ backgroundColor: CHART_COLORS[color] }} />{label}</span>)}

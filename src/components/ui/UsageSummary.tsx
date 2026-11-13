@@ -31,12 +31,12 @@ export interface UsageSummaryProps {
 export function UsageSummary({ title, usage, detail, note, showBar = false }: UsageSummaryProps) {
   const value = usage ?? 0;
   const color = value > 100 ? 'negative' : value >= 75 ? '3' : 'positive';
-  return <div className="flex items-center gap-4">
-    <DonutChart label={title} isCompact isSmall centerLabel={usage === null ? '—' : formatPercent(value)} segments={[{ label: title, value: Math.min(100, Math.max(0, value)), color }, { label: 'Restante', value: Math.max(0, 100 - value), color: 'grid' }]} />
+  return <div className={showBar ? 'flex items-center gap-4' : 'flex items-center gap-4 lg:gap-5'}>
+    <DonutChart label={title} isCompact isSmall isResponsive={!showBar} isEmbedded={showBar} centerLabel={usage === null ? '—' : formatPercent(value)} segments={[{ label: title, value: Math.min(100, Math.max(0, value)), color }, { label: 'Restante', value: Math.max(0, 100 - value), color: 'grid' }]} />
     <div className="flex min-w-0 flex-1 flex-col gap-1">
-      <div className="flex flex-wrap items-center justify-between gap-2"><span className="text-subtitle">{title}</span>{showBar && <span className="text-body-s text-content-secondary">{detail}</span>}</div>
+      <div className="flex items-center justify-between gap-2"><span className={showBar ? 'min-w-0 flex-1 text-subtitle [overflow-wrap:anywhere]' : 'text-subtitle lg:text-title'}>{title}</span>{showBar && <span className="max-w-[75%] shrink-0 text-body-s text-content-secondary [overflow-wrap:anywhere]">{detail}</span>}</div>
       {showBar ? <ProgressBar value={value} tone={value > 100 ? 'danger' : value >= 75 ? 'warning' : 'success'} label={title} /> : <span className="text-body-s text-content-secondary lg:text-body">{detail}</span>}
-      <span className="text-body-s text-content-muted">{note}</span>
+      <span className={showBar ? 'mt-1 text-body-s text-content-muted' : 'text-body-s text-content-muted'}>{note}</span>
     </div>
   </div>;
 }
