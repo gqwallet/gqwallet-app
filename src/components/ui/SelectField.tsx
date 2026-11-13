@@ -62,7 +62,7 @@ export function SelectField({ label, value, options, onChange, placeholder, help
           aria-invalid={Boolean(error) || undefined}
           aria-describedby={hint ? `${id}-hint` : undefined}
           onChange={(event) => onChange(event.target.value)}
-          className="h-full w-full appearance-none bg-transparent pr-9 pl-3 text-body text-content-primary outline-none"
+          className="h-full w-full appearance-none bg-transparent pr-9 pl-3 text-[16px]/[22px] text-content-primary lg:text-body outline-none"
         >
           {placeholder !== undefined && <option value="">{placeholder}</option>}
           {options.map((option) => (
