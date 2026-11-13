@@ -37,7 +37,7 @@ export * from '@/components/ui/InformationButton';
 
 export { DonutChart, type DonutChartProps } from './DonutChart';
 export { StackedBar, type StackedBarProps } from './StackedBar';
-export { UsageSummary, type UsageSummaryProps } from './UsageSummary';
+export { UsageSummary, type UsageBreakdownItem, type UsageSummaryProps } from './UsageSummary';
 export { CHART_COLORS, CHART_PALETTE, type ChartColor, type ChartSegment } from './chartTokens';
 
 export { CreditCardMark, type CreditCardMarkProps } from './CreditCardMark';

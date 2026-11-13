@@ -133,7 +133,7 @@ test('net position, breakdown, cash-basis outflows and budget split', async ({ p
   await expect(stat(page, 'Deuda de tarjetas')).toContainText('S/ 200.00');
   await expect(stat(page, 'Posición neta')).toContainText('S/ 750.00');
   await expect(stat(page, 'Salidas del mes')).toContainText('S/ 50.00');
-  await expect(page.getByText(/Sin presupuesto: S\/ 50.00/).first()).toBeVisible();
+  await expect(page.getByText(/^S\/ 50.00 · 1 categoría$/).first()).toBeVisible();
   await assertKpiAlignment(page, 6, 'dashboard', info);
   await page.getByRole('button', { name: /Posición neta.*Ver desglose/ }).click();
   await expect(page).toHaveURL(/dashboard\/posicion-neta\?moneda=PEN$/);
