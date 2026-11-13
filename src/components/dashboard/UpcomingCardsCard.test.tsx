@@ -1,10 +1,10 @@
 /**
- * Tests same-cycle billing dates and billing tenses on dashboard cards.
+ * Tests same-cycle billing dates, billing tenses and per-card line usage on dashboard cards.
  *
  * @author G0nz4loQu3dena
  * @packageDocumentation
  */
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { UpcomingCardsCard } from '@/components/dashboard/UpcomingCardsCard';
 import type { DashboardCard } from '@/types/overview';
@@ -38,5 +38,25 @@ describe('UpcomingCardsCard', () => {
   ])('uses the correct tense for billing on %s', (billingDate, text) => {
     render(<UpcomingCardsCard cards={[{ ...card, billingDate, paymentDueDate: '2026-12-20' }]} action={null} onSelect={vi.fn()} />);
     expect(screen.getByText(`Paga hasta el 20 dic. · ${text}`)).toBeInTheDocument();
+  });
+
+  it('keeps each line usage inside the block of its own card', () => {
+    const second: DashboardCard = { ...card, cardId: 'c2', name: 'Mastercard' };
+    const usages = {
+      c1: { cardId: 'c1', currency: 'PEN' as const, creditLine: 1000, used: 700, available: 300, creditBalance: 0 },
+      c2: { cardId: 'c2', currency: 'PEN' as const, creditLine: 1100, used: 110, available: 990, creditBalance: 0 },
+    };
+    render(<UpcomingCardsCard cards={[card, second]} usages={usages} action={null} onSelect={vi.fn()} />);
+    const items = screen.getAllByRole('listitem');
+    expect(items).toHaveLength(2);
+    expect(within(items[0]).getByText('Visa')).toBeInTheDocument();
+    expect(within(items[0]).getByRole('progressbar', { name: 'Línea utilizada de Visa' })).toHaveAttribute('aria-valuenow', '70');
+    expect(within(items[1]).getByText('S/ 110.00 de S/ 1,100.00')).toBeInTheDocument();
+    expect(within(items[1]).getByRole('progressbar', { name: 'Línea utilizada de Mastercard' })).toHaveAttribute('aria-valuenow', '10');
+  });
+
+  it('omits the line usage when the server did not provide it', () => {
+    render(<UpcomingCardsCard cards={[card]} action={null} onSelect={vi.fn()} />);
+    expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
   });
 });
