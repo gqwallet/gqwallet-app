@@ -7,7 +7,7 @@
 import { useState } from 'react';
 import { BudgetStateBadge, CopyLimitsModal, LimitModal } from '@/components/budget';
 import { PageHeader } from '@/components/layout';
-import { Button, Callout, Card, ChipGroup, DataTable, EmptyState, MonthChip, Spinner, StatCard } from '@/components/ui';
+import { Button, Card, ChipGroup, DataTable, EmptyState, MonthChip, Spinner, StatCard, ProgressBar, UsageSummary } from '@/components/ui';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/context/ToastContext';
 import { useBudget } from '@/hooks/useBudget';
@@ -71,21 +71,26 @@ export function BudgetPage() {
           <Button key="define" label="Definir límite" icon="add" onClick={() => setLimitCategory('')} />,
         ]}
       />
-      <div className="mb-4 flex gap-2 overflow-x-auto [scrollbar-width:none]">
+      <div className="mb-4 flex gap-2 overflow-x-auto lg:mb-6 [scrollbar-width:none]">
         <MonthChip title="Elige el mes" value={period} onChange={setPeriod} />
         <ChipGroup label="Moneda" options={CURRENCY_OPTIONS} value={currency} onChange={setCurrency} className="mx-0 px-0" />
       </div>
       {isLoading && !data && <Spinner />}
       {error && <EmptyState icon="error" title="No pudimos cargar el presupuesto" />}
       {status && totalRow && <>
-            <div className="mb-4 grid grid-cols-2 items-stretch gap-3 lg:mb-6 lg:grid-cols-4 lg:gap-4">
+            <div className="mb-4 grid grid-cols-2 items-stretch gap-3 lg:mb-6 lg:grid-cols-4">
               <StatCard informationTopic="Límite total" label="Límite total" value={money(status.totalLimit)} detail={`${withLimit} categorías con límite`} tone="neutral" />
-              <StatCard informationTopic="Gastado con presupuesto" label="Gastado con presupuesto" value={money(status.budgetedConsumption)} detail={`Uso ${formatPercent(usage)}`} tone={usage > 100 ? 'danger' : 'warning'} />
-              <StatCard informationTopic="Gastado sin presupuesto" label="Gastado sin presupuesto" value={money(status.unbudgetedConsumption)} detail={`${status.lines.filter((line) => line.limit === null).length} categorías`} tone="neutral" />
-              <StatCard informationTopic="Total gastado" label="Total gastado" value={money(status.totalConsumption)} detail="Consumos y pagos fijos" tone="warning" />
+              <StatCard informationTopic="Gastado con presupuesto" label="Gastado con presupuesto" value={money(status.budgetedConsumption)} detail={`Uso ${formatPercent(usage)}`} tone={usage > 100 ? 'danger' : 'success'} />
+              <StatCard informationTopic="Gastado sin presupuesto" label="Gastado sin presupuesto" value={money(status.unbudgetedConsumption)} detail={<>{status.lines.filter((line) => line.limit === null && line.consumption > 0).length} categoría<span className="hidden lg:inline"> sin límite</span></>} tone="warning" />
+              <StatCard informationTopic="Total gastado" label="Total gastado" value={money(status.totalConsumption)} detail={<>Incluye pagos fijos<span className="hidden lg:inline"> con categoría</span></>} tone="neutral" />
             </div>
+            <Card className="mb-4 lg:mb-6"><UsageSummary title={`Uso del presupuesto de ${monthName}`} usage={status.totalUsage}
+              detail={`${money(status.budgetedConsumption)} de ${money(status.totalLimit)} con presupuesto`}
+              note={`Sin presupuesto: ${money(status.unbudgetedConsumption)} en ${status.lines.filter(line => line.limit === null && line.consumption > 0).length} categoría · total gastado ${money(status.totalConsumption)}`} /></Card>
             <Card title="Por categoría" className="mb-4">
               <DataTable
+                showScrollHint
+                mobileScrollHintOnly
                 caption={`Presupuesto de ${monthName}`}
                 isWide
                 rows={[
@@ -96,7 +101,7 @@ export function BudgetPage() {
                   ...status.lines.filter((line) => line.limit === null),
                   { categoryId: 'subtotal-unbudgeted', categoryName: 'Subtotal sin presupuesto', limit: null, consumption: status.unbudgetedConsumption, balance: null, usage: null, state: 'NO_BUDGET' },
                 ] as Array<Omit<BudgetLine, 'consumption'> & { consumption: number | null }>}
-                rowClassName={(line) => line.categoryId.startsWith('group-') ? 'bg-surface-container text-subtitle' : line.categoryId.startsWith('subtotal-') ? 'text-subtitle' : undefined}
+                rowClassName={(line) => line.categoryId.startsWith('group-') ? 'text-overline uppercase text-content-secondary' : line.categoryId.startsWith('subtotal-') ? 'bg-surface-container text-subtitle' : undefined}
                 rowKey={(line) => line.categoryId}
                 footer={totalRow}
                 onRowClick={(line) => { if (status.lines.some((item) => item.categoryId === line.categoryId)) setLimitCategory(line.categoryId); }}
@@ -106,18 +111,14 @@ export function BudgetPage() {
                     header: 'Categoría',
                     render: (line) => line.categoryName,
                   },
-                  { key: 'limit', header: 'Límite', isNumeric: true, render: (line) => amount(line.limit) },
-                  { key: 'consumption', header: 'Consumo', isNumeric: true, render: (line) => amount(line.consumption) },
-                  { key: 'balance', header: 'Saldo', isNumeric: true, render: (line) => <span className={cn(line.balance !== null && line.balance < 0 && 'text-danger')}>{amount(line.balance)}</span> },
-                  { key: 'usage', header: 'Uso', isNumeric: true, render: (line) => (line.usage === null ? '—' : formatPercent(line.usage)) },
+                  { key: 'limit', header: 'Límite', isNumeric: true, render: (line) => line.categoryId.startsWith('group-') ? null : amount(line.limit) },
+                  { key: 'consumption', header: 'Consumo', isNumeric: true, render: (line) => line.categoryId.startsWith('group-') ? null : amount(line.consumption) },
+                  { key: 'balance', header: 'Saldo', isNumeric: true, render: (line) => line.categoryId.startsWith('group-') ? null : <span className={cn(line.balance !== null && line.balance < 0 && 'text-danger')}>{amount(line.balance)}</span> },
+                  { key: 'usage', header: 'Uso', isNumeric: true, render: (line) => line.categoryId.startsWith('group-') ? null : (line.usage === null ? '—' : <span className="flex items-center justify-end gap-3">{status.lines.some(item => item.categoryId === line.categoryId) && <ProgressBar size="compact" value={line.usage} tone={line.state === 'EXCEEDED' ? 'danger' : line.state === 'ATTENTION' || line.state === 'REACHED' ? 'warning' : 'success'} label={`Uso de ${line.categoryName}`} />}{formatPercent(line.usage)}</span>) },
                   { key: 'state', header: 'Estado', isNumeric: true, render: (line) => (!status.lines.some((item) => item.categoryId === line.categoryId) ? null : <BudgetStateBadge state={line.state} />) },
                 ]}
               />
             </Card>
-            <Callout
-              title="Cómo leerlo"
-              text="Normal: menos de 75 %. Atención: de 75 % a menos de 100 %. Alcanzado: 100 %. Excedido: más de 100 %. Con límite 0 (decidiste no gastar): Sin gasto sin consumo y Excedido desde el primer gasto. Sin límite: Sin presupuesto."
-            />
           </>}
       {data && (
         <LimitModal

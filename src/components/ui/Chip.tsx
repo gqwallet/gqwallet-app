@@ -20,7 +20,7 @@ export interface ChipProps {
 }
 
 /**
- * Renders a 30 px chip; selected chips use the inverse surface and a check.
+ * Renders a 30 px chip; selected chips use the primary color and a check.
  *
  * @example
  * ```tsx
@@ -37,7 +37,7 @@ export function Chip({ label, isSelected = false, icon, onClick }: ChipProps) {
       className={cn(
         'inline-flex h-[30px] shrink-0 items-center gap-1.5 rounded-full border px-3 text-label whitespace-nowrap transition-colors',
         'focus-visible:outline-2 focus-visible:outline-primary',
-        isSelected ? 'border-surface-inverse bg-surface-inverse text-content-on-primary' : 'border-line-outline bg-surface-card text-content-secondary hover:bg-surface-container',
+        isSelected ? 'border-primary bg-primary text-content-on-primary' : 'border-line-outline bg-surface-card text-content-secondary hover:bg-surface-container',
       )}
     >
       {glyph && <Icon name={glyph} size={16} />}
@@ -85,7 +85,7 @@ export function ChipGroup<TValue extends string>({ label, options, value, onChan
     <div
       role="group"
       aria-label={label}
-      className={cn('-mx-1 flex min-w-0 max-w-full gap-2 px-1 py-0.5', isWrapping ? 'flex-wrap' : 'overflow-x-auto [scrollbar-width:none]', className)}
+      className={cn('-mx-1 flex min-w-0 max-w-full gap-2 px-1', isWrapping ? 'flex-wrap' : 'overflow-x-auto [scrollbar-width:none]', className)}
     >
       {options.map((option) => (
         <Chip key={option.value} label={option.label} icon={option.icon} isSelected={option.value === value} onClick={() => onChange(option.value)} />

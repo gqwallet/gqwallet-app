@@ -36,16 +36,16 @@ export function SignInPage() {
 
   return (
     <AuthLayout>
-      <AuthHeading title="Inicia sesión" />
-      {sessionExpired && <Callout title="Tu sesión terminó" text="Inicia sesión nuevamente." className="mb-4" />}
+      <AuthHeading title="Inicia sesión" description="Ingresa con tu correo y contraseña." />
+      {sessionExpired && <Callout title="Tu sesión venció." text="Inicia sesión nuevamente." className="mb-4" />}
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         {hasFailed && (
           <Callout tone="danger" title="No pudimos iniciar sesión" text="El correo o la contraseña no son correctos. Revisa tus datos e inténtalo de nuevo." />
         )}
         <TextField label="Correo" type="email" autoComplete="email" required value={email} onChange={setEmail} />
         <TextField label="Contraseña" type="password" autoComplete="current-password" required value={password} onChange={setPassword} />
-        <Button type="submit" label="Ingresar" isLoading={isSubmitting} isBlock />
-        <TextLink label="¿No tienes cuenta? Crea una" to={PATHS.signUp} className="self-start" />
+        <Button type="submit" label="Ingresar" isLoading={isSubmitting} isBlock className="mt-1" />
+        <TextLink label="¿No tienes cuenta? Crea una" to={PATHS.signUp} className="mt-1 self-start px-4" />
       </form>
     </AuthLayout>
   );

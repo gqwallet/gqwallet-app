@@ -67,18 +67,18 @@ export function AccountForm({ id, banks, initial, defaultCurrency, today, aliasE
   };
 
   return (
-    <form id={id} noValidate onSubmit={handleSubmit} className="flex flex-col gap-4">
+    <form id={id} noValidate onSubmit={handleSubmit} className="grid gap-4 lg:grid-cols-2">
       {isEdit ? (
         <SelectField label="Tipo de cuenta" value={type} options={toOptions(ACCOUNT_TYPE_LABEL)} onChange={() => undefined} disabled />
       ) : (
-        <div className="flex flex-col gap-1.5">
+        <div className="flex flex-col gap-2 lg:col-span-2">
           <span className="text-label text-content-secondary">Tipo de cuenta</span>
           <ChipGroup label="Tipo de cuenta" options={toOptions(ACCOUNT_TYPE_LABEL)} value={type} onChange={setType} />
         </div>
       )}
       <TextField label="Alias" value={alias} onChange={setAlias} helper={isEdit ? undefined : 'Un nombre único para reconocerla.'} error={errors.alias ?? aliasError} />
       {type !== 'CASH' && <>
-        <SelectField label="Banco" value={bank} options={bankOptions} onChange={setBank} error={errors.bank} />
+        <SelectField label="Banco" value={bank} options={bankOptions} onChange={setBank} helper={isEdit ? undefined : 'Bancos de tu país. Elige «Otro banco» si no aparece.'} error={errors.bank} />
         {bank === 'OTHER' && <TextField label="Nombre del banco" value={customBankName} onChange={setCustomBankName} maxLength={150} error={errors.bank} />}
       </>}
       <SelectField label="Moneda" value={currency} options={CURRENCY_OPTIONS} onChange={(value) => setCurrency(value as Currency)} disabled={isEdit} />

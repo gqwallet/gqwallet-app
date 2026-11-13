@@ -55,7 +55,7 @@ export function CategoriesPage() {
         title="Categorías"
         actions={<Button label="Nueva categoría" icon="add" onClick={() => setIsNewOpen(true)} />}
       />
-      <ChipGroup label="Naturaleza" options={[{ value: 'EXPENSE', label: 'Gasto' }, { value: 'INCOME', label: 'Ingreso' }]} value={nature} onChange={setNature} className="mb-4" />
+      <ChipGroup label="Naturaleza" options={[{ value: 'EXPENSE', label: 'Gasto' }, { value: 'INCOME', label: 'Ingreso' }]} value={nature} onChange={setNature} className="mb-4 lg:mb-6" />
       <Card>
         {isLoading && categories.length === 0 && <Spinner />}
         {error && <EmptyState icon="error" title="No pudimos cargar tus categorías" />}

@@ -79,29 +79,31 @@ export function MonthGrid({ period, today, marks }: MonthGridProps) {
     return day >= 1 && day <= days ? toIsoDate(new Date(first.getFullYear(), first.getMonth(), day)) : null;
   });
   return (
-    <div className="-mx-4 overflow-x-auto px-4 lg:mx-0 lg:px-0">
-      <div className="grid min-w-160 grid-cols-7 gap-1.5">
+    <div>
+      <div className="grid grid-cols-7 gap-1 lg:gap-2">
         {WEEKDAYS.map((weekday) => (
-          <div key={weekday} className="py-1 text-center text-label text-content-secondary">
-            {weekday}
+          <div key={weekday} className="text-center text-label text-content-secondary lg:py-1">
+            <span className="lg:hidden">{weekday[0]}</span><span className="hidden lg:inline">{weekday}</span>
           </div>
         ))}
         {cells.map((date, index) =>
           date ? (
-            <div key={date} className={cn('flex min-h-18 flex-col gap-1 rounded-sm border p-1.5', date === today ? 'border-primary' : 'border-line-subtle')}>
-              <span className={cn('text-caption', date === today ? 'text-subtitle text-primary' : 'text-content-secondary')}>{Number(date.slice(8))}</span>
+            <div key={date} className={cn('flex min-h-14 flex-col gap-1 rounded-sm border p-1.5 lg:min-h-24', date === today ? 'border-primary' : 'border-line-subtle')}>
+              <span className={cn('text-caption', date === today ? 'text-primary' : 'text-content-secondary')}>{Number(date.slice(8))}</span>
+              <span className="flex flex-wrap gap-1 lg:flex-col">
               {marks
                 .filter((mark) => mark.date === date)
                 .slice(0, 3)
                 .map((mark) => (
-                  <span key={mark.key} className={cn('flex items-start gap-1 rounded-sm px-1.5 py-0.5 text-caption', PILL[toneOf(mark)])}>
-                    <span className={cn('mt-1 size-1.5 shrink-0 rounded-full', DOT[toneOf(mark)])} />
-                    <span className="line-clamp-2">{mark.label}</span>
+                  <span key={mark.key} title={mark.label} className={cn('flex items-start gap-1 rounded-sm text-caption lg:px-1.5 lg:py-0.5', PILL[toneOf(mark)])}>
+                    <span className={cn('size-1.5 shrink-0 rounded-full lg:mt-1', DOT[toneOf(mark)])} />
+                    <span className="sr-only lg:not-sr-only lg:line-clamp-2">{mark.label}</span>
                   </span>
                 ))}
+              </span>
             </div>
           ) : (
-            <div key={`empty-${index}`} className="min-h-18 rounded-sm bg-surface-container" />
+            <div key={`empty-${index}`} className="min-h-14 rounded-sm border border-line-subtle bg-surface-container lg:min-h-24" />
           ),
         )}
       </div>

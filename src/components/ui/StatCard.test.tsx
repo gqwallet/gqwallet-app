@@ -26,7 +26,7 @@ it('keeps a link-style action inside one keyboard-accessible card button', () =>
   expect(screen.queryByRole('link')).not.toBeInTheDocument();
   expect(screen.getByText('Ver desglose').tagName).toBe('SPAN');
   expect(screen.getByText('Posición neta')).toHaveClass('min-h-10', '[overflow-wrap:anywhere]');
-  expect(screen.getByText('Ver desglose').parentElement).toHaveClass('mt-auto');
+  expect(screen.getByText('Ver desglose').parentElement).toHaveClass('min-h-4');
   fireEvent.click(button);
   expect(onClick).toHaveBeenCalledOnce();
 });

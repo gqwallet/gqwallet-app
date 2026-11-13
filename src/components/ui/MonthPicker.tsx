@@ -303,7 +303,7 @@ function PeriodButton({ label, ariaLabel, isSelected, isDisabled, onClick }: Per
       onClick={onClick}
       className={cn(
         'h-11 rounded-md border text-body capitalize focus-visible:outline-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-40',
-        isSelected ? 'border-surface-inverse bg-surface-inverse text-content-on-primary' : 'border-line-outline bg-surface-card text-content-primary hover:bg-surface-container',
+        isSelected ? 'border-primary bg-primary text-content-on-primary' : 'border-line-outline bg-surface-card text-content-primary hover:bg-surface-container',
       )}
     >
       {label}

@@ -94,7 +94,7 @@ export function NewTransferPage() {
   return (
     <>
       <PageHeader breadcrumb="Movimientos / Transferencia" title="Nueva transferencia"  />
-      <div className="mb-4 flex flex-col gap-1.5 lg:mb-6">
+      <div className="mb-4 flex flex-col gap-2 lg:mb-6">
         <span className="text-label text-content-secondary">Tipo de transferencia</span>
         <ChipGroup
           label="Tipo de transferencia"

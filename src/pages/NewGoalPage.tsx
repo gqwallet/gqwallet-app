@@ -54,14 +54,14 @@ export function NewGoalPage() {
   return (
     <>
       <PageHeader breadcrumb="Metas / Nueva" title="Nueva meta"  />
-      <form noValidate onSubmit={handleSubmit} className="lg:max-w-160">
+      <form noValidate onSubmit={handleSubmit}>
         <Card title="Datos de la meta">
-          <div className="flex flex-col gap-4">
+          <div className="grid gap-4 lg:grid-cols-2">
             <TextField label="Nombre" value={name} onChange={setName} error={errors.name} />
             <SelectField label="Moneda" value={currency} options={CURRENCY_OPTIONS} onChange={(value) => setCurrency(value as Currency)} />
             <TextField label="Importe objetivo" inputMode="decimal" placeholder="0.00" value={target} onChange={setTarget} error={errors.target} />
             <TextField label="Fecha objetivo" type="date" min={MIN_DATE} value={date} onChange={setDate} helper="Opcional." />
-            <Toggle label="Usar como fondo de emergencia" description="Su saldo se usa para calcular cuántos meses de pagos fijos cubres." isOn={isFund} onChange={setIsFund} />
+            <div className="lg:col-span-2"><Toggle label="Usar como fondo de emergencia" description="Su saldo se usa para calcular cuántos meses de pagos fijos cubres." isOn={isFund} onChange={setIsFund} /></div>
             {isDuplicateFund && (
               <Callout
                 tone="danger"

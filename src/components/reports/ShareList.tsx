@@ -5,7 +5,7 @@
  * @packageDocumentation
  */
 import { InformationButton } from '@/components/ui/InformationButton';
-import { Card, ProgressBar, type ProgressTone } from '@/components/ui';
+import { Card, DonutChart, ProgressBar, CHART_PALETTE, type ChartColor, type ProgressTone } from '@/components/ui';
 import type { ReportSlice } from '@/types/transaction';
 import { formatPercent } from '@/utils/format';
 
@@ -23,6 +23,8 @@ export interface ShareListProps {
   toneOf?: (label: string) => ProgressTone;
   /** Footnote. */
   note?: string;
+  /** Adds the report donut using the same slices and colors as its legend. */
+  showDonut?: boolean;
 }
 
 /**
@@ -33,25 +35,28 @@ export interface ShareListProps {
  * <ShareList title="Por medio de pago" slices={report.byPaymentMethod} />
  * ```
  */
-export function ShareList({ title, slices, labelOf = (label) => label, toneOf = () => 'primary', note, informationTopic }: ShareListProps) {
+export function ShareList({ title, slices, labelOf = (label) => label, toneOf = () => 'primary', note, informationTopic, showDonut = false }: ShareListProps) {
+  const colors: ChartColor[] = slices.map((slice, index) => showDonut && ['True', 'False', 'UNKNOWN'].includes(slice.label) ? ({ True: 'positive', False: '3', UNKNOWN: 'neutral' } as const)[slice.label as 'True' | 'False' | 'UNKNOWN'] : CHART_PALETTE[index % CHART_PALETTE.length]);
+  const tones: Partial<Record<ChartColor, ProgressTone>> = { '1': 'primary', '2': 'teal', '3': 'warning', '4': 'sky', '5': 'violet', '6': 'neutral', positive: 'success', neutral: 'neutral' };
   return (
     <Card title={title} action={informationTopic ? <InformationButton topic={informationTopic} /> : undefined}>
       {slices.length === 0 ? (
         <p className="text-body text-content-secondary">Sin datos en este periodo.</p>
       ) : (
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-4">
+          {showDonut && <DonutChart label={title} segments={slices.map((slice, index) => ({ label: labelOf(slice.label), value: slice.amount, color: colors[index] }))} />}
           {slices.map((slice, index) => (
-            <div key={`${index}-${slice.label}`} className="flex flex-col gap-1">
+            <div key={`${index}-${slice.label}`} className="flex flex-col gap-1.5">
               <div className="flex justify-between gap-2">
                 <span className="text-subtitle">{labelOf(slice.label)}</span>
                 <span className="text-caption text-content-secondary">{formatPercent(slice.share)}</span>
               </div>
-              <ProgressBar value={slice.share} tone={toneOf(slice.label)} label={labelOf(slice.label)} />
+              <ProgressBar value={slice.share} tone={showDonut ? tones[colors[index]] ?? 'primary' : toneOf(slice.label)} label={labelOf(slice.label)} />
             </div>
           ))}
         </div>
       )}
-      {note && <p className="mt-3 text-caption text-content-muted">{note}</p>}
+      {note && <p className="mt-4 text-caption text-content-muted">{note}</p>}
     </Card>
   );
 }

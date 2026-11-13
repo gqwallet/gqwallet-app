@@ -5,3 +5,5 @@
  * @packageDocumentation
  */
 export * from '@/components/overview/ExchangeRateModal';
+
+export { CashFlowChart, type CashFlowChartProps } from './CashFlowChart';

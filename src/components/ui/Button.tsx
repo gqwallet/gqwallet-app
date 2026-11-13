@@ -12,7 +12,7 @@ import { Icon } from '@/components/ui/Icon';
 export type ButtonVariant = 'primary' | 'secondary' | 'soft' | 'ghost' | 'danger';
 
 const VARIANT: Record<ButtonVariant, string> = {
-  primary: 'bg-surface-inverse text-content-on-primary hover:bg-content-secondary',
+  primary: 'bg-primary text-content-on-primary hover:bg-primary-hover',
   secondary: 'bg-surface-card text-content-primary border border-line-outline hover:bg-surface-container',
   soft: 'bg-primary-container text-primary-on-container hover:bg-primary-pale',
   ghost: 'bg-transparent text-primary-on-container hover:bg-primary-container',

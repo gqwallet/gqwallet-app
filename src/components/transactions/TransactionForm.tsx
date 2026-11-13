@@ -169,7 +169,7 @@ export function TransactionForm(props: TransactionFormProps) {
             value={currency}
             options={CURRENCY_OPTIONS}
             onChange={(next) => setCurrency(next as Currency)}
-            helper={initial ? undefined : 'Por defecto, tu moneda principal.'}
+            helper={!initial && isExpense ? 'Por defecto, tu moneda principal.' : undefined}
           />
           <PickerField
             label="Categoría"
@@ -178,7 +178,7 @@ export function TransactionForm(props: TransactionFormProps) {
             onOpen={() => setIsPickerOpen(true)}
             error={errors.categoryId}
           />
-          <TextField label="Fecha económica" type="date" min={MIN_DATE} value={date} onChange={setDate} helper={initial ? undefined : 'Por defecto, hoy (hora de Lima).'} />
+          <TextField label="Fecha económica" type="date" min={MIN_DATE} value={date} onChange={setDate} helper={!initial && isExpense ? 'Por defecto, hoy (hora de Lima).' : undefined} />
           {hasInstruments ? (
             <SelectField
               label={isExpense ? 'Medio de pago' : 'Cuenta de destino'}
@@ -232,7 +232,7 @@ export function TransactionForm(props: TransactionFormProps) {
         )}
       </Card>
       <Card title="Detalles opcionales">
-        <p className="mb-4 text-body text-content-secondary">
+        <p className="mb-4 text-caption text-content-secondary">
           {isExpense ? 'Si no los completas, el gasto se guarda con esencial «Sin dato» y sin estado de ánimo.' : 'Si no los completas, aparecerán como «Sin dato» en tus reportes.'}
         </p>
         {isExpense ? (
@@ -273,7 +273,7 @@ export function TransactionForm(props: TransactionFormProps) {
 
 function Dimension({ label, children, informationTopic }: { label: string; children: ReactNode; informationTopic?: string }) {
   return (
-    <div className="flex flex-col gap-1.5">
+    <div className="flex flex-col gap-2">
       <div className="flex items-center justify-between"><span className="text-label text-content-secondary">{label}</span>{informationTopic && <InformationButton topic={informationTopic} />}</div>
       {children}
     </div>

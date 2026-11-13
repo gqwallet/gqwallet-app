@@ -36,11 +36,11 @@ export function GoalCard({ goal, coverageMonths, minimum, onOpen, onContribute }
   const isFund = goal.emergencyFund && minimum !== undefined && minimum > 0;
   const fundProgress = isFund ? (goal.contributed / minimum) * 100 : 0;
   return (
-    <Card informationTopic="Resumen de meta" title={goal.name}>
-      <p className="-mt-2 mb-4 text-body-s text-content-secondary">
+    <Card informationTopic="Resumen de meta" title={goal.name} className="[&>header]:min-h-11 [&>header]:items-start">
+      <p className="mb-4 text-body-s text-content-secondary">
         {goal.currency} · {goal.emergencyFund ? 'marcada como fondo de emergencia' : goal.targetDate ? `objetivo al ${formatShortDate(goal.targetDate, true)}` : 'sin fecha objetivo'}
       </p>
-      <div className="mb-1 flex flex-wrap items-center justify-between gap-2">
+      <div className="mb-1.5 flex flex-wrap items-center justify-between gap-2">
         <span className="flex items-center gap-2 text-subtitle">
           {isFund ? `${formatPercent(fundProgress)} del mínimo` : isAchieved ? '100 %' : formatPercent(goal.progress)}
           {isAchieved && <Badge label="Cumplida" tone="success" />}
@@ -49,7 +49,7 @@ export function GoalCard({ goal, coverageMonths, minimum, onOpen, onContribute }
           {money(goal.contributed)} de {money(isFund && minimum !== undefined ? minimum : goal.target)}
         </span>
       </div>
-      <ProgressBar value={isFund ? fundProgress : goal.progress} tone={isFund ? 'warning' : isAchieved ? 'success' : 'primary'} label={`Progreso de ${goal.name}`} className="mb-1" />
+      <ProgressBar value={isFund ? fundProgress : goal.progress} tone={isFund ? 'tertiary' : isAchieved ? 'success' : 'primary'} label={`Progreso de ${goal.name}`} className="mb-1.5" />
       <p className="mb-4 text-caption text-content-muted">
         {isFund && coverageMonths !== undefined && coverageMonths !== null
           ? `Cubre ${coverageMonths.toFixed(1)} meses de pagos fijos`
@@ -57,7 +57,7 @@ export function GoalCard({ goal, coverageMonths, minimum, onOpen, onContribute }
             ? 'Sigue admitiendo aportes.'
             : `Faltan ${money(goal.remaining)}`}
       </p>
-      <div className="flex flex-wrap gap-3">
+      <div className={goal.emergencyFund || isAchieved ? 'grid gap-3 lg:flex' : 'grid grid-cols-2 gap-3 lg:flex'}>
         {goal.emergencyFund ? (
           <Button label="Ver fondo" icon="shield" variant="soft" onClick={onOpen} />
         ) : (

@@ -6,6 +6,7 @@
  */
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
+import { CashFlowChart } from '@/components/overview';
 import { PageHeader } from '@/components/layout';
 import { Button, Card, ChipGroup, DataTable, EmptyState, Spinner, StatCard, YearChip } from '@/components/ui';
 import { useAuth } from '@/context/AuthContext';
@@ -80,7 +81,7 @@ export function CashFlowPage() {
           <Button key="csv" label="Exportar CSV" icon="download" variant="soft" isLoading={isExporting} onClick={handleExport} />,
         ]}
       />
-      <div className="mb-4 flex gap-2 overflow-x-auto [scrollbar-width:none]">
+      <div className="mb-4 flex gap-2 overflow-x-auto lg:mb-6 [scrollbar-width:none]">
         <YearChip title="Elige el año" value={year} onChange={setYear} />
         <ChipGroup label="Moneda" options={CURRENCY_OPTIONS} value={currency} onChange={setCurrency} className="mx-0 px-0" />
       </div>
@@ -91,30 +92,36 @@ export function CashFlowPage() {
       )}
       {data && visible.length > 0 && total && (
         <>
-          <div className="mb-4 grid grid-cols-2 items-stretch gap-3 lg:mb-6 lg:grid-cols-3 lg:gap-4">
-            <StatCard informationTopic="Flujo acumulado" label={`Flujo acumulado a ${monthName}`} value={money(rows[anchor - 1].accumulated)} detail="Saldo real de cuentas" />
-            <StatCard informationTopic="Flujo mensual" label={`Flujo de ${monthName}`} value={money(rows[anchor - 1].flow)} detail={isCurrentYear ? 'Mes en curso' : 'Último mes del año'} tone={rows[anchor - 1].flow < 0 ? 'danger' : 'success'} />
-            <StatCard informationTopic="Proyección anual" label="Acumulado proyectado a diciembre" value={money(rows[11].accumulated)} detail="Solo con lo ya registrado" tone="neutral" className="col-span-2 lg:col-span-1" />
+          <div className="mb-4 grid grid-cols-2 items-stretch gap-3 lg:mb-6 lg:grid-cols-3 lg:pr-0.5">
+            <StatCard size="flow" valueSize="compact" informationTopic="Flujo acumulado" label={`Flujo acumulado a ${monthName}`} value={money(rows[anchor - 1].accumulated)} detail="Saldo real de cuentas" />
+            <StatCard size="flow" valueSize="large" informationTopic="Flujo mensual" label={`Flujo de ${monthName}`} value={money(rows[anchor - 1].flow)} detail={isCurrentYear ? 'Mes en curso' : 'Último mes del año'} tone={rows[anchor - 1].flow < 0 ? 'danger' : 'success'} />
+            <StatCard size="flow" valueSize="compact" informationTopic="Proyección anual" label="Acumulado proyectado a diciembre" value={money(rows[11].accumulated)} detail="Solo con lo ya registrado" tone="neutral" className="col-span-2 lg:col-span-1" />
           </div>
+          <CashFlowChart rows={rows} currency={currency} year={year} />
           <Card title={`Matriz mensual · ${currency} ${year}`}>
             <DataTable
+              layout="matrix"
+              isCompact
+              showScrollHint
+              scrollHint={<><span className="lg:hidden">Desliza la tabla para ver todos los meses</span><span className="hidden lg:inline">Desliza la tabla para ver todas las columnas.</span></>}
               caption={`Flujo de caja ${year}`}
               isWide
               rows={CONCEPTS}
               rowKey={(row) => row.key}
-              rowClassName={(row) => (row.key === 'pendingCommitments' ? 'italic text-content-muted' : row.key === 'flow' ? 'bg-surface-container text-subtitle' : row.isStrong ? 'text-subtitle' : undefined)}
+              rowClassName={(row) => (row.key === 'pendingCommitments' ? 'italic text-content-muted' : row.key === 'flow' ? 'bg-surface-container font-semibold' : row.isStrong ? 'font-semibold' : undefined)}
               columns={[
                 { key: 'concept', header: 'Concepto', render: (row) => <span className="whitespace-nowrap">{row.label}</span> },
                 ...visible.map((month) => ({
                   key: month.month,
-                  header: `${MONTHS_LONG[Number(month.month.slice(5, 7)) - 1].slice(0, 3)}${month.projection ? ' · proyección' : ''}`,
+                  header: `${MONTHS_LONG[Number(month.month.slice(5, 7)) - 1].slice(0, 3)}${month.projection ? '*' : ''}`,
+                  ariaLabel: month.projection ? `${MONTHS_LONG[Number(month.month.slice(5, 7)) - 1].slice(0, 3)} · proyección` : undefined,
                   isNumeric: true,
                   render: (row: ConceptRow) => cell(month[row.key]),
                 })),
                 { key: 'total', header: 'Total', isNumeric: true, render: (row: ConceptRow) => (row.key === 'accumulated' ? '—' : cell(total[row.key])) },
               ]}
             />
-            <p className="mt-3 text-caption text-content-muted">
+            <p className="mt-4 hidden text-caption text-content-muted lg:block">
               {visible.some((month) => month.projection)
                 ? `Proyección: los meses posteriores a ${monthName} incluyen vencimientos pendientes y facturaciones proyectadas. `
                 : ''}

@@ -44,8 +44,15 @@ export function ConsolidatedPage() {
       />
       {isLoading && !data && <Spinner />}
       {error && <EmptyState icon="error" title="No pudimos cargar la vista consolidada" />}
+      {hasRate && position && <Callout
+        tone="warning"
+        icon="info"
+        title="Valores referenciales"
+        text={`Tipo de cambio ${position.rate} soles por dólar, registrado el ${formatShortDate(position.rateDate ?? '', true)}. Tus valores por moneda no cambian.`}
+        className="mb-4 lg:mb-6"
+      />}
       {position && (
-        <div className="mb-4 grid gap-3 lg:grid-cols-3 lg:gap-4">
+        <div className="mb-4 grid gap-3 lg:mb-6 lg:grid-cols-3 lg:gap-3 lg:pr-0.5">
           {position.penAvailable !== null && (
             <StatCard informationTopic="Posición por moneda" label="Disponible en soles" value={formatMoney(position.penAvailable, 'PEN')} detail={target === 'PEN' || rate === null ? 'Valor original' : `Valor original · equivale a ${formatMoney(position.penAvailable / rate, 'USD')}`} tone="neutral" />
           )}
@@ -73,13 +80,6 @@ export function ConsolidatedPage() {
       )}
       {data && position && (
         <>
-          {hasRate && <Callout
-            tone="warning"
-            icon="info"
-            title="Valores referenciales"
-            text={`Tipo de cambio ${position.rate} soles por dólar, registrado el ${formatShortDate(position.rateDate ?? '', true)}. Tus valores por moneda no cambian.`}
-            className="mb-4"
-          />}
           <Card informationTopic="Flujo mensual" title={`Flujo de caja de ${MONTHS_LONG[data.flow.month - 1].toLowerCase()}${hasRate ? ' (referencial)' : ''}`}>
             <BreakdownRow label="Flujo en soles" value={formatMoney(data.flow.pen, 'PEN')} />
             <BreakdownRow

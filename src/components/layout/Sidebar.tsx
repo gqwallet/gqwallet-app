@@ -94,10 +94,10 @@ export interface SidebarProps {
 export function Sidebar({ sections, userName, userDetail, userInitials, onSignOut, onNavigate, className }: SidebarProps) {
   return (
     <nav aria-label="Menú principal" className={cn('flex h-full w-[248px] flex-col gap-1 overflow-y-auto border-r border-line-subtle bg-surface-card px-4 py-5', className)}>
-      <Brand className="mb-3" />
+      <Brand className="mb-4" />
       {sections.map((section) => (
         <div key={section.title} className="flex flex-col gap-1">
-          <Overline label={section.title} className="px-3 pt-3 pb-1.5" />
+          <Overline label={section.title} className="px-3 pt-3 pb-1" />
           {section.items.map((item) => (
             <NavLink
               key={item.to}
@@ -117,7 +117,7 @@ export function Sidebar({ sections, userName, userDetail, userInitials, onSignOu
         </div>
       ))}
       <div className="flex-1" />
-      <div className="flex flex-col gap-3 border-t border-line-subtle pt-4">
+      <div className="flex flex-col gap-3 border-t border-line-subtle pt-3">
         <div className="flex items-center gap-3 px-3">
           <Avatar initials={userInitials} />
           <div className="flex min-w-0 flex-col">

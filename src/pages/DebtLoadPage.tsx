@@ -56,7 +56,7 @@ export function DebtLoadPage() {
         onBack={() => navigate(PATHS.cashFlow)}
         actions={<Button label="Cambiar umbral" icon="tune" variant="secondary" onClick={() => { setDraft(String(threshold)); setDraftError(null); setIsThresholdOpen(true); }} />}
       />
-      <div className="mb-4 flex gap-2 overflow-x-auto [scrollbar-width:none]">
+      <div className="mb-4 flex gap-2 overflow-x-auto [scrollbar-width:none] lg:mb-6">
         <YearChip title="Elige el año" value={year} onChange={setYear} />
         <ChipGroup label="Moneda" options={CURRENCY_OPTIONS} value={currency} onChange={setCurrency} className="mx-0 px-0" />
       </div>
@@ -64,7 +64,7 @@ export function DebtLoadPage() {
       {error && <EmptyState icon="error" title="No pudimos calcular la carga de deuda" />}
       {data && (
         <>
-          <Card informationTopic="Carga de deuda" title={`Serie de 12 meses · umbral ${formatPercent(data.threshold, 2)}`} className="mb-4">
+          <Card informationTopic="Carga de deuda" title={`Serie de 12 meses · umbral ${formatPercent(data.threshold)}`} className="mb-4 lg:mb-6">
             <p className="-mt-2 mb-4 text-caption text-content-muted">% de los ingresos del mes</p>
             <BarChart
               label="Carga de deuda por mes"

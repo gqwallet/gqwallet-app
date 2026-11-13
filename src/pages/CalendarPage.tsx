@@ -100,7 +100,7 @@ export function CalendarPage() {
           <Card title={formatMonth(period, true)} className="mb-4 lg:mb-6">
             <MonthGrid period={period} today={today} marks={marks.map((mark) => ({ key: mark.key, date: mark.date, label: labelOf(mark), color: mark.color, status: mark.status }))} />
           </Card>
-          <div className="grid gap-4 lg:grid-cols-[436px_1fr] lg:gap-6">
+          <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,var(--container-calendar-aside))_1fr] lg:gap-6">
             <div className="flex flex-col gap-4 lg:gap-6">
               <Card title="Leyenda">
                 {data.cards.map((card) => (

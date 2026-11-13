@@ -43,3 +43,12 @@ it('keeps unbudgeted consumption visible when there are no limits', () => {
     expect(screen.getByRole('table')).toBeVisible();
   } finally { Object.assign(status, previous); }
 });
+
+it('counts only unbudgeted categories that have consumption', () => {
+  const previous = status.lines;
+  status.lines = [...previous, { categoryId: 'unused', categoryName: 'Sin consumo', limit: null, consumption: 0, balance: null, usage: null, state: 'NO_BUDGET' }];
+  try {
+    render(<BudgetPage />);
+    expect(screen.getByText('Gastado sin presupuesto').closest('[data-stat-card]')).toHaveTextContent('1 categoría');
+  } finally { status.lines = previous; }
+});

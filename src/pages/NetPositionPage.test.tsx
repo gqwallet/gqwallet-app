@@ -21,7 +21,8 @@ it('shows accounts, cards and totals exactly as returned without subtracting com
   expect(useNetPosition).toHaveBeenCalledWith('USD');
   expect(screen.getByText('Total en cuentas').parentElement).toHaveTextContent('US$ 999.00');
   expect(screen.getByText('Total de deuda').parentElement).toHaveTextContent('US$ 299.00');
-  expect(screen.getByText('US$ 699.00')).toBeVisible();
+  expect(screen.getAllByText('US$ 699.00')).toHaveLength(2);
+  expect(screen.getByRole('heading', { name: /^Desglose al / })).toBeVisible();
   expect(screen.getByText('2 compromisos').parentElement).toHaveTextContent('US$ 141.00');
   fireEvent.change(screen.getByLabelText('Moneda'), { target: { value: 'PEN' } });
   expect(useNetPosition).toHaveBeenLastCalledWith('PEN');

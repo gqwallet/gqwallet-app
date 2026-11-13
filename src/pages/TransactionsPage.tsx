@@ -98,7 +98,7 @@ export function TransactionsPage() {
         )}
       </div>
       {data && !isEmpty && <HistoryTotals totals={data.totals} />}
-      <Card>
+      <Card className="lg:pt-6">
         {isLoading && !data && <Spinner />}
         {error && <EmptyState icon="error" title="No pudimos cargar tus movimientos" action={<Button label="Reintentar" onClick={refetch} />} />}
         {isEmpty &&

@@ -9,6 +9,8 @@
 export interface AuthHeadingProps {
   /** Form title. */
   title: string;
+  /** Short instruction shown by the current access-screen design. */
+  description?: string;
 }
 
 /**
@@ -19,10 +21,11 @@ export interface AuthHeadingProps {
  * <AuthHeading title={title} />
  * ```
  */
-export function AuthHeading({ title }: AuthHeadingProps) {
+export function AuthHeading({ title, description }: AuthHeadingProps) {
   return (
-    <div className="mb-6 flex flex-col gap-3">
+    <div className="mb-5 flex flex-col gap-5">
       <h1 className="text-headline">{title}</h1>
+      {description && <p className="hidden text-body text-content-secondary lg:block">{description}</p>}
     </div>
   );
 }

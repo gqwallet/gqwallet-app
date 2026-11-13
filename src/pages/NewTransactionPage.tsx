@@ -65,7 +65,7 @@ export function NewTransactionPage() {
         breadcrumb="Movimientos / Nuevo"
         title="Nuevo movimiento"
       />
-      <div className="mb-4 flex flex-col gap-1.5 lg:mb-6">
+      <div className="mb-4 flex flex-col gap-2 lg:mb-6">
         <span className="text-label text-content-secondary">Tipo de movimiento</span>
         <div role="group" aria-label="Tipo de movimiento" className="flex gap-2">
           <Chip label="Gasto" isSelected={isExpense} onClick={() => setNature('EXPENSE')} />

@@ -21,7 +21,7 @@ const TITLES: Array<[string, string]> = [
   [PATHS.transactions, 'Movimientos'],
   [PATHS.accounts, 'Cuentas'],
   [PATHS.cards, 'Tarjetas'],
-  [PATHS.fixedPaymentsSummary, 'Resumen de pagos fijos'],
+  [PATHS.fixedPaymentsSummary, 'Resumen'],
   [PATHS.fixedPayments, 'Pagos fijos'],
   [PATHS.budget, 'Presupuesto'],
   [PATHS.debtLoad, 'Carga de deuda'],
@@ -43,10 +43,11 @@ const TITLES: Array<[string, string]> = [
  * @returns Title text.
  * @example
  * ```ts
- * titleFor('/tarjetas/abc'); // 'Tarjetas'
+ * titleFor('/tarjetas/abc'); // 'Tarjeta'
  * ```
  */
 export function titleFor(pathname: string): string {
   const match = TITLES.find(([path]) => pathname === path || pathname.startsWith(`${path}/`));
+  if (match?.[0] === PATHS.cards && pathname !== PATHS.cards) return 'Tarjeta';
   return match ? match[1] : 'GQWallet';
 }

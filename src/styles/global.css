@@ -5,48 +5,64 @@
  */
 @import 'tailwindcss';
 @import '@fontsource/inter/400.css';
+@import '@fontsource/inter/400-italic.css';
 @import '@fontsource/inter/600.css';
 @import '@fontsource/inter/700.css';
-@import 'material-symbols/rounded.css';
+@import 'material-symbols/rounded.css' layer(base);
 
 @theme {
   --container-inline-form: 520px;
   --spacing-dialog-action: 95px;
   --container-information: 480px;
+  --container-chart: 640px;
   --radius-information: 16px;
   --color-*: initial;
-  --color-information-scrim: #1a1a1a59;
+  --color-information-scrim: #12162a59;
   --color-white: #ffffff;
   --color-transparent: transparent;
 
-  --color-primary: #3333b2;
-  --color-primary-container: #eeeefa;
-  --color-primary-on-container: #3333b2;
-  --color-primary-pale: #d6d6f2;
-  --color-secondary: #338033;
-  --color-secondary-container: #ebf5eb;
-  --color-tertiary: #b24d1a;
-  --color-tertiary-container: #fdf1ea;
-  --color-danger: #cc3333;
-  --color-danger-container: #fbeaea;
+  --color-primary: #4338ca;
+  --color-primary-hover: #3730a3;
+  --color-primary-subtle: #f6f7ff;
+  --color-primary-container: #eef0fe;
+  --color-primary-on-container: #4338ca;
+  --color-primary-pale: #dcddfb;
+  --color-secondary: #147a3a;
+  --color-secondary-container: #e7f6ec;
+  --color-tertiary: #b45309;
+  --color-tertiary-container: #fef2e4;
+  --color-danger: #c92a39;
+  --color-danger-container: #fdecee;
   --color-caution: #8a6d00;
   --color-caution-container: #fbf6e0;
   --color-caution-accent: #e5cc66;
 
-  --color-surface-background: #f5f5f5;
+  --color-surface-background: #f3f5f9;
   --color-surface-card: #ffffff;
-  --color-surface-container: #fafafa;
-  --color-surface-high: #ebebeb;
-  --color-surface-inverse: #1a1a1a;
-  --color-scrim: #1a1a1a73;
+  --color-surface-container: #f8f9fc;
+  --color-surface-high: #e7eaf1;
+  --color-surface-inverse: #12162a;
+  --color-scrim: #12162a73;
 
-  --color-content-primary: #1a1a1a;
-  --color-content-secondary: #595959;
-  --color-content-muted: #808080;
+  --color-content-primary: #12162a;
+  --color-content-secondary: #474e63;
+  --color-content-muted: #636b7f;
   --color-content-on-primary: #ffffff;
 
-  --color-line-subtle: #ebebeb;
-  --color-line-outline: #d1d1d1;
+  --color-line-subtle: #e7eaf1;
+  --color-line-outline: #ced3df;
+
+  --color-chart-1: #4338ca;
+  --color-chart-2: #0d9488;
+  --color-chart-3: #f59e0b;
+  --color-chart-4: #0ea5e9;
+  --color-chart-5: #8b5cf6;
+  --color-chart-6: #ec4899;
+  --color-chart-positive: #147a3a;
+  --color-chart-negative: #c92a39;
+  --color-chart-projection: #dcddfb;
+  --color-chart-grid: #e7eaf1;
+  --color-chart-neutral: #9aa3b5;
 
   /* Card identifier palette offered when registering a credit card (FR-004). */
   --color-card-indigo: #3333b2;
@@ -58,29 +74,31 @@
 
   --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
 
-  --text-display: 28px;
-  --text-display--line-height: 34px;
-  --text-display--letter-spacing: -0.4px;
+  --text-display: 30px;
+  --text-display--line-height: 36px;
+  --text-display--letter-spacing: -0.6px;
   --text-display--font-weight: 700;
   --text-amount: 22px;
   --text-amount--line-height: 28px;
-  --text-amount--letter-spacing: -0.2px;
+  --text-amount--letter-spacing: -0.3px;
   --text-amount--font-weight: 700;
-  --text-amount-s: 18px;
+  --text-amount-s: 20px;
   --text-amount-s--line-height: 26px;
-  --text-amount-s--letter-spacing: -0.2px;
+  --text-amount-s--letter-spacing: -0.3px;
   --text-amount-s--font-weight: 700;
-  --text-headline: 20px;
-  --text-headline--line-height: 26px;
+  --text-headline: 22px;
+  --text-headline--line-height: 28px;
+  --text-headline--letter-spacing: -0.3px;
   --text-headline--font-weight: 700;
   --text-title: 16px;
   --text-title--line-height: 22px;
-  --text-title--font-weight: 700;
-  --text-subtitle: 13px;
-  --text-subtitle--line-height: 18px;
+  --text-title--font-weight: 600;
+  --text-title--letter-spacing: -0.1px;
+  --text-subtitle: 14px;
+  --text-subtitle--line-height: 20px;
   --text-subtitle--font-weight: 600;
-  --text-body: 13px;
-  --text-body--line-height: 18px;
+  --text-body: 14px;
+  --text-body--line-height: 20px;
   --text-body--font-weight: 400;
   --text-body-s: 12px;
   --text-body-s--line-height: 16px;
@@ -88,10 +106,10 @@
   --text-label: 12px;
   --text-label--line-height: 16px;
   --text-label--font-weight: 600;
-  --text-caption: 11px;
-  --text-caption--line-height: 14px;
+  --text-caption: 12px;
+  --text-caption--line-height: 16px;
   --text-caption--font-weight: 400;
-  --text-overline: 10px;
+  --text-overline: 11px;
   --text-overline--line-height: 14px;
   --text-overline--letter-spacing: 0.6px;
   --text-overline--font-weight: 600;
@@ -102,8 +120,23 @@
   --radius-xl: 20px;
   --radius-full: 9999px;
 
-  --shadow-card: 0 1px 3px 0 #0000000f;
-  --shadow-floating: 0 2px 6px 0 #0000000f, 0 12px 32px 0 #00000029;
+  --shadow-card: 0 1px 2px 0 #12162a0a, 0 4px 16px 0 #12162a0d;
+  --shadow-stat: 0 1px 1px 0 #12162a0a, 0 4px 8px 0 #12162a0d;
+  --shadow-floating: 0 2px 6px 0 #12162a0f, 0 12px 32px 0 #12162a29;
+  --container-dashboard-aside: 436px;
+  --container-calendar-aside: 362px;
+  --spacing-chart-ring: 72px;
+  --spacing-chart-donut: 132px;
+  --spacing-chart-height: 186px;
+  --spacing-chart-bars: 146px;
+  --spacing-chart-bar: calc((100% - 8px) / 2);
+  --spacing-chart-line-mobile: 100px;
+  --spacing-chart-line: 120px;
+  --spacing-stat: 122px;
+  --spacing-stat-mobile: 120px;
+  --spacing-stat-compact: 116px;
+  --spacing-stat-report: 130px;
+  --spacing-stat-flow: 126px;
 }
 
 html,

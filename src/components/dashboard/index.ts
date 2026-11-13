@@ -7,3 +7,5 @@
 export * from '@/components/dashboard/BudgetUsageCard';
 export * from '@/components/dashboard/FirstSteps';
 export * from '@/components/dashboard/UpcomingCardsCard';
+
+export { OutflowBreakdown, type OutflowBreakdownProps } from './OutflowBreakdown';
