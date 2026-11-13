@@ -27,7 +27,7 @@ async function fixtures(page: Page) {
 test('the redesigned budget uses the real percentage and keeps compact bars inside their cells', async ({ page }) => {
   await fixtures(page);
   await page.goto('/presupuesto');
-  await expect(page.getByRole('img', { name: /Uso del presupuesto/ })).toBeVisible();
+  await expect(page.getByRole('img', { name: 'Con presupuesto' })).toBeVisible();
   await expect(page.getByText('120.0 %').first()).toBeVisible();
   for (const width of [360, 768, 1440]) {
     await page.setViewportSize({ width, height: 1000 });
