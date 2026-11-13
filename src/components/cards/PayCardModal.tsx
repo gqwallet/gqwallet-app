@@ -69,8 +69,10 @@ export interface PayCardModalProps {
  * ```
  */
 export function PayCardModal({ isOpen, cardName, currency, cycles, initialClosingDate, accounts, isSaving, error, onSubmit, onClose }: PayCardModalProps) {
-  const unpaid = [...cycles].filter((cycle) => Number(cycle.amountDue) > 0).sort((a, b) => a.closingDate.localeCompare(b.closingDate));
-  const initial = unpaid.find((cycle) => cycle.closingDate === initialClosingDate) ?? unpaid[0];
+  const today = todayIso();
+  const selectable = [...cycles].filter((cycle) => Number(cycle.amountDue) > 0 || cycle.closingDate >= today).sort((a, b) => a.closingDate.localeCompare(b.closingDate));
+  const unpaid = selectable.filter((cycle) => Number(cycle.amountDue) > 0);
+  const initial = selectable.find((cycle) => cycle.closingDate === initialClosingDate) ?? unpaid[0] ?? selectable[0];
   const [closingDate, setClosingDate] = useState(initial?.closingDate ?? '');
   const [sourceId, setSourceId] = useState(accounts[0]?.id ?? '');
   const [amount, setAmount] = useState(formatAmount(initial?.amountDue ?? 0));
@@ -93,7 +95,7 @@ export function PayCardModal({ isOpen, cardName, currency, cycles, initialClosin
       setAmountError('Ingresa un importe mayor a cero.');
       return;
     }
-    if (!unpaid.some((cycle) => cycle.closingDate === closingDate) || !accounts.some((account) => account.id === sourceId)) return;
+    if (!selectable.some((cycle) => cycle.closingDate === closingDate) || !accounts.some((account) => account.id === sourceId)) return;
     onSubmit({ cycleClosingDate: closingDate, sourceAccountId: sourceId, amount: value, economicDate: date });
   };
 
@@ -107,7 +109,7 @@ export function PayCardModal({ isOpen, cardName, currency, cycles, initialClosin
       footer={
         <>
           <Button label="Cancelar" variant="secondary" onClick={onClose} />
-          <Button label="Registrar pago" isLoading={isSaving} disabled={accounts.length === 0 || !unpaid.some((cycle) => cycle.closingDate === closingDate)} onClick={handlePay} />
+          <Button label="Registrar pago" isLoading={isSaving} disabled={accounts.length === 0 || !selectable.some((cycle) => cycle.closingDate === closingDate)} onClick={handlePay} />
         </>
       }
     >
@@ -122,9 +124,9 @@ export function PayCardModal({ isOpen, cardName, currency, cycles, initialClosin
           helper={`Solo puedes pagar con una cuenta en la misma moneda de la línea (${currency}).`}
         />
       )}
-      <SelectField label="Facturación" value={closingDate} options={unpaid.map((cycle) => ({ value: cycle.closingDate, label: `Factura el ${formatShortDate(cycle.closingDate, true)} · paga hasta ${formatShortDate(cycle.paymentDueDate, true)} · ${formatMoney(cycle.amountDue, currency)}` }))} onChange={(value) => {
+      <SelectField label="Facturación" value={closingDate} options={selectable.map((cycle) => ({ value: cycle.closingDate, label: `${cycle.closingDate <= today ? 'Facturó' : 'Factura'} el ${formatShortDate(cycle.closingDate, true)} · paga hasta ${formatShortDate(cycle.paymentDueDate, true)} · ${formatMoney(cycle.amountDue, currency)}` }))} onChange={(value) => {
         setClosingDate(value);
-        setAmount(formatAmount(unpaid.find((cycle) => cycle.closingDate === value)?.amountDue ?? 0));
+        setAmount(formatAmount(selectable.find((cycle) => cycle.closingDate === value)?.amountDue ?? 0));
         setAmountError(null);
       }} />
       <TextField label="Importe" inputMode="decimal" value={amount} onChange={setAmount} helper="Puedes pagar una parte; el saldo queda pendiente" error={amountError ?? error} />

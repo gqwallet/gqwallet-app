@@ -7,7 +7,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { PageHeader } from '@/components/layout';
-import { BudgetUsageCard, FirstSteps, UpcomingCardsCard } from '@/components/dashboard';
+import { BudgetUsageCard, FirstSteps, OutflowBreakdown, UpcomingCardsCard } from '@/components/dashboard';
 import { DueGroups } from '@/components/obligations';
 import { Button, Callout, Card, ChipGroup, EmptyState, Spinner, StatCard } from '@/components/ui';
 import { useAuth } from '@/context/AuthContext';
@@ -47,17 +47,17 @@ export function DashboardPage() {
   const { dashboard, dues, budget } = data;
   const newMovement = <Button key="new" label="Nuevo movimiento" icon="add" onClick={() => navigate(PATHS.newTransaction)} />;
   const currencyPicker = (
-    <div className="mb-4 flex flex-col gap-2">
+    <div className="mb-4 flex flex-col gap-2 lg:mb-6">
       <ChipGroup label="Moneda" options={CURRENCY_OPTIONS} value={currency} onChange={setCurrency} />
     </div>
   );
   const stats = (
-    <div className="mb-4 grid grid-cols-2 items-stretch gap-3 lg:mb-6 lg:grid-cols-3 lg:gap-4">
-      <StatCard informationTopic="Saldo en cuentas" label="Saldo en cuentas" value={formatMoney(dashboard.accountsBalance, currency)} tone="neutral" />
-      <StatCard informationTopic="Deuda de tarjetas" label="Deuda de tarjetas" value={formatMoney(dashboard.cardsDebt, currency)} tone="warning" />
+    <div className="mb-4 grid grid-cols-2 items-stretch gap-3 lg:mb-6 lg:grid-cols-3 lg:pr-0.5">
+      <StatCard informationTopic="Saldo en cuentas" label="Saldo en cuentas" value={formatMoney(dashboard.accountsBalance, currency)} detail={data.accountCount === undefined ? undefined : plural(data.accountCount, 'cuenta activa', 'cuentas activas')} tone="neutral" />
+      <StatCard informationTopic="Deuda de tarjetas" label="Deuda de tarjetas" value={formatMoney(dashboard.cardsDebt, currency)} detail={data.cardCount === undefined ? undefined : plural(data.cardCount, 'tarjeta', 'tarjetas')} tone="neutral" />
       <StatCard informationTopic="Posición neta" label="Posición neta" value={formatMoney(dashboard.netPosition, currency)} actionLabel="Ver desglose" onClick={() => navigate(`${PATHS.netPosition}?moneda=${currency}`)} />
-      <StatCard informationTopic="Ingresos" label="Ingresos" value={formatMoney(dashboard.monthIncomes, currency)} detail={plural(dashboard.monthIncomesCount, 'ingreso', 'ingresos')} tone="success" />
-      <StatCard informationTopic="Salidas" label="Salidas" value={formatMoney(dashboard.monthOutflows.total, currency)} detail={`Gastos desde cuentas ${formatMoney(dashboard.monthOutflows.accountExpenses, currency)} · Pagos fijos pagados ${formatMoney(dashboard.monthOutflows.fixedPaid, currency)} · Pagos de tarjeta ${formatMoney(dashboard.monthOutflows.cardPayments, currency)}`} tone="neutral" />
+      <StatCard informationTopic="Ingresos" label="Ingresos del mes" value={formatMoney(dashboard.monthIncomes, currency)} detail={plural(dashboard.monthIncomesCount, 'ingreso', 'ingresos')} tone="success" />
+      <StatCard informationTopic="Salidas" label="Salidas del mes" value={formatMoney(dashboard.monthOutflows.total, currency)} tone="neutral" />
       <StatCard informationTopic="Compromisos" label="Compromisos" value={formatMoney(dashboard.pendingCommitments.total, currency)} detail={`${dashboard.pendingCommitments.count} por vencer`} tone="warning" />
     </div>
   );
@@ -105,12 +105,13 @@ export function DashboardPage() {
     <>
       <PageHeader informationTopic="Dashboard"
         title={name}
-        subtitle={`Resumen de ${month} en ${currencyWord} al ${formatWeekdayDate(today).toLowerCase()} ${today.slice(0, 4)}.`}
+        subtitle={`Así van tus finanzas en ${currencyWord} al ${formatWeekdayDate(today).toLowerCase()} ${today.slice(0, 4)}.`}
         actions={[<Button key="transfer" label="Nueva transferencia" icon="swap_horiz" variant="secondary" onClick={() => navigate(PATHS.newTransfer)} />, newMovement]}
       />
       {currencyPicker}
       {stats}
-      <div className="grid gap-4 lg:grid-cols-[1fr_436px] lg:gap-6">
+      <div className="mb-4 lg:hidden"><OutflowBreakdown outflows={dashboard.monthOutflows} currency={currency} monthName={month} /></div>
+      <div className="grid gap-4 lg:grid-cols-[1fr_var(--container-dashboard-aside)] lg:gap-6">
         <div className="flex flex-col gap-4 lg:gap-6">
           <Card title="Próximos vencimientos" action={<Button label="Ver todos" variant="ghost" onClick={() => navigate(PATHS.fixedPayments)} />}>
             {hasDues ? (
@@ -124,11 +125,13 @@ export function DashboardPage() {
         <div className="flex flex-col gap-4 lg:gap-6">
           <UpcomingCardsCard
             cards={dashboard.upcomingCards}
+            usages={data.cardUsages}
             action={<Button label="Ver tarjetas" variant="ghost" onClick={() => navigate(PATHS.cards)} />}
             onSelect={(id) => navigate(withId(PATHS.card, id))}
           />
+          <div className="hidden lg:block"><OutflowBreakdown outflows={dashboard.monthOutflows} currency={currency} monthName={month} /></div>
           <Card title="Vista consolidada">
-            <p className="mb-4 text-body text-content-secondary">Referencial: convierte tus {currency === 'PEN' ? 'dólares a soles' : 'soles a dólares'} con un tipo de cambio que tú registras.</p>
+            <p className="mb-4 text-body-s text-content-muted">Referencial: convierte tus {currency === 'PEN' ? 'dólares a soles' : 'soles a dólares'} con un tipo de cambio que tú registras.</p>
             <Button label="Abrir vista consolidada" icon="currency_exchange" variant="soft" isBlock className="lg:w-auto" onClick={() => navigate(PATHS.consolidated)} />
           </Card>
         </div>

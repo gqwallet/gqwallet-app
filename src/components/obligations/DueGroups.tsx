@@ -55,21 +55,22 @@ export function DueGroups({ dues, today, instrumentNames = {}, onSelect, isCompa
     { key: 'month', label: 'Este mes', items: dues.laterThisMonth },
   ];
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col gap-1">
       {groups
         .filter((group) => group.items.length > 0)
         .map((group) => (
           <Fragment key={group.key}>
-            <Overline label={group.label} tone={group.isOverdue ? 'danger' : 'muted'} className="mt-3 mb-1 px-1" />
+            <Overline label={group.label} tone={group.isOverdue ? 'danger' : 'muted'} className="px-1 pt-2 pb-0.5" />
             {group.items.map((due) => (
               <ListRow
                 key={due.id}
                 icon={FIXED_KIND_ICON[due.kind]}
                 title={due.description}
                 detail={detailOf(due, Boolean(group.isOverdue), instrumentNames, isCompact)}
-                badge={group.isOverdue ? <Badge label={chargesOnDay(due.kind) ? 'Cobro pendiente' : 'Vencido'} tone="danger" className="hidden sm:inline-flex" /> : undefined}
+                badge={group.isOverdue ? <Badge label={chargesOnDay(due.kind) ? 'Cobro pendiente' : 'Vencido'} tone="danger" /> : undefined}
+                showMobileBadge={false}
                 amount={formatMoney(due.expectedAmount, due.currency)}
-                meta={group.isOverdue ? <span className="text-danger sm:hidden">{chargesOnDay(due.kind) ? 'Cobro pendiente' : 'Vencido'}</span> : due.currency}
+                meta={group.isOverdue ? <><span className="text-danger sm:hidden">{chargesOnDay(due.kind) ? 'Cobro pendiente' : 'Vencido'}</span><span className="hidden sm:inline">{due.currency}</span></> : due.currency}
                 onClick={onSelect ? () => onSelect(due) : undefined}
               />
             ))}

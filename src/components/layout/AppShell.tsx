@@ -8,7 +8,6 @@ import { useEffect, useState, type ReactNode } from 'react';
 import { useLocation } from 'react-router';
 import { IconButton } from '@/components/ui';
 import { MobileHeader } from '@/components/layout/MobileHeader';
-import { MoneyPattern } from '@/components/layout/MoneyPattern';
 import { Sidebar, type SidebarProps } from '@/components/layout/Sidebar';
 
 /** Props of {@link AppShell}. */
@@ -42,7 +41,6 @@ export function AppShell({ title, children, ...sidebar }: AppShellProps) {
 
   return (
     <div className="relative isolate min-h-screen lg:flex">
-      <MoneyPattern />
       <Sidebar {...sidebar} className="sticky top-0 hidden h-screen shrink-0 lg:flex" />
       <div className="flex min-w-0 flex-1 flex-col">
         <MobileHeader informationTopic={({ "/dashboard": "Dashboard", "/movimientos": "Movimientos", "/cuentas": "Cuentas", "/tarjetas": "Tarjetas", "/pagos-fijos": "Pagos fijos", "/presupuesto": "Presupuesto", "/flujo-de-caja": "Flujo de caja", "/metas": "Metas", "/reportes": "Reportes", "/calendario": "Calendario" } as Record<string, string>)[location.pathname]} title={title} onOpenMenu={() => setIsMenuOpen(true)} />

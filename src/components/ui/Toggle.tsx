@@ -53,11 +53,12 @@ export function Toggle({ label, description, error, isOn, onChange, isDisabled =
         disabled={isDisabled}
         onClick={() => onChange(!isOn)}
         className={cn(
-          'flex h-6 w-11 shrink-0 items-center rounded-full p-0.5 transition-colors focus-visible:outline-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-50',
-          isOn ? 'bg-secondary' : 'bg-surface-high',
+          '-my-2.5 flex size-11 shrink-0 items-center rounded-md focus-visible:outline-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-50',
         )}
       >
-        <span className={cn('size-5 rounded-full bg-surface-card shadow-card transition-transform', isOn && 'translate-x-5')} />
+        <span className={cn('flex h-6 w-11 items-center rounded-full p-0.5 transition-colors', isOn ? 'bg-secondary' : 'bg-surface-high')}>
+          <span className={cn('size-5 rounded-full bg-surface-card shadow-card transition-transform', isOn && 'translate-x-5')} />
+        </span>
       </button>
     </div>
   );

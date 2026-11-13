@@ -45,14 +45,14 @@ export function SignUpPage() {
 
   return (
     <AuthLayout>
-      <AuthHeading title="Crea tu cuenta" />
+      <AuthHeading title="Crea tu cuenta" description="Solo necesitas un correo y una contraseña." />
       <form noValidate onSubmit={handleSubmit} className="flex flex-col gap-4">
         {errors.general && <Callout tone="danger" text={errors.general} />}
         <TextField label="Correo" type="email" autoComplete="email" value={email} onChange={setEmail} error={emailError} />
         <TextField label="Contraseña" type="password" autoComplete="new-password" value={password} onChange={setPassword} helper={PASSWORD_HELP} error={passwordError} />
         <Toggle label="Acepto los términos y la política de privacidad" description="Necesario para crear tu cuenta." error={consentError} isOn={consent} onChange={setConsent} />
-        <Button type="submit" label="Crear cuenta" isLoading={isSubmitting} isBlock />
-        <TextLink label="¿Ya tienes cuenta? Inicia sesión" to={PATHS.signIn} className="self-start" />
+        <Button type="submit" label="Crear cuenta" isLoading={isSubmitting} isBlock className="mt-1" />
+        <TextLink label="¿Ya tienes cuenta? Inicia sesión" to={PATHS.signIn} className="mt-1 self-start px-4" />
       </form>
     </AuthLayout>
   );

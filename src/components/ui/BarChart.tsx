@@ -33,6 +33,8 @@ export interface BarChartProps {
   threshold?: number;
   /** Text shown for bars without value. */
   emptyText?: string;
+  /** Unit caption above the plot, as used by monthly reports. */
+  caption?: string;
 }
 
 /**
@@ -43,12 +45,13 @@ export interface BarChartProps {
  * <BarChart label="Carga de deuda" data={months} threshold={7} emptyText="Sin ingresos" />
  * ```
  */
-export function BarChart({ label, data, threshold, emptyText = '—' }: BarChartProps) {
-  const max = Math.max(threshold ?? 0, ...data.map((datum) => datum.value ?? 0)) * 1.15 || 1;
+export function BarChart({ label, data, threshold, emptyText = '—', caption }: BarChartProps) {
+  const max = Math.max(threshold ?? 0, ...data.map((datum) => datum.value ?? 0)) || 1;
   return (
     <figure aria-label={label} className="-mx-4 overflow-x-auto px-4 lg:mx-0 lg:px-0">
-      <div className="relative flex h-[160px] min-w-[560px] items-end gap-2">
-        {threshold !== undefined && <div aria-hidden="true" className="absolute inset-x-0 h-px bg-danger" style={{ bottom: `${(threshold / max) * 136 + 24}px` }} />}
+      {caption && <figcaption className="mb-1.5 text-caption text-content-muted">{caption}</figcaption>}
+      <div className="relative flex h-[150px] min-w-[560px] items-end gap-2.5">
+        {threshold !== undefined && <div aria-hidden="true" className="absolute inset-x-0 h-px bg-danger" style={{ bottom: `${(threshold / max) * 126}px` }} />}
         {data.map((datum) => (
           <div key={datum.label} className="flex flex-1 flex-col items-center justify-end gap-1">
             {datum.value === null ? (
@@ -56,13 +59,13 @@ export function BarChart({ label, data, threshold, emptyText = '—' }: BarChart
             ) : (
               <>
                 {datum.valueLabel && <span className="text-caption whitespace-nowrap text-content-secondary">{datum.valueLabel}</span>}
-                <div className={cn('w-full rounded-t-sm', FILL[datum.tone ?? 'success'])} style={{ height: `${Math.max(2, (datum.value / max) * 136)}px` }} />
+                <div className={cn('w-[calc(100%_-_12px)] rounded-t-sm', FILL[datum.tone ?? 'primary'])} style={{ height: `${Math.max(0, (datum.value / max) * 126)}px` }} />
               </>
             )}
-            <span className="text-caption text-content-muted">{datum.label}</span>
           </div>
         ))}
       </div>
+      <div className="mt-1.5 flex min-w-[560px] gap-2.5">{data.map(datum => <span key={datum.label} className="flex-1 text-center text-caption text-content-muted">{datum.label}</span>)}</div>
     </figure>
   );
 }

@@ -42,10 +42,10 @@ export function NewAccountPage() {
     <>
       <PageHeader breadcrumb="Cuentas / Nueva" title="Nueva cuenta"  />
       {error && <Callout tone="danger" text={error} className="mb-4" />}
-      <Card title="Datos de la cuenta" className="lg:max-w-160">
+      <Card title="Datos de la cuenta">
         <AccountForm banks={banks.data ?? []} id={FORM_ID} defaultCurrency={profile?.preferredCurrency ?? 'PEN'} today={todayIso()} aliasError={aliasError} onSubmit={handleSubmit} />
       </Card>
-      <div className="mt-4 flex flex-col-reverse gap-2 lg:mt-6 lg:max-w-160 lg:flex-row lg:justify-end">
+      <div className="mt-4 flex gap-3 [&>*]:flex-1 lg:mt-6 lg:justify-end lg:[&>*]:flex-none">
         <Button label="Cancelar" variant="secondary" onClick={() => navigate(PATHS.accounts)} />
         <Button type="submit" form={FORM_ID} label="Guardar cuenta" icon="check" isLoading={isSaving} />
       </div>

@@ -4,7 +4,7 @@
  * @author G0nz4loQu3dena
  * @packageDocumentation
  */
-import { Card, DataTable } from '@/components/ui';
+import { Card, DataTable, ProgressBar } from '@/components/ui';
 import type { ReportSlice } from '@/types/transaction';
 import { formatAmount, formatPercent } from '@/utils/format';
 
@@ -35,13 +35,15 @@ export function RankingTable({ title, labelHeader, amountHeader, slices }: Ranki
         <p className="text-body text-content-secondary">Sin datos en este periodo.</p>
       ) : (
         <DataTable
+          layout="ranking"
+          showScrollHint
           caption={title}
           rows={slices.slice(0, 10)}
           rowKey={(slice) => slice.label}
           columns={[
             { key: 'label', header: labelHeader, render: (slice) => slice.label },
             { key: 'amount', header: amountHeader, isNumeric: true, render: (slice) => formatAmount(slice.amount) },
-            { key: 'share', header: 'Participación', isNumeric: true, render: (slice) => formatPercent(slice.share) },
+            { key: 'share', header: 'Participación', isNumeric: true, render: (slice) => <span className="flex items-center justify-end gap-3"><ProgressBar size="compact" label={`Participación de ${slice.label}`} value={slice.share} />{formatPercent(slice.share)}</span> },
           ]}
         />
       )}

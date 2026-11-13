@@ -15,6 +15,8 @@ export interface BrandProps {
   isMarkOnly?: boolean;
   /** Layout utilities. */
   className?: string;
+  /** Uses the larger lockup of the public access screens. */
+  size?: 'default' | 'large';
 }
 
 /**
@@ -25,13 +27,13 @@ export interface BrandProps {
  * <Brand />
  * ```
  */
-export function Brand({ isInverse = false, isMarkOnly = false, className }: BrandProps) {
+export function Brand({ isInverse = false, isMarkOnly = false, className, size = 'default' }: BrandProps) {
   return (
     <span className={cn('inline-flex items-center gap-2.5', className)}>
-      <span className={cn('flex size-9 items-center justify-center rounded-md', isInverse ? 'bg-surface-card text-content-primary' : 'bg-surface-inverse text-content-on-primary')}>
-        <Icon name="payments" />
+      <span className={cn('flex items-center justify-center rounded-md', size === 'large' ? 'size-11' : 'size-9', isInverse ? 'bg-surface-card text-content-primary' : 'bg-primary text-content-on-primary')}>
+        <Icon name="payments" size={size === 'large' ? 24 : 20} />
       </span>
-      {!isMarkOnly && <span className={cn('text-title', isInverse ? 'text-content-on-primary' : 'text-content-primary')}>GQWallet</span>}
+      {!isMarkOnly && <span className={cn(size === 'large' ? 'text-headline' : 'text-title', isInverse ? 'text-content-on-primary' : 'text-content-primary')}>GQWallet</span>}
     </span>
   );
 }

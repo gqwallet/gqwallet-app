@@ -7,12 +7,14 @@
 import { useAuth } from '@/context/AuthContext';
 import { useResource } from '@/hooks/useResource';
 import { budgetsService } from '@/services/budgets.service';
+import { accountsService } from '@/services/accounts.service';
 import { cardsService } from '@/services/cards.service';
 import { obligationsService } from '@/services/obligations.service';
 import { overviewService } from '@/services/overview.service';
 import { transactionsService } from '@/services/transactions.service';
 import type { ApiError, Currency } from '@/types/api';
 import type { BudgetStatus } from '@/types/budget';
+import type { CreditLineUsage } from '@/types/card';
 import type { PaymentDue, UpcomingDues } from '@/types/obligation';
 import type { Dashboard } from '@/types/overview';
 import { monthOf, monthRange, todayIso } from '@/utils/format';
@@ -25,6 +27,12 @@ export interface DashboardData {
   dues: UpcomingDues;
   /** Budget table of the current month. */
   budget: BudgetStatus;
+  /** Server-calculated line usage for the cards displayed in the dashboard. */
+  cardUsages?: Record<string, CreditLineUsage>;
+  /** Number of active accounts in the selected currency. */
+  accountCount?: number;
+  /** Number of cards in the selected currency. */
+  cardCount?: number;
   /** Number of incomes of the month. */
   incomeCount: number;
   /** Number of expenses of the month. */
@@ -77,7 +85,7 @@ export function useDashboard(currency: Currency): DashboardState {
     async (signal) => {
       const period = monthOf(todayIso());
       const { from, to } = monthRange(period);
-      const [dashboard, dues, budget, cards, incomes, expenses, monthDueList] = await Promise.all([
+      const [dashboard, dues, budget, cards, incomes, expenses, monthDueList, accounts] = await Promise.all([
         overviewService.getDashboard(currency, signal),
         obligationsService.getUpcoming(signal),
         budgetsService.getStatus(period, currency, signal),
@@ -85,14 +93,24 @@ export function useDashboard(currency: Currency): DashboardState {
         transactionsService.list({ from, to, currency, nature: 'INCOME', status: 'ACTIVE', size: 1 }, signal),
         transactionsService.list({ from, to, currency, nature: 'EXPENSE', status: 'ACTIVE', size: 1 }, signal),
         obligationsService.listDues(from, to, signal),
+        // Counts are supplemental copy; an unavailable count must not hide financial totals.
+        accountsService.list(signal).catch(() => null),
       ]);
       const ofCurrency = monthDueList.filter((due) => due.currency === currency && due.status !== 'VOIDED');
       const grouped = byCurrency(dues, currency);
+      const cardUsageResults = await Promise.allSettled(
+        dashboard.upcomingCards.filter(card => cards.some(item => item.id === card.cardId)).map(async card =>
+          [card.cardId, await cardsService.getCreditLineUsage(card.cardId, signal)] as const),
+      );
+      const cardUsages = Object.fromEntries(cardUsageResults.flatMap(result => result.status === 'fulfilled' ? [result.value] : []));
       const hasDues = Object.values(grouped).some((list) => list.length > 0);
       return {
         dashboard,
         dues: grouped,
         budget,
+        cardUsages,
+        accountCount: accounts?.filter(account => account.status === 'ACTIVE' && account.currency === currency).length,
+        cardCount: cards.filter(card => card.currency === currency).length,
         incomeCount: incomes.totalElements,
         expenseCount: expenses.totalElements,
         monthDues: ofCurrency.length,

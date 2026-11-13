@@ -44,6 +44,15 @@ it('honors a cycle chosen from the pending list and resets it when reopened', ()
   expect(screen.getByLabelText('Importe')).toHaveValue('60.00');
 });
 
+it('offers the current and next cycles even with zero balance while excluding settled past cycles', () => {
+  const next: PaymentCycle = { cycleStart: '2026-12-02', closingDate: '2027-01-01', paymentDueDate: '2027-01-02', billed: 0, paid: 0, amountDue: 0, status: 'OPEN' };
+  render(<PayCardModal isOpen cardName="Visa" currency="PEN" cycles={[...cycles, next]} accounts={accounts} isSaving={false} error={null} onSubmit={vi.fn()} onClose={vi.fn()} />);
+  const values = [...screen.getByLabelText('Facturación').querySelectorAll('option')].map(option => option.value);
+  expect(values).toEqual(['2026-10-01', '2026-12-01', '2027-01-01']);
+  expect(screen.getByLabelText('Facturación')).toHaveValue('2026-10-01');
+  expect(screen.getByLabelText('Importe')).toHaveValue('60.00');
+});
+
 it('prevents payment without an unpaid cycle or a source account', () => {
   const props = { isOpen: true, cardName: 'Visa', currency: 'PEN' as const, cycles: [], accounts, isSaving: false, error: null, onSubmit: vi.fn(), onClose: vi.fn() };
   const { rerender } = render(<PayCardModal {...props} />);

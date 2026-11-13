@@ -13,7 +13,9 @@ export interface CardProps {
   /** Card content. */
   children: ReactNode;
   /** Title rendered by a section header. */
-  title?: string;
+  title?: ReactNode;
+  /** Accessible heading name for a title containing an independently labeled action. */
+  titleLabel?: string;
   /** Element on the right of the title, usually a ghost button. */
   action?: ReactNode;
   /** Contextual explanation for this financial summary. */
@@ -30,12 +32,12 @@ export interface CardProps {
  * <Card title={title} action={<Button variant="ghost" label={actionLabel} />}>…</Card>
  * ```
  */
-export function Card({ children, title, action, className, informationTopic }: CardProps) {
+export function Card({ children, title, titleLabel, action, className, informationTopic }: CardProps) {
   return (
-    <section className={cn('min-w-0 rounded-lg border border-line-subtle bg-surface-card p-4 shadow-card lg:p-6', className)}>
+    <section className={cn('min-w-0 rounded-lg border border-line-subtle bg-surface-card px-4 pt-3 pb-4 shadow-card lg:px-6 lg:pt-5 lg:pb-6 [&>[data-list-row]+[data-list-row]]:mt-1', className)}>
       {(title || action || informationTopic) && (
-        <header className="mb-4 flex min-h-10 items-center justify-between gap-2">
-          {title && <h2 className="min-w-0 flex-1 text-title [overflow-wrap:anywhere]">{title}</h2>}
+        <header className={cn('mb-4 flex items-center justify-between gap-2', Boolean(action || informationTopic) && 'min-h-10')}>
+          {title && <h2 aria-label={titleLabel} className="min-w-0 flex-1 text-title [overflow-wrap:anywhere]">{title}</h2>}
           {informationTopic && <InformationButton topic={informationTopic} />}
           {action}
         </header>

@@ -65,7 +65,7 @@ export function NewTransactionPage() {
         breadcrumb="Movimientos / Nuevo"
         title="Nuevo movimiento"
       />
-      <div className="mb-4 flex flex-col gap-1.5 lg:mb-6">
+      <div className="mb-4 flex flex-col gap-2 lg:mb-6">
         <span className="text-label text-content-secondary">Tipo de movimiento</span>
         <div role="group" aria-label="Tipo de movimiento" className="flex gap-2">
           <Chip label="Gasto" isSelected={isExpense} onClick={() => setNature('EXPENSE')} />
@@ -91,7 +91,7 @@ export function NewTransactionPage() {
             onSuggestMerchants={suggestMerchants}
             onManageCategories={() => navigate(PATHS.categories)}
           />
-          <div className="mt-4 flex flex-col-reverse gap-2 lg:mt-6 lg:flex-row lg:justify-end">
+          <div className="mt-4 flex gap-3 [&>*]:flex-1 lg:mt-6 lg:justify-end lg:[&>*]:flex-none">
             <Button label="Cancelar" variant="secondary" onClick={() => navigate(-1)} />
             <Button type="submit" form={FORM_ID} label={isExpense ? 'Guardar gasto' : 'Guardar ingreso'} icon="check" isLoading={isSaving} />
           </div>

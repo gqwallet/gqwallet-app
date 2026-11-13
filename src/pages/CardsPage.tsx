@@ -50,7 +50,7 @@ export function CardsPage() {
       )}
       {cards && cards.length > 0 && (
         <>
-          <div className="mb-4 grid gap-4 lg:mb-6 lg:grid-cols-2 lg:gap-6">
+          <div className="mb-4 grid items-start gap-4 lg:mb-6 lg:grid-cols-2 lg:gap-6">
             {cards.map((summary) => (
               <CardSummaryCard
                 key={summary.card.id}
