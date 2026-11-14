@@ -29,6 +29,58 @@ async function fixtures(page: Page) {
   });
 }
 
+for (const [nature, word] of [['EXPENSE', 'gasto'], ['INCOME', 'ingreso']] as const) {
+  test(`void ${word} keeps keyboard focus while typing the complete reason`, async ({ page }) => {
+    await fixtures(page);
+    const transaction = { id: 't1', nature, categoryId: 'c1', amount: 45.9, currency: 'PEN', economicDate: '2026-11-10', registeredAt: '2026-11-10T12:00:00Z', status: 'ACTIVE', essentiality: 'UNKNOWN' };
+    await page.route('**/api/v1/categories?**', (route) => route.fulfill({ json: [{ id: 'c1', name: 'Prueba', nature, status: 'ACTIVE' }] }));
+    await page.route('**/api/v1/transactions/t1', (route) => route.fulfill({ json: transaction }));
+    let submittedReason: unknown;
+    await page.route('**/api/v1/transactions/t1/voids', async (route) => {
+      submittedReason = route.request().postDataJSON();
+      await route.fulfill({ json: { ...transaction, status: 'VOIDED' } });
+    });
+    await page.goto('/movimientos/t1');
+    const trigger = page.getByRole('button', { name: 'Anular', exact: true });
+    await trigger.click();
+    const dialog = page.getByRole('dialog', { name: `¿Anular este ${word}?`, exact: true });
+    const reason = dialog.getByLabel('Motivo', { exact: true });
+    // fill() emits one change and misses focus loss between actual keystrokes.
+    await reason.click();
+    await page.keyboard.type('Lo registré dos veces');
+    await expect(reason).toHaveValue('Lo registré dos veces');
+    await expect(reason).toBeFocused();
+    await expect(dialog).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(dialog).toBeHidden();
+    await expect(trigger).toBeFocused();
+    await trigger.click();
+    await expect(reason).toHaveValue('Lo registré dos veces');
+    await dialog.getByRole('button', { name: `Anular ${word}`, exact: true }).click();
+    await expect(page).toHaveURL(/\/movimientos$/);
+    expect(submittedReason).toEqual({ reason: 'Lo registré dos veces' });
+  });
+}
+
+test('debt threshold keeps focus while typing and cancel preserves the saved value', async ({ page }) => {
+  await fixtures(page);
+  await page.route('**/api/v1/debt-loads/me?**', (route) => route.fulfill({ json: { year: 2026, currency: 'PEN', threshold: 7, months: [] } }));
+  await page.goto('/flujo-de-caja/carga-de-deuda');
+  const trigger = page.getByRole('button', { name: 'Cambiar umbral', exact: true });
+  await trigger.click();
+  const dialog = page.getByRole('dialog', { name: 'Cambiar umbral', exact: true });
+  const input = dialog.getByLabel('Umbral (%)', { exact: true });
+  await input.clear();
+  await expect(input).toBeFocused();
+  await page.keyboard.type('12.5');
+  await expect(input).toHaveValue('12.5');
+  await expect(input).toBeFocused();
+  await dialog.getByRole('button', { name: 'Cancelar', exact: true }).click();
+  await expect(trigger).toBeFocused();
+  await trigger.click();
+  await expect(input).toHaveValue('7');
+});
+
 test('dashboard greeting and long transfer rows fit all supported widths', async ({ page }) => {
   await fixtures(page);
   await page.goto('/dashboard');
