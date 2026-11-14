@@ -48,9 +48,18 @@ export function Modal({ isOpen, title, description, children, footer, onClose, i
 
   useEffect(() => {
     if (!isOpen) return undefined;
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [isOpen, onClose]);
+
+  // Focus and scroll follow visibility only; inline close callbacks can change on every keystroke.
+  useEffect(() => {
+    if (!isOpen) return undefined;
     const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     const handleKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') onClose();
       if (event.key === 'Tab') {
         const items = panel.current?.querySelectorAll<HTMLElement>('button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex="0"]');
         const first = items?.[0]; const last = items?.[items.length - 1];
@@ -68,7 +77,7 @@ export function Modal({ isOpen, title, description, children, footer, onClose, i
       document.body.style.overflow = overflow;
       previousFocus?.focus({ preventScroll: true });
     };
-  }, [isOpen, onClose]);
+  }, [isOpen]);
 
   if (!isOpen) return null;
   return createPortal(
