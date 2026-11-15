@@ -97,7 +97,7 @@ export function CashFlowPage() {
             <StatCard icon="show_chart" size="flow" valueSize="large" informationTopic="Flujo mensual" label={`Flujo de ${monthName}`} value={money(rows[anchor - 1].flow)} detail={isCurrentYear ? 'Mes en curso' : 'Último mes del año'} tone={rows[anchor - 1].flow < 0 ? 'danger' : 'success'} />
             <StatCard icon="analytics" size="flow" valueSize="compact" informationTopic="Proyección anual" label="Acumulado proyectado a diciembre" value={money(rows[11].accumulated)} detail="Solo con lo ya registrado" tone="neutral" className="col-span-2 lg:col-span-1" />
           </div>
-          <CashFlowChart rows={rows} currency={currency} year={year} />
+          <CashFlowChart key={`${year}-${currency}`} rows={visible} currency={currency} year={year} />
           <Card title={`Matriz mensual · ${currency} ${year}`}>
             <DataTable
               layout="matrix"
