@@ -5,7 +5,7 @@
  * @packageDocumentation
  */
 import type { ReactNode } from 'react';
-import { Callout, Card, UsageSummary } from '@/components/ui';
+import { Badge, Callout, Card, UsageSummary } from '@/components/ui';
 import type { BudgetStatus } from '@/types/budget';
 import { formatMoney, formatPercent } from '@/utils/format';
 
@@ -19,10 +19,6 @@ export interface BudgetUsageCardProps {
   action: ReactNode;
 }
 
-function joinNames(names: string[]): string {
-  return names.length <= 1 ? names.join('') : `${names.slice(0, -1).join(', ')} y ${names[names.length - 1]}`;
-}
-
 /**
  * Renders the total usage and a warning that names categories in attention or over their limit.
  *
@@ -34,14 +30,8 @@ function joinNames(names: string[]): string {
 export function BudgetUsageCard({ budget, monthName, action }: BudgetUsageCardProps) {
   const attention = budget.lines.filter((line) => line.state === 'ATTENTION');
   const over = budget.lines.filter((line) => line.state === 'EXCEEDED');
-  const parts: string[] = [];
-  if (attention.length) {
-    parts.push(
-      `${joinNames(attention.map((line) => `${line.categoryName}${line.usage !== null ? ` (${formatPercent(line.usage)})` : ''}`))} ${attention.length === 1 ? 'está' : 'están'} en atención`,
-    );
-  }
-  if (over.length) parts.push(`${joinNames(over.map((line) => line.categoryName))} ${over.length === 1 ? 'superó' : 'superaron'} su límite`);
-  const review = attention.length + over.length;
+  const categories = [...attention, ...over];
+  const review = categories.length;
   const usage = budget.totalUsage ?? 0;
   const unbudgeted = budget.lines.filter((line) => line.limit === null && line.consumption > 0).length;
   return (
@@ -57,7 +47,15 @@ export function BudgetUsageCard({ budget, monthName, action }: BudgetUsageCardPr
           tone="warning"
           className="mt-4"
           title={`Revisa ${review} ${review === 1 ? 'categoría' : 'categorías'}`}
-          text={`${parts.join('; ')}.`}
+          text={null}
+          items={<ul className="flex min-w-0 flex-col gap-2" aria-label="Categorías por revisar">
+            {categories.slice(0, 3).map(line => <li key={line.categoryId} className="flex min-w-0 items-center justify-between gap-2">
+              <span className="min-w-0 truncate" title={line.categoryName}>{line.categoryName}</span>
+              <Badge tone={line.state === 'EXCEEDED' ? 'danger' : 'caution'} label={`${line.state === 'EXCEEDED' ? 'Excedido' : 'Atención'} · ${line.usage === null ? '—' : formatPercent(line.usage)}`} />
+            </li>)}
+            {review > 3 && <li className="text-content-secondary">y {review - 3} más</li>}
+          </ul>}
+          action={review > 3 ? action : undefined}
         />
       )}
       {budget.totalLimit === 0 && <p className="mt-3 text-body-s text-content-muted">Aún no defines límites para este mes.</p>}
