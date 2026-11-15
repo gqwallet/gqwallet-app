@@ -5,6 +5,7 @@
  * @packageDocumentation
  */
 import { cn } from '@/utils/cn';
+import { Icon } from '@/components/ui/Icon';
 import { cardTone, type CardTone } from '@/utils/cardPalette';
 import { parseIsoDate, toIsoDate } from '@/utils/format';
 
@@ -22,15 +23,15 @@ export interface DayMark {
   status: 'PENDING' | 'OVERDUE' | 'PAID' | null;
 }
 
-const DOT: Record<CardTone | 'pending' | 'overdue' | 'paid', string> = {
-  primary: 'bg-primary',
-  success: 'bg-secondary',
-  warning: 'bg-tertiary',
-  danger: 'bg-danger',
-  caution: 'bg-caution-accent',
-  pending: 'bg-caution-accent',
-  overdue: 'bg-danger',
-  paid: 'bg-secondary',
+const INK: Record<CardTone | 'pending' | 'overdue' | 'paid', string> = {
+  primary: 'text-primary',
+  success: 'text-secondary',
+  warning: 'text-tertiary',
+  danger: 'text-danger',
+  caution: 'text-caution',
+  pending: 'text-caution',
+  overdue: 'text-danger',
+  paid: 'text-secondary',
 };
 const PILL: Record<CardTone | 'pending' | 'overdue' | 'paid', string> = {
   primary: 'bg-primary-container',
@@ -96,7 +97,7 @@ export function MonthGrid({ period, today, marks }: MonthGridProps) {
                 .slice(0, 3)
                 .map((mark) => (
                   <span key={mark.key} title={mark.label} className={cn('flex items-start gap-1 rounded-sm text-caption lg:px-1.5 lg:py-0.5', PILL[toneOf(mark)])}>
-                    <span className={cn('size-1.5 shrink-0 rounded-full lg:mt-1', DOT[toneOf(mark)])} />
+                    <Icon name={mark.color ? 'credit_card' : mark.status === 'PAID' ? 'check_circle' : 'event'} size={16} className={INK[toneOf(mark)]} />
                     <span className="sr-only lg:not-sr-only lg:line-clamp-2">{mark.label}</span>
                   </span>
                 ))}

@@ -41,6 +41,8 @@ export interface CalloutProps {
   icon?: string;
   /** Element shown below the text, e.g. a button. */
   action?: ReactNode;
+  /** Compact list or supporting elements shown below the message. */
+  items?: ReactNode;
   /** Layout utilities. */
   className?: string;
 }
@@ -53,14 +55,19 @@ export interface CalloutProps {
  * <Callout tone="warning" title={title} text={text} />
  * ```
  */
-export function Callout({ text, title, tone = 'primary', icon, action, className }: CalloutProps) {
+export function Callout({ text, title, tone = 'primary', icon, action, items, className }: CalloutProps) {
   return (
-    <div role={tone === 'danger' ? 'alert' : undefined} className={cn('flex gap-3 rounded-md px-4 py-3', SURFACE[tone], className)}>
-      <Icon name={icon ?? GLYPH[tone]} className={ACCENT[tone]} />
-      <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-        {title && <p className={cn('text-subtitle', ACCENT[tone])}>{title}</p>}
-        <div className="text-body text-content-primary">{text}</div>
-        {action && <div className="mt-2">{action}</div>}
+    <div role={tone === 'danger' ? 'alert' : undefined} className={cn('flex gap-3 rounded-xl p-4', SURFACE[tone], className)}>
+      <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-surface-card">
+        <Icon name={icon ?? GLYPH[tone]} className={ACCENT[tone]} />
+      </span>
+      <div className="flex min-w-0 flex-1 flex-col gap-3">
+        <div className="flex min-w-0 flex-1 flex-col gap-1">
+          {title && <p className="text-subtitle text-content-primary">{title}</p>}
+          {text !== null && text !== undefined && <div className="text-body text-content-secondary">{text}</div>}
+          {items && <div className="mt-2 text-body-s text-content-secondary">{items}</div>}
+        </div>
+        {action && <div className="self-start">{action}</div>}
       </div>
     </div>
   );
