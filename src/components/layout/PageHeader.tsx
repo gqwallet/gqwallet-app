@@ -49,7 +49,7 @@ export function PageHeader({ title, subtitle, actions, breadcrumb, onBack, class
         {onBack && !breadcrumb && <IconButton icon="arrow_back" label="Volver" onClick={onBack} className="-ml-2" />}
         <div className={cn('min-w-0 flex flex-1 flex-col', showMobileBreadcrumb ? 'gap-3 lg:gap-1' : 'gap-1')}>
           {breadcrumb && (onBack ? <button type="button" aria-label="Volver" onClick={onBack} className={cn('self-start rounded-sm text-left text-caption text-content-muted hover:underline focus-visible:outline-2 focus-visible:outline-primary', !showMobileBreadcrumb && 'hidden lg:block')}>{breadcrumb}</button> : <p className={cn('text-caption text-content-muted', !showMobileBreadcrumb && 'hidden lg:block')}>{breadcrumb}</p>)}
-          <div className="hidden items-center justify-between gap-2 lg:flex"><h1 className="hidden break-words text-headline lg:block">{title}</h1>{informationTopic && <InformationButton topic={informationTopic} />}</div>
+          <div className="hidden items-center gap-3 lg:flex"><h1 className="hidden min-w-0 break-words text-headline lg:block">{title}</h1>{informationTopic && <InformationButton topic={informationTopic} />}</div>
           {subtitle && <div className={isHero ? 'text-title text-content-primary lg:text-body lg:font-normal lg:text-content-secondary' : 'text-body text-content-secondary'}>{subtitle}</div>}
         </div>
         {isHero && <Bonny position="absolute" className="right-1.5 bottom-0 lg:right-0 lg:-bottom-[26px]" />}
