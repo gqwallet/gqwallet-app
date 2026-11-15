@@ -77,7 +77,7 @@ export function OnboardingPage() {
   };
 
   return (
-    <AuthLayout showMascot={false}>
+    <AuthLayout>
       <AuthHeading
         title="Configura tu billetera"
       />
