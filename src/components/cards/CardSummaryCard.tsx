@@ -4,7 +4,7 @@
  * @author G0nz4loQu3dena
  * @packageDocumentation
  */
-import { BreakdownRow, Button, Card, CreditCardMark, ProgressBar } from '@/components/ui';
+import { BreakdownRow, Button, Card, CreditCardVisual, ProgressBar } from '@/components/ui';
 import type { Card as CreditCard, CreditLineUsage, NextBilling, PaymentCycle } from '@/types/card';
 import { cardTone } from '@/utils/cardPalette';
 import { formatMoney, parseIsoDate, todayIso } from '@/utils/format';
@@ -43,7 +43,8 @@ export function CardSummaryCard({ card, usage, paymentCycles, onOpen, onPay, onE
   const summary = summarizeClosedStatements(paymentCycles, todayIso());
   const hasDue = Boolean(oldest);
   return (
-    <Card titleLabel={card.name} informationTopic="Resumen de tarjeta" className="pt-3 [&>header]:min-h-11" title={hasDue ? <span className="inline-flex items-center"><CreditCardMark color={card.color} />{card.name}</span> : <button type="button" aria-label="Ver detalle" onClick={onOpen} className="inline-flex items-center rounded-sm text-left focus-visible:outline-2 focus-visible:outline-primary"><CreditCardMark color={card.color} />{card.name}</button>}>
+    <Card titleLabel={card.name} informationTopic="Resumen de tarjeta" className="pt-3 [&>header]:min-h-11" title={hasDue ? card.name : <button type="button" aria-label="Ver detalle" onClick={onOpen} className="rounded-sm text-left focus-visible:outline-2 focus-visible:outline-primary">{card.name}</button>}>
+      <CreditCardVisual bankName={card.bankName} currency={card.currency} color={card.color} className="mb-4" />
       <p className="mb-4 text-body-s text-content-muted">
         {card.currency} · Facturación día {parseIsoDate(card.billingDate).getDate()}{card.billingCutoffTime ? ` · corte ${card.billingCutoffTime}` : ''} · Pago día {parseIsoDate(card.paymentDueDate).getDate()}
       </p>
