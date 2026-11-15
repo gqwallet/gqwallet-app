@@ -19,7 +19,7 @@ const SURFACE: Record<StatTone, string> = {
   success: 'bg-surface-card',
   warning: 'bg-surface-card',
   danger: 'bg-surface-card',
-  featured: 'bg-linear-[132deg] from-primary to-chart-5',
+  featured: 'bg-linear-[132deg] from-featured-start to-featured-end',
 };
 
 const VALUE: Record<StatTone, string> = {

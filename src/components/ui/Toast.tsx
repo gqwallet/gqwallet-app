@@ -44,11 +44,11 @@ export function Toast({ title, detail, tone = 'success', onDismiss }: ToastProps
         <Icon name={GLYPH[tone]} />
       </span>
       <div className="flex min-w-0 flex-1 flex-col">
-        <p className="text-subtitle text-content-on-primary">{title}</p>
-        {detail && <p className="text-body-s text-content-on-primary opacity-80">{detail}</p>}
+        <p className="text-subtitle text-content-inverse">{title}</p>
+        {detail && <p className="text-body-s text-content-inverse opacity-80">{detail}</p>}
       </div>
       {onDismiss && (
-        <button type="button" aria-label="Cerrar aviso" onClick={onDismiss} className="text-content-on-primary opacity-80 hover:opacity-100">
+        <button type="button" aria-label="Cerrar aviso" onClick={onDismiss} className="text-content-inverse opacity-80 hover:opacity-100">
           <Icon name="close" size={20} />
         </button>
       )}
