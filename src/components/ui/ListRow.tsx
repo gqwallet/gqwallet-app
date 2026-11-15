@@ -81,7 +81,7 @@ export function ListRow({ title, detail, icon, iconTone, leading, badge, showMob
   );
   const classes = cn('grid w-full min-w-0 grid-cols-[2.25rem_minmax(0,1fr)_1.5rem] items-center gap-x-3 gap-y-1 py-3 text-left sm:flex sm:gap-3', className);
   return onClick ? (
-    <button data-list-row type="button" onClick={onClick} className={cn(classes, 'rounded-md px-1 transition-colors hover:bg-surface-container focus-visible:outline-2 focus-visible:outline-primary lg:px-4')}>
+    <button data-list-row type="button" onClick={onClick} className={cn(classes, 'rounded-md px-1 transition-colors hover:bg-surface-container active:bg-surface-high focus-visible:outline-2 focus-visible:outline-primary lg:px-4')}>
       {content}
     </button>
   ) : (
