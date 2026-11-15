@@ -44,7 +44,7 @@ export function AppShell({ title, children, ...sidebar }: AppShellProps) {
       <Sidebar {...sidebar} className="sticky top-0 hidden h-screen shrink-0 lg:flex" />
       <div className="flex min-w-0 flex-1 flex-col">
         <MobileHeader informationTopic={({ "/dashboard": "Dashboard", "/movimientos": "Movimientos", "/cuentas": "Cuentas", "/tarjetas": "Tarjetas", "/pagos-fijos": "Pagos fijos", "/presupuesto": "Presupuesto", "/flujo-de-caja": "Flujo de caja", "/metas": "Metas", "/reportes": "Reportes", "/calendario": "Calendario" } as Record<string, string>)[location.pathname]} title={title} onOpenMenu={() => setIsMenuOpen(true)} />
-        <main className="mx-auto w-full max-w-[1192px] flex-1 px-4 pt-4 pb-10 lg:px-10 lg:pt-8">{children}</main>
+        <main className="mx-auto w-full max-w-[1192px] flex-1 px-4 pt-4 pb-10 lg:px-10 lg:pt-8"><div key={location.pathname} className="motion-safe:animate-page-in">{children}</div></main>
       </div>
       {isMenuOpen && (
         <div className="fixed inset-0 z-40 bg-scrim lg:hidden" role="dialog" aria-modal="true" aria-label="Menú">
