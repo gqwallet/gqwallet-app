@@ -29,7 +29,7 @@ export function StackedBar({ label, segments, showLegend = false }: StackedBarPr
       {segments.filter(item => item.value > 0).map((item, index) => <span key={index} title={item.label} style={{ flex: item.value / (total || 1), backgroundColor: CHART_COLORS[item.color] }} />)}
     </div>
     {showLegend && <figcaption className="mt-2.5 flex flex-wrap gap-x-3 gap-y-1.5">
-      {segments.map((item, index) => <span key={index} className="inline-flex items-center gap-1.5 text-caption text-content-secondary"><span className="size-2.5 rounded-sm" style={{ backgroundColor: CHART_COLORS[item.color] }} />{item.label}</span>)}
+      {segments.map((item, index) => <span key={index} className="inline-flex items-center gap-1.5 text-caption text-content-secondary"><span className="size-2.5 rounded-[3px]" style={{ backgroundColor: CHART_COLORS[item.color] }} />{item.label}</span>)}
     </figcaption>}
   </figure>;
 }

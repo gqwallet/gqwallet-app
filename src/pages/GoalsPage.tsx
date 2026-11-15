@@ -53,7 +53,7 @@ export function GoalsPage() {
             <p className="text-body-s text-content-secondary">{data.goals.length} {data.goals.length === 1 ? 'meta' : 'metas'} · {data.goals.filter(goal => goal.status === 'ACHIEVED').length} {data.goals.filter(goal => goal.status === 'ACHIEVED').length === 1 ? 'cumplida' : 'cumplidas'}</p>
             <span className="rounded-full bg-primary-container px-2.5 py-1 text-label text-primary">Aportes manuales</span>
           </div>
-          <Bonny pose="celebra" position="absolute" className="right-1.5 bottom-0 lg:right-6" />
+          <Bonny pose={data.goals.some(goal => goal.status === 'ACHIEVED') ? 'celebra' : 'regia'} position="absolute" className="right-1.5 bottom-0 lg:right-6" />
         </section>
       )}
       {data && data.goals.length > 0 && (

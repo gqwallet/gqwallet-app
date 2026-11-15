@@ -80,10 +80,10 @@ export function BudgetPage() {
       {error && <EmptyState icon="error" title="No pudimos cargar el presupuesto" />}
       {status && totalRow && <>
             <div className="mb-4 grid grid-cols-2 items-stretch gap-3 lg:mb-6 lg:grid-cols-4">
-              <StatCard icon="data_usage" informationTopic="Límite total" label="Límite total" value={money(status.totalLimit)} detail={`${withLimit} categorías con límite`} tone="neutral" />
-              <StatCard icon="task_alt" informationTopic="Gastado con presupuesto" label="Gastado con presupuesto" value={money(status.budgetedConsumption)} detail={`Uso ${formatPercent(usage)}`} tone={usage > 100 ? 'danger' : 'success'} />
-              <StatCard icon="report" informationTopic="Gastado sin presupuesto" label="Gastado sin presupuesto" value={money(status.unbudgetedConsumption)} detail={<>{unbudgeted} {unbudgeted === 1 ? 'categoría' : 'categorías'}<span className="hidden lg:inline"> sin límite</span></>} tone="warning" />
-              <StatCard icon="shopping_cart" iconTone="violet" informationTopic="Total gastado" label="Total gastado" value={money(status.totalConsumption)} detail={<>Incluye pagos fijos<span className="hidden lg:inline"> con categoría</span></>} tone="neutral" />
+              <StatCard size="flow" icon="data_usage" informationTopic="Límite total" label="Límite total" value={money(status.totalLimit)} detail={`${withLimit} categorías con límite`} tone="neutral" />
+              <StatCard size="flow" icon="task_alt" informationTopic="Gastado con presupuesto" label="Gastado con presupuesto" value={money(status.budgetedConsumption)} detail={`Uso ${formatPercent(usage)}`} tone={usage > 100 ? 'danger' : 'success'} />
+              <StatCard size="flow" icon="report" informationTopic="Gastado sin presupuesto" label="Gastado sin presupuesto" value={money(status.unbudgetedConsumption)} detail={<>{unbudgeted} {unbudgeted === 1 ? 'categoría' : 'categorías'}<span className="hidden lg:inline"> sin límite</span></>} tone="warning" />
+              <StatCard size="flow" icon="shopping_cart" iconTone="violet" informationTopic="Total gastado" label="Total gastado" value={money(status.totalConsumption)} detail={<>Incluye pagos fijos<span className="hidden lg:inline"> con categoría</span></>} tone="neutral" />
             </div>
             <Card title={`Uso del presupuesto de ${monthName}`} className="mb-4 lg:mb-6">
               <UsageSummary title="Con presupuesto" usage={status.totalUsage}

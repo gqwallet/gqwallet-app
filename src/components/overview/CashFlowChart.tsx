@@ -50,7 +50,7 @@ export function CashFlowChart({ rows, currency, year }: CashFlowChartProps) {
   return <Card className="mb-4 lg:mb-6">
     <h2 className="mb-4 text-title">Ingresos y salidas por mes<span className="hidden lg:inline"> · {currency} {year}</span></h2>
     <div className="mb-4 flex flex-wrap gap-2 text-caption text-content-secondary">
-      {([['bg-chart-positive', 'Ingresos'], ['bg-chart-1', 'Salidas efectivas'], ['bg-chart-projection', 'Salidas proyectadas*']] as const).map(([color, label]) => <span key={label} className="inline-flex items-center gap-1 rounded-full bg-surface-container px-2 py-1"><span className={cn('size-2.5 rounded-sm', color)} />{label}</span>)}
+      {([['bg-chart-positive', 'Ingresos'], ['bg-chart-1', 'Salidas efectivas'], ['bg-chart-projection', 'Salidas proyectadas*']] as const).map(([color, label]) => <span key={label} className="inline-flex items-center gap-1 rounded-full bg-surface-container px-2 py-1"><span className={cn('size-2.5 rounded-[3px]', color)} />{label}</span>)}
     </div>
     <figure aria-label="Ingresos y salidas por mes">
       <div className="flex flex-col gap-1 lg:hidden">
