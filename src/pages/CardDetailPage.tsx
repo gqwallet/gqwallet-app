@@ -59,15 +59,15 @@ export function CardDetailPage() {
         ]}
       />
       <div className="mb-4 grid items-stretch gap-3 lg:mb-6 lg:grid-cols-3 lg:gap-4">
-        <StatCard informationTopic="Total a pagar"
+        <StatCard icon="receipt_long" informationTopic="Total a pagar"
           label="Total a pagar"
           value={money(billedDue)}
           detail={billedCount === 0 ? 'Sin pagos pendientes' : `${billedCount} ${billedCount === 1 ? 'facturación' : 'facturaciones'}${overdueCount > 0 ? ` · ${overdueCount} ${overdueCount === 1 ? 'vencida' : 'vencidas'}` : ''}`}
           tone="warning"
           valueSize="large"
         />
-        <StatCard informationTopic="Línea utilizada" label="Línea utilizada" value={money(usage.used)} detail={openingDebt > 0 ? `Incluye deuda inicial ${money(openingDebt)}` : 'Deuda pendiente calculada'} tone="neutral" valueSize="large" />
-        <StatCard informationTopic="Línea disponible" label="Línea disponible" value={money(usage.available)} detail={`Línea total ${money(usage.creditLine)}${usage.creditBalance > 0 ? ` · saldo a favor ${money(usage.creditBalance)}` : ''}`} tone="success" valueSize="large" />
+        <StatCard icon="credit_score" iconTone="sky" informationTopic="Línea utilizada" label="Línea utilizada" value={money(usage.used)} detail={openingDebt > 0 ? `Incluye deuda inicial ${money(openingDebt)}` : 'Deuda pendiente calculada'} tone="neutral" valueSize="large" />
+        <StatCard icon="account_balance" informationTopic="Línea disponible" label="Línea disponible" value={money(usage.available)} detail={`Línea total ${money(usage.creditLine)}${usage.creditBalance > 0 ? ` · saldo a favor ${money(usage.creditBalance)}` : ''}`} tone="success" valueSize="large" />
       </div>
       <div className="grid items-start gap-4 lg:grid-cols-[1fr_436px] lg:gap-6">
         <div className="min-w-0">

@@ -83,7 +83,7 @@ export function CashFlowPage() {
       />
       <div className="mb-4 flex gap-2 overflow-x-auto lg:mb-6 [scrollbar-width:none]">
         <YearChip title="Elige el año" value={year} onChange={setYear} />
-        <ChipGroup label="Moneda" options={CURRENCY_OPTIONS} value={currency} onChange={setCurrency} className="mx-0 px-0" />
+        <ChipGroup label="Moneda" options={CURRENCY_OPTIONS} value={currency} onChange={setCurrency} />
       </div>
       {isLoading && !data && <Spinner />}
       {error && <EmptyState icon="error" title="No pudimos cargar el flujo de caja" />}
@@ -93,9 +93,9 @@ export function CashFlowPage() {
       {data && visible.length > 0 && total && (
         <>
           <div className="mb-4 grid grid-cols-2 items-stretch gap-3 lg:mb-6 lg:grid-cols-3 lg:pr-0.5">
-            <StatCard size="flow" valueSize="compact" informationTopic="Flujo acumulado" label={`Flujo acumulado a ${monthName}`} value={money(rows[anchor - 1].accumulated)} detail="Saldo real de cuentas" />
-            <StatCard size="flow" valueSize="large" informationTopic="Flujo mensual" label={`Flujo de ${monthName}`} value={money(rows[anchor - 1].flow)} detail={isCurrentYear ? 'Mes en curso' : 'Último mes del año'} tone={rows[anchor - 1].flow < 0 ? 'danger' : 'success'} />
-            <StatCard size="flow" valueSize="compact" informationTopic="Proyección anual" label="Acumulado proyectado a diciembre" value={money(rows[11].accumulated)} detail="Solo con lo ya registrado" tone="neutral" className="col-span-2 lg:col-span-1" />
+            <StatCard icon="show_chart" size="flow" valueSize="compact" informationTopic="Flujo acumulado" label={`Flujo acumulado a ${monthName}`} value={money(rows[anchor - 1].accumulated)} detail="Saldo real de cuentas" />
+            <StatCard icon="show_chart" size="flow" valueSize="large" informationTopic="Flujo mensual" label={`Flujo de ${monthName}`} value={money(rows[anchor - 1].flow)} detail={isCurrentYear ? 'Mes en curso' : 'Último mes del año'} tone={rows[anchor - 1].flow < 0 ? 'danger' : 'success'} />
+            <StatCard icon="analytics" size="flow" valueSize="compact" informationTopic="Proyección anual" label="Acumulado proyectado a diciembre" value={money(rows[11].accumulated)} detail="Solo con lo ya registrado" tone="neutral" className="col-span-2 lg:col-span-1" />
           </div>
           <CashFlowChart rows={rows} currency={currency} year={year} />
           <Card title={`Matriz mensual · ${currency} ${year}`}>

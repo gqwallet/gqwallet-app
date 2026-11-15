@@ -8,7 +8,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { PageHeader } from '@/components/layout';
 import { ContributeModal, GoalCard } from '@/components/savings';
-import { Button, Callout, Card, EmptyState, Spinner } from '@/components/ui';
+import { Bonny, Button, Callout, Card, EmptyState, Spinner } from '@/components/ui';
 import { useToast } from '@/context/ToastContext';
 import { useGoals } from '@/hooks/useGoals';
 import { PATHS, withId } from '@/navigation/paths';
@@ -45,6 +45,16 @@ export function GoalsPage() {
         <Card className="mb-4">
           <EmptyState icon="savings" title="Aún no tienes metas" text="Crea una meta y aporta desde tus cuentas de la misma moneda." action={<Button label="Nueva meta" icon="add" onClick={() => navigate(PATHS.newGoal)} />} />
         </Card>
+      )}
+      {data && data.goals.length > 0 && (
+        <section aria-label="Tus metas de ahorro" className="relative mb-4 flex min-h-[124px] items-center overflow-hidden rounded-xl bg-linear-[143deg] from-accent-container to-chart-4-container py-5 pr-[150px] pl-5 shadow-card lg:mb-6 lg:min-h-[140px] lg:px-7 lg:pr-[210px]">
+          <div className="flex min-w-0 flex-col items-start gap-1">
+            <h2 className="text-title lg:text-headline">Tus metas de ahorro</h2>
+            <p className="text-body-s text-content-secondary">{data.goals.length} {data.goals.length === 1 ? 'meta' : 'metas'} · {data.goals.filter(goal => goal.status === 'ACHIEVED').length} {data.goals.filter(goal => goal.status === 'ACHIEVED').length === 1 ? 'cumplida' : 'cumplidas'}</p>
+            <span className="rounded-full bg-primary-container px-2.5 py-1 text-label text-primary">Aportes manuales</span>
+          </div>
+          <Bonny pose="celebra" position="absolute" className="right-1.5 bottom-0 lg:right-6" />
+        </section>
       )}
       {data && data.goals.length > 0 && (
         <div className="mb-4 grid items-start gap-4 lg:mb-6 lg:grid-cols-3 lg:gap-6">

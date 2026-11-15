@@ -8,6 +8,7 @@ import type { ReactNode } from 'react';
 import { cn } from '@/utils/cn';
 import { InformationButton } from '@/components/ui/InformationButton';
 import { IconButton } from '@/components/ui';
+import { Bonny } from '@/components/ui/Bonny';
 
 /** Props of {@link PageHeader}. */
 export interface PageHeaderProps {
@@ -29,6 +30,8 @@ export interface PageHeaderProps {
   showMobileBreadcrumb?: boolean;
   /** Stacks long action labels on phones while keeping desktop actions inline. */
   stackActionsOnMobile?: boolean;
+  /** Dashboard banner; the profile greeting remains desktop-only. */
+  isHero?: boolean;
 }
 
 /**
@@ -39,16 +42,17 @@ export interface PageHeaderProps {
  * <PageHeader title="Movimientos" subtitle="Junio 2026" actions={<Button label="Nuevo movimiento" icon="add" />} />
  * ```
  */
-export function PageHeader({ title, subtitle, actions, breadcrumb, onBack, className, informationTopic, showMobileBreadcrumb = Boolean(breadcrumb), stackActionsOnMobile = false }: PageHeaderProps) {
+export function PageHeader({ title, subtitle, actions, breadcrumb, onBack, className, informationTopic, showMobileBreadcrumb = Boolean(breadcrumb), stackActionsOnMobile = false, isHero = false }: PageHeaderProps) {
   return (
-    <div className={cn('mb-4 flex flex-col gap-3 lg:mb-6 lg:flex-row lg:items-center lg:gap-4 lg:justify-between', breadcrumb && 'lg:min-h-12', !subtitle && !onBack && !actions && !showMobileBreadcrumb && 'hidden lg:flex', className)}>
-      <div className={cn("min-w-0 flex-1 items-start gap-2", subtitle || onBack || showMobileBreadcrumb ? "flex" : "hidden lg:flex")}>
+    <div className={cn('mb-4 flex flex-col gap-3 lg:mb-6 lg:flex-row lg:items-center lg:gap-4 lg:justify-between', breadcrumb && 'lg:min-h-12', !subtitle && !onBack && !actions && !showMobileBreadcrumb && 'hidden lg:flex', isHero && 'lg:overflow-hidden lg:rounded-xl lg:bg-linear-[161deg] lg:from-accent-container lg:to-chart-4-container lg:px-7 lg:py-[26px]', className)}>
+      <div className={cn('min-w-0 flex-1 items-start gap-2', subtitle || onBack || showMobileBreadcrumb ? 'flex' : 'hidden lg:flex', isHero && 'relative flex min-h-[124px] overflow-hidden rounded-xl bg-linear-[143deg] from-accent-container to-chart-4-container p-5 pr-[150px] lg:min-h-0 lg:overflow-visible lg:rounded-none lg:bg-none lg:p-0 lg:pr-[170px]')}>
         {onBack && !breadcrumb && <IconButton icon="arrow_back" label="Volver" onClick={onBack} className="-ml-2" />}
         <div className={cn('min-w-0 flex flex-1 flex-col', showMobileBreadcrumb ? 'gap-3 lg:gap-1' : 'gap-1')}>
           {breadcrumb && (onBack ? <button type="button" aria-label="Volver" onClick={onBack} className={cn('self-start rounded-sm text-left text-caption text-content-muted hover:underline focus-visible:outline-2 focus-visible:outline-primary', !showMobileBreadcrumb && 'hidden lg:block')}>{breadcrumb}</button> : <p className={cn('text-caption text-content-muted', !showMobileBreadcrumb && 'hidden lg:block')}>{breadcrumb}</p>)}
           <div className="hidden items-center justify-between gap-2 lg:flex"><h1 className="hidden break-words text-headline lg:block">{title}</h1>{informationTopic && <InformationButton topic={informationTopic} />}</div>
-          {subtitle && <div className="text-body text-content-secondary">{subtitle}</div>}
+          {subtitle && <div className={cn('text-body text-content-secondary', isHero && 'text-title text-content-primary lg:text-body lg:text-content-secondary')}>{subtitle}</div>}
         </div>
+        {isHero && <Bonny position="absolute" className="right-1.5 bottom-0 lg:right-0 lg:-bottom-[26px]" />}
       </div>
       {actions && <div className={cn('flex flex-wrap lg:[&>*]:flex-none', stackActionsOnMobile ? 'flex-col gap-2 [&>*]:flex-none lg:flex-row lg:gap-3' : 'gap-3 [&>*]:flex-1')}>{actions}</div>}
     </div>

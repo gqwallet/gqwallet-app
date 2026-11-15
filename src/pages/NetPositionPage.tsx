@@ -37,7 +37,7 @@ export function NetPositionPage() {
             <BreakdownRow label="Total de deuda" value={money(data.cardsDebt)} tone="total" />
             <BreakdownRow label="Posición neta" value={money(data.netPosition)} tone="total" />
           </Card>
-        <StatCard informationTopic="Posición neta" label="Posición neta" value={money(data.netPosition)} className="mb-4 lg:mb-6" />
+        <StatCard tone="featured" informationTopic="Posición neta" label="Posición neta" value={money(data.netPosition)} className="mb-4 lg:mb-6" />
         <Card informationTopic="Compromisos" title="Compromisos próximos · no se restan" className="mb-4">
           <BreakdownRow label="Pagos fijos pendientes" value={money(data.commitments.dues)} />
           <BreakdownRow label="Facturaciones de tarjetas" value={money(data.commitments.cards)} />
