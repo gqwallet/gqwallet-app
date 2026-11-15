@@ -7,6 +7,7 @@
 import type { ReactNode } from 'react';
 import { cn } from '@/utils/cn';
 import { Icon } from '@/components/ui/Icon';
+import { Bonny } from '@/components/ui/Bonny';
 
 /** Props of {@link EmptyState}. */
 export interface EmptyStateProps {
@@ -27,7 +28,7 @@ export interface EmptyStateProps {
 }
 
 /**
- * Renders a centered empty state with icon box, title, text and action.
+ * Renders a centered empty state; failures and restricted access retain their status glyph.
  *
  * @example
  * ```tsx
@@ -37,9 +38,9 @@ export interface EmptyStateProps {
 export function EmptyState({ title, text, icon = 'account_balance_wallet', action, className }: EmptyStateProps) {
   return (
     <div className={cn('flex flex-col items-center gap-3 px-6 py-8 text-center', className)}>
-      <span className="flex size-14 items-center justify-center rounded-lg bg-primary-container text-primary-on-container">
+      {icon !== 'error' && icon !== 'lock' ? <Bonny pose="descansa" stage="empty" /> : <span className="flex size-14 items-center justify-center rounded-lg bg-primary-container text-primary-on-container">
         <Icon name={icon} size={24} />
-      </span>
+      </span>}
       <p className="text-title text-content-primary">{title}</p>
       {text && <div className="max-w-sm text-body text-content-secondary">{text}</div>}
       {action}

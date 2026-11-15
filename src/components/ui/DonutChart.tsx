@@ -16,7 +16,7 @@ export interface DonutChartProps {
   centerLabel?: string;
   /** Renders the compact 72 px usage ring instead of the 132 px report donut. */
   isCompact?: boolean;
-  /** Within the compact variant, uses the 64 px ring with a tighter centered label, for rings beside other content. */
+  /** Within the compact variant, uses the 88 px budget ring beside other content. */
   isEmbedded?: boolean;
 }
 
@@ -43,8 +43,8 @@ export function DonutChart({ label, segments, centerLabel, isCompact = false, is
     </svg>;
   };
   return (
-    <figure role="img" aria-label={label} className={cn('relative shrink-0', isCompact ? isEmbedded ? 'size-16' : 'size-chart-ring' : 'mx-auto size-chart-donut')}>
-      {graph(isCompact && isEmbedded ? 64 : 72)}
+    <figure role="img" aria-label={label} className={cn('relative shrink-0', isCompact ? isEmbedded ? 'size-budget-ring' : 'size-chart-ring' : 'mx-auto size-chart-donut')}>
+      {graph(isCompact && isEmbedded ? 88 : 72)}
       {centerLabel && <span className={cn('absolute inset-0 flex items-center justify-center whitespace-nowrap tabular-nums', isEmbedded ? 'text-overline tracking-normal' : 'text-label')}>{centerLabel}</span>}
     </figure>
   );

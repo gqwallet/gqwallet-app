@@ -5,7 +5,7 @@
  * @packageDocumentation
  */
 import { Fragment } from 'react';
-import { Badge, Icon, ListRow, Overline } from '@/components/ui';
+import { Badge, ListRow, Overline } from '@/components/ui';
 import type { HistoryDay, HistoryItem } from '@/types/history';
 import { formatMoney, formatSignedMoney, formatWeekdayDate } from '@/utils/format';
 
@@ -39,13 +39,6 @@ export function HistoryList({ days, onSelect }: HistoryListProps) {
             <ListRow
               key={`${item.type}-${item.id}`}
               icon={item.icon}
-              leading={
-                item.isIncome && !item.isVoided ? (
-                  <span className="flex size-10 shrink-0 items-center justify-center rounded-md bg-secondary-container text-secondary">
-                    <Icon name={item.icon} />
-                  </span>
-                ) : undefined
-              }
               title={item.title}
               detail={item.detail}
               badge={item.badge ? <Badge label={item.badge} tone={item.isVoided ? 'danger' : 'neutral'} /> : undefined}

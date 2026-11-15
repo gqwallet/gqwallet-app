@@ -14,12 +14,18 @@ const { state } = vi.hoisted(() => ({ state: { position: { targetCurrency: null 
 vi.mock('@/hooks/useConsolidatedView', () => ({ useConsolidatedView: () => ({ data: { position: state.position, flow: { month: 6, pen: 10, usd: 5, consolidated: null } }, isLoading: false, error: null, registerRate: vi.fn(), isSaving: false, saveError: null }) }));
 beforeEach(() => { Object.assign(state.position, { targetCurrency: null, available: false, penAvailable: 150, usdAvailable: 20, rate: null, consolidated: null }); });
 
+function expectStatAmount(label: string, value: string) {
+  const amount = screen.getByText(label).closest('[data-stat-card]')!.querySelector('[data-stat-value]');
+  expect(amount).toBeVisible();
+  expect(amount!.textContent).toBe(value);
+}
+
 it('shows the Figma notice and navigates to the exchange-rate form', () => {
   render(<MemoryRouter><ConsolidatedPage /></MemoryRouter>);
   expect(screen.getByText('Registra un tipo de cambio')).toBeVisible();
   expect(screen.getByText('Para mostrar una vista consolidada necesitamos un tipo de cambio y su fecha. Mientras tanto, no sumamos tus monedas.')).toBeVisible();
-  expect(screen.getByText('S/ 150.00')).toBeVisible();
-  expect(screen.getByText('US$ 20.00')).toBeVisible();
+  expectStatAmount('Disponible en soles', 'S/ 150.00');
+  expectStatAmount('Disponible en dólares', 'US$ 20.00');
   expect(screen.getByText('S/ 10.00')).toBeVisible();
   expect(screen.getByText('US$ 5.00')).toBeVisible();
   expect(screen.queryByText(/Flujo referencial/)).not.toBeInTheDocument();
@@ -41,6 +47,6 @@ it('handles null balances without inventing zero amounts', () => {
 it('shows a returned zero balance independently of a missing foreign balance', () => {
   Object.assign(state.position, { penAvailable: 0, usdAvailable: null });
   render(<MemoryRouter><ConsolidatedPage /></MemoryRouter>);
-  expect(screen.getByText('S/ 0.00')).toBeVisible();
+  expectStatAmount('Disponible en soles', 'S/ 0.00');
   expect(screen.queryByText('Disponible en dólares')).not.toBeInTheDocument();
 });

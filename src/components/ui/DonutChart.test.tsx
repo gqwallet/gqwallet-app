@@ -20,10 +20,12 @@ it('keeps an empty track and never emits invalid geometry for empty or negative 
 it('preserves the server percentage above the limit while clamping the visual fill', () => {
   render(<UsageSummary title="Presupuesto" usage={150} detail="Consumo registrado" breakdown={[{ label: 'Total gastado', value: 'S/ 1,185.43' }]} />);
   expect(screen.getByText('150.0 %')).toBeVisible();
-  expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '100');
+  expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
   const paths = screen.getByRole('img', { name: 'Presupuesto' }).querySelector('svg')!.querySelectorAll('circle');
   expect(paths).toHaveLength(2);
   expect(paths[1]).toHaveAttribute('stroke', 'var(--color-chart-negative)');
+  const [filled, circumference] = paths[1].getAttribute('stroke-dasharray')!.split(' ').map(Number);
+  expect(filled).toBeCloseTo(circumference);
 });
 
 it('stacks heading and amounts on mobile so the heading keeps whole words', () => {

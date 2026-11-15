@@ -14,7 +14,13 @@ it('uses only the server budgeted usage and displays unbudgeted spending separat
   expect(screen.getByText('Sin presupuesto')).toBeVisible();
   expect(screen.getByText(/^S\/ 900.00 ·/)).toBeVisible();
   expect(screen.getByText('S/ 1,100.00')).toBeVisible();
-  expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '20');
+  const ring = screen.getByRole('img', { name: 'Con presupuesto' });
+  expect(ring).toHaveTextContent('20.0 %');
+  expect(ring).toHaveClass('size-budget-ring');
+  const arc = ring.querySelectorAll('circle')[1];
+  const [filled, circumference] = arc.getAttribute('stroke-dasharray')!.split(' ').map(Number);
+  expect(filled / circumference).toBeCloseTo(0.2);
+  expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
 });
 
 it.each([

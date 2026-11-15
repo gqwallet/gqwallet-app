@@ -13,6 +13,8 @@ export * from '@/components/ui/Chip';
 export * from '@/components/ui/DataTable';
 export * from '@/components/ui/EmptyState';
 export * from '@/components/ui/Icon';
+export * from '@/components/ui/IconTile';
+export * from '@/components/ui/Bonny';
 export * from '@/components/ui/IconButton';
 export * from '@/components/ui/ListRow';
 export * from '@/components/ui/Modal';
