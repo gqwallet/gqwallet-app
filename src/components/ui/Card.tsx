@@ -22,19 +22,21 @@ export interface CardProps {
   informationTopic?: string;
   /** Layout utilities. */
   className?: string;
+  /** Optional lilac surface for the emergency-fund card. */
+  surface?: 'default' | 'accent';
 }
 
 /**
- * Renders a white card with subtle border, 14 px radius and elevation.
+ * Renders a white card with subtle border, 20 px radius and elevation.
  *
  * @example
  * ```tsx
  * <Card title={title} action={<Button variant="ghost" label={actionLabel} />}>…</Card>
  * ```
  */
-export function Card({ children, title, titleLabel, action, className, informationTopic }: CardProps) {
+export function Card({ children, title, titleLabel, action, className, informationTopic, surface = 'default' }: CardProps) {
   return (
-    <section className={cn('min-w-0 rounded-lg border border-line-subtle bg-surface-card px-4 pt-3 pb-4 shadow-card lg:px-6 lg:pt-5 lg:pb-6 [&>[data-list-row]+[data-list-row]]:mt-1', className)}>
+    <section className={cn('min-w-0 rounded-xl border px-4 pt-3 pb-4 shadow-card lg:px-6 lg:pt-5 lg:pb-6 [&>[data-list-row]+[data-list-row]]:mt-1', surface === 'accent' ? 'border-accent-container-strong bg-accent-container' : 'border-line-subtle bg-surface-card', className)}>
       {(title || action || informationTopic) && (
         <header className={cn('mb-4 flex items-center justify-between gap-2', Boolean(action || informationTopic) && 'min-h-10')}>
           {title && <h2 aria-label={titleLabel} className="min-w-0 flex-1 text-title [overflow-wrap:anywhere]">{title}</h2>}

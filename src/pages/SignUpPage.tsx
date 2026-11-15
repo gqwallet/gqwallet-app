@@ -44,7 +44,7 @@ export function SignUpPage() {
   };
 
   return (
-    <AuthLayout>
+    <AuthLayout pose="celebra">
       <AuthHeading title="Crea tu cuenta" description="Solo necesitas un correo y una contraseña." />
       <form noValidate onSubmit={handleSubmit} className="flex flex-col gap-4">
         {errors.general && <Callout tone="danger" text={errors.general} />}

@@ -17,17 +17,19 @@ export interface ChipProps {
   icon?: string;
   /** Called when the chip is pressed. */
   onClick?: () => void;
+  /** Uses a segment inside a shared currency pill. */
+  isSegment?: boolean;
 }
 
 /**
- * Renders a 30 px chip; selected chips use the primary color and a check.
+ * Renders a selectable chip with a lilac selected surface and a check.
  *
  * @example
  * ```tsx
  * <Chip label="PEN · Soles" isSelected onClick={selectPen} />
  * ```
  */
-export function Chip({ label, isSelected = false, icon, onClick }: ChipProps) {
+export function Chip({ label, isSelected = false, icon, onClick, isSegment = false }: ChipProps) {
   const glyph = isSelected ? 'check' : icon;
   return (
     <button
@@ -35,9 +37,10 @@ export function Chip({ label, isSelected = false, icon, onClick }: ChipProps) {
       aria-pressed={isSelected}
       onClick={onClick}
       className={cn(
-        'inline-flex h-[30px] shrink-0 items-center gap-1.5 rounded-full border px-3 text-label whitespace-nowrap transition-colors',
+        'inline-flex shrink-0 items-center gap-1.5 rounded-full border px-3 text-label whitespace-nowrap transition-colors',
         'focus-visible:outline-2 focus-visible:outline-primary',
-        isSelected ? 'border-primary bg-primary text-content-on-primary' : 'border-line-outline bg-surface-card text-content-secondary hover:bg-surface-container',
+        isSelected ? 'border-transparent bg-accent-container-strong text-content-primary' : isSegment ? 'border-transparent bg-transparent text-content-secondary hover:bg-surface-container' : 'border-line-outline bg-surface-card text-content-secondary hover:bg-surface-container',
+        isSegment ? 'h-7' : 'h-[30px]',
       )}
     >
       {glyph && <Icon name={glyph} size={16} />}
@@ -81,14 +84,15 @@ export interface ChipGroupProps<TValue extends string> {
  * ```
  */
 export function ChipGroup<TValue extends string>({ label, options, value, onChange, isWrapping = false, className }: ChipGroupProps<TValue>) {
+  const isCurrency = options.length === 2 && options.some(option => option.value === 'PEN') && options.some(option => option.value === 'USD');
   return (
     <div
       role="group"
       aria-label={label}
-      className={cn('-mx-1 flex min-w-0 max-w-full gap-2 px-1', isWrapping ? 'flex-wrap' : 'overflow-x-auto [scrollbar-width:none]', className)}
+      className={cn('flex min-w-0 max-w-full', isCurrency ? 'w-fit shrink-0 gap-1 self-start rounded-full border border-line-subtle bg-surface-card p-1' : '-mx-1 gap-2 px-1', isWrapping ? 'flex-wrap' : 'overflow-x-auto [scrollbar-width:none]', className)}
     >
       {options.map((option) => (
-        <Chip key={option.value} label={option.label} icon={option.icon} isSelected={option.value === value} onClick={() => onChange(option.value)} />
+        <Chip key={option.value} label={option.label} icon={option.icon} isSelected={option.value === value} isSegment={isCurrency} onClick={() => onChange(option.value)} />
       ))}
     </div>
   );

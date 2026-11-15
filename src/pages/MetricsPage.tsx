@@ -47,8 +47,9 @@ export function MetricsPage() {
       {data && metrics && (
         <>
           <div className="mb-4 grid grid-cols-2 gap-3 lg:mb-6 lg:max-w-150 lg:gap-4">
-            <StatCard size="flow" label="Usuarios registrados" value={COUNT.format(metrics.registeredUsers)} detail="Cuentas creadas en total" />
+            <StatCard icon="group" size="flow" label="Usuarios registrados" value={COUNT.format(metrics.registeredUsers)} detail="Cuentas creadas en total" />
             <StatCard
+              icon="group"
               size="flow"
               label={`Usuarios activos · ${metrics.activeWindowDays} días`}
               value={COUNT.format(metrics.activeUsers)}

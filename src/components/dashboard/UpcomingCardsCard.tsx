@@ -71,6 +71,7 @@ export function UpcomingCardsCard({ cards, usages, action, onSelect }: UpcomingC
               <li key={card.cardId} className="py-3 first:pt-0 last:pb-0">
                 <ListRow
                   icon="credit_card"
+                  iconTone="violet"
                   title={card.name}
                   detail={card.amountDue > 0 ? `Paga hasta el ${formatShortDate(card.paymentDueDate)} · ${billing}` : `Sin pagos pendientes · ${billing}`}
                   amount={formatMoney(card.amountDue, card.currency)}

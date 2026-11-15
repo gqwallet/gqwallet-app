@@ -1,13 +1,12 @@
 /**
- * Usage ring with heading, amounts, progress bar and breakdown for percentage-based summaries.
+ * Compact usage ring with heading, amounts and breakdown for percentage-based summaries.
  * @author G0nz4loQu3dena
  * @packageDocumentation
  */
 import { DonutChart } from '@/components/ui/DonutChart';
-import { ProgressBar } from '@/components/ui/ProgressBar';
 import { formatPercent } from '@/utils/format';
 
-/** One labelled figure below the bar. */
+/** One labelled figure below the ring summary. */
 export interface UsageBreakdownItem {
   /** Concept name, such as `Total gastado`. */
   label: string;
@@ -23,12 +22,12 @@ export interface UsageSummaryProps {
   usage: number | null;
   /** Amounts line, already formatted. */
   detail: string;
-  /** Secondary figures below the bar, one whole line each on mobile. */
+  /** Secondary figures below the summary, one whole line each on mobile. */
   breakdown: readonly UsageBreakdownItem[];
 }
 
 /**
- * Renders a percentage ring beside its heading, amounts, progress bar and breakdown.
+ * Renders an 88 px percentage ring beside its heading and amounts, followed by a breakdown.
  * Heading and amounts stack on mobile and share one row from `lg`; the breakdown is a full-width
  * footer with one label/value row per item on mobile, sharing one row from `lg`.
  * @example
@@ -50,7 +49,6 @@ export function UsageSummary({ title, usage, detail, breakdown }: UsageSummaryPr
             <span className="text-subtitle">{title}</span>
             <span className="text-body-s text-content-secondary">{detail}</span>
           </div>
-          <ProgressBar value={value} tone={value > 100 ? 'danger' : value >= 75 ? 'warning' : 'success'} label={title} className="mt-1" />
         </div>
       </div>
       {/* Full-width footer, one row per figure: line breaks fall between concepts, never inside one. */}

@@ -58,7 +58,7 @@ export function DebtLoadPage() {
       />
       <div className="mb-4 flex gap-2 overflow-x-auto [scrollbar-width:none] lg:mb-6">
         <YearChip title="Elige el año" value={year} onChange={setYear} />
-        <ChipGroup label="Moneda" options={CURRENCY_OPTIONS} value={currency} onChange={setCurrency} className="mx-0 px-0" />
+        <ChipGroup label="Moneda" options={CURRENCY_OPTIONS} value={currency} onChange={setCurrency} />
       </div>
       {isLoading && !data && <Spinner />}
       {error && <EmptyState icon="error" title="No pudimos calcular la carga de deuda" />}
