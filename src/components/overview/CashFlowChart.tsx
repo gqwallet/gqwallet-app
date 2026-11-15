@@ -95,7 +95,7 @@ export function CashFlowChart({ rows, currency, year }: CashFlowChartProps) {
               <span data-cash-income className={cn('w-5 rounded-t-sm bg-chart-positive', row.projection && 'opacity-35')} style={{ height: `${Math.max(0, row.incomes / ceiling * 100)}%` }} />
               <span data-cash-outflow className={cn('w-5 rounded-t-sm', row.projection ? 'bg-chart-projection' : 'bg-chart-1')} style={{ height: `${Math.max(0, row.outflows / ceiling * 100)}%` }} />
             </div>)}
-            {column && <div data-current-cash-bubble className="pointer-events-none absolute top-2 w-max max-w-full rounded-full bg-surface-inverse px-3 py-2 text-caption break-words text-white" style={{ left: `${(columnIndex + 0.5) / rows.length * 100}%`, transform: `translateX(-${(columnIndex + 0.5) / rows.length * 100}%)` }}><p>{monthLabel(column)} · Ingresos {formatMoney(column.incomes, currency)}</p><p>{monthLabel(column)} · Salidas {formatMoney(column.outflows, currency)}{column.projection ? ' · proyección*' : ''}</p></div>}
+            {column && <div data-current-cash-bubble className="pointer-events-none absolute top-2 w-max max-w-full rounded-full bg-surface-inverse px-3 py-2 text-caption break-words text-content-inverse" style={{ left: `${(columnIndex + 0.5) / rows.length * 100}%`, transform: `translateX(-${(columnIndex + 0.5) / rows.length * 100}%)` }}><p>{monthLabel(column)} · Ingresos {formatMoney(column.incomes, currency)}</p><p>{monthLabel(column)} · Salidas {formatMoney(column.outflows, currency)}{column.projection ? ' · proyección*' : ''}</p></div>}
           </div>
         </div>
         <div className="mt-2 ml-14 flex">{rows.map(row => <span key={row.month} className={cn('min-w-0 flex-1 text-center text-caption', row.projection ? 'text-content-muted' : 'text-content-primary')}>{monthLabel(row)}</span>)}</div>
@@ -125,7 +125,7 @@ export function CashFlowChart({ rows, currency, year }: CashFlowChartProps) {
           </svg>
           {selectedPoint && <>
             <span data-selected-balance-point aria-hidden="true" className="pointer-events-none absolute size-3 -translate-1/2 rounded-full border-2 border-primary bg-surface-card" style={{ left: `${selectedPoint.x / 10}%`, top: `${selectedPoint.y / 2}%` }} />
-            <span data-current-balance-bubble className="pointer-events-none absolute w-max max-w-full rounded-full bg-surface-inverse px-3 py-1.5 text-center text-body-s break-words text-white" style={{ left: `${selectedPoint.x / 10}%`, transform: `translateX(-${selectedPoint.x / 10}%)`, top: selectedPoint.y < 80 ? `calc(${selectedPoint.y / 2}% + 10px)` : undefined, bottom: selectedPoint.y >= 80 ? `calc(${100 - selectedPoint.y / 2}% + 10px)` : undefined }}>{selectionText}</span>
+            <span data-current-balance-bubble className="pointer-events-none absolute w-max max-w-full rounded-full bg-surface-inverse px-3 py-1.5 text-center text-body-s break-words text-content-inverse" style={{ left: `${selectedPoint.x / 10}%`, transform: `translateX(-${selectedPoint.x / 10}%)`, top: selectedPoint.y < 80 ? `calc(${selectedPoint.y / 2}% + 10px)` : undefined, bottom: selectedPoint.y >= 80 ? `calc(${100 - selectedPoint.y / 2}% + 10px)` : undefined }}>{selectionText}</span>
           </>}
         </div>
       </div>
