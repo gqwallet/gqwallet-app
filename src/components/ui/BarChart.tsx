@@ -9,7 +9,11 @@ import { cn } from '@/utils/cn';
 /** Tone of a bar. */
 export type BarTone = 'success' | 'danger' | 'primary';
 
-const FILL: Record<BarTone, string> = { success: 'bg-secondary', danger: 'bg-danger', primary: 'bg-primary' };
+const FILL: Record<BarTone, string> = {
+  success: 'bg-linear-to-t from-secondary to-chart-2',
+  danger: 'bg-linear-to-t from-danger to-tertiary',
+  primary: 'bg-linear-to-t from-primary to-chart-5',
+};
 
 /** One bar of {@link BarChart}. */
 export interface BarDatum {
@@ -51,17 +55,20 @@ export function BarChart({ label, data, threshold, emptyText = '—', caption }:
     <figure aria-label={label} className="-mx-4 overflow-x-auto px-4 lg:mx-0 lg:px-0">
       {caption && <figcaption className="mb-1.5 text-caption text-content-muted">{caption}</figcaption>}
       <div className="relative flex h-[150px] min-w-[560px] items-end gap-2.5">
-        {threshold !== undefined && <div aria-hidden="true" className="absolute inset-x-0 h-px bg-danger" style={{ bottom: `${(threshold / max) * 126}px` }} />}
+        {threshold !== undefined && <div aria-hidden="true" className="absolute inset-x-0 z-10 h-px bg-danger" style={{ bottom: `${(threshold / max) * 126}px` }} />}
         {data.map((datum) => (
-          <div key={datum.label} className="flex flex-1 flex-col items-center justify-end gap-1">
-            {datum.value === null ? (
-              <span className="mb-1 border-b-2 border-line-subtle pb-1 text-caption whitespace-nowrap text-content-muted">{emptyText}</span>
-            ) : (
-              <>
-                {datum.valueLabel && <span className="text-caption whitespace-nowrap text-content-secondary">{datum.valueLabel}</span>}
-                <div className={cn('w-[calc(100%_-_12px)] rounded-t-sm', FILL[datum.tone ?? 'primary'])} style={{ height: `${Math.max(0, (datum.value / max) * 126)}px` }} />
-              </>
-            )}
+          <div key={datum.label} className="group flex h-full flex-1 flex-col items-center justify-end gap-1">
+            <span className={cn('text-caption whitespace-nowrap', datum.value === null ? 'text-content-muted' : 'text-content-secondary transition-colors group-hover:text-content-primary')}>
+              {datum.value === null ? emptyText : datum.valueLabel}
+            </span>
+            <div className="flex h-[126px] w-full max-w-12 items-end overflow-hidden rounded-[10px] bg-surface-container">
+              {datum.value !== null && (
+                <div
+                  className={cn('w-full rounded-[10px] transition-[filter] motion-safe:duration-200 group-hover:brightness-110', FILL[datum.tone ?? 'primary'])}
+                  style={{ height: `${Math.max(0, (datum.value / max) * 126)}px` }}
+                />
+              )}
+            </div>
           </div>
         ))}
       </div>

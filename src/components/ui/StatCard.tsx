@@ -90,7 +90,7 @@ export function StatCard({ label, value, detail, actionLabel, tone = 'featured',
   );
   const classes = cn('group flex h-full min-h-kpi w-full min-w-0 flex-col gap-1 rounded-xl border p-4 text-left shadow-stat', isFeatured ? 'border-transparent' : 'border-line-subtle', SURFACE[tone], !informationTopic && className);
   const card = onClick ? (
-    <button data-stat-card type="button" onClick={onClick} className={cn(classes, 'transition-shadow hover:shadow-card focus-visible:outline-2 focus-visible:outline-primary')}>
+    <button data-stat-card type="button" onClick={onClick} className={cn(classes, 'transition-[box-shadow,border-color] hover:border-accent-container-strong hover:shadow-card active:shadow-stat focus-visible:outline-2 focus-visible:outline-primary')}>
       {body}
     </button>
   ) : (

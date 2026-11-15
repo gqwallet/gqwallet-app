@@ -43,3 +43,4 @@ export { UsageSummary, type UsageBreakdownItem, type UsageSummaryProps } from '.
 export { CHART_COLORS, CHART_PALETTE, type ChartColor, type ChartSegment } from './chartTokens';
 
 export { CreditCardMark, type CreditCardMarkProps } from './CreditCardMark';
+export { CreditCardVisual, type CreditCardVisualProps } from './CreditCardVisual';
