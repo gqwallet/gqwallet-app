@@ -11,7 +11,11 @@ import { StatCard } from '@/components/ui/StatCard';
 it('displays a static figure or activates a callback', () => {
   const onClick = vi.fn();
   const { rerender } = render(<StatCard label="Disponible" value="S/ 10.00" detail="Original" />);
-  expect(screen.getByText('S/ 10.00')).toBeVisible();
+  const amount = screen.getByText('Disponible').closest('[data-stat-card]')!.querySelector('[data-stat-value]');
+  expect(amount).toBeVisible();
+  expect(amount!.textContent).toBe('S/ 10.00');
+  expect(amount!.querySelector('span')).toHaveTextContent('.00');
+  expect(amount!.querySelector('span')).toHaveClass('text-[16px]');
   expect(screen.queryByRole('button')).not.toBeInTheDocument();
   rerender(<StatCard label="Disponible" value="S/ 10.00" onClick={onClick} />);
   fireEvent.click(screen.getByRole('button', { name: /Disponible\s*S\/ 10\.00/ }));
@@ -25,7 +29,7 @@ it('keeps a link-style action inside one keyboard-accessible card button', () =>
   expect(screen.getAllByRole('button')).toHaveLength(1);
   expect(screen.queryByRole('link')).not.toBeInTheDocument();
   expect(screen.getByText('Ver desglose').tagName).toBe('SPAN');
-  expect(screen.getByText('Posición neta')).toHaveClass('min-h-10', '[overflow-wrap:anywhere]');
+  expect(screen.getByText('Posición neta')).toHaveClass('min-h-4', 'text-body-s', '[overflow-wrap:anywhere]');
   expect(screen.getByText('Ver desglose').parentElement).toHaveClass('min-h-4');
   fireEvent.click(button);
   expect(onClick).toHaveBeenCalledOnce();

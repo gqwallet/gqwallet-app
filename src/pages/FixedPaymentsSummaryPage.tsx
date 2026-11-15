@@ -50,9 +50,9 @@ export function FixedPaymentsSummaryPage() {
       {data && (
         <>
           <div className="mb-4 grid grid-cols-1 gap-3 lg:mb-6 lg:grid-cols-3 lg:pr-0.5">
-            <StatCard valueSize="large" informationTopic="Total mensual" label="Total mensual" value={money(data.summary.monthlyTotal)} detail={data.active.length ? `Suma de ${data.active.length} pagos fijos activos` : undefined} tone="warning" />
-            <StatCard valueSize="compact" informationTopic="Total anual proyectado" label="Total anual proyectado" value={money(data.summary.annualTotal)} detail={data.active.length ? '12 × total mensual' : undefined} tone="neutral" />
-            <StatCard valueSize="large" informationTopic="Pagos fijos activos" label="Pagos fijos activos" value={String(data.active.length)} detail={withInstallments ? `${withInstallments} con cuotas` : undefined} tone="neutral" />
+            <StatCard icon="event_repeat" valueSize="large" informationTopic="Total mensual" label="Total mensual" value={money(data.summary.monthlyTotal)} detail={data.active.length ? `Suma de ${data.active.length} pagos fijos activos` : undefined} tone="warning" />
+            <StatCard icon="calendar_month" iconTone="violet" valueSize="compact" informationTopic="Total anual proyectado" label="Total anual proyectado" value={money(data.summary.annualTotal)} detail={data.active.length ? '12 × total mensual' : undefined} tone="neutral" />
+            <StatCard icon="autorenew" iconTone="amber" valueSize="large" informationTopic="Pagos fijos activos" label="Pagos fijos activos" value={String(data.active.length)} detail={withInstallments ? `${withInstallments} con cuotas` : undefined} tone="neutral" />
           </div>
           {data.active.length === 0 ? (
             <Card>

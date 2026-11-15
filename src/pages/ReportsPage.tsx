@@ -81,10 +81,10 @@ export function ReportsPage() {
         <>
           <div className="mb-4 grid grid-cols-2 gap-3 lg:mb-6 lg:grid-cols-5 lg:pr-1">
             <StatCard size="report" informationTopic="Total del reporte" label={kind === 'EXPENSE' ? 'Gasto total' : 'Ingreso total'} value={money(report.total)} tone={kind === 'EXPENSE' ? 'danger' : 'success'} />
-            <StatCard size="report" informationTopic="Promedio del reporte" label={kind === 'EXPENSE' ? 'Gasto promedio por transacción' : 'Ingreso promedio'} value={money(report.average)} tone="neutral" />
-            <StatCard size="report" informationTopic="Máximo del reporte" label={kind === 'EXPENSE' ? 'Gasto máximo' : 'Ingreso máximo'} value={money(report.max)} tone="neutral" />
-            <StatCard size="report" informationTopic="Mínimo del reporte" label={kind === 'EXPENSE' ? 'Gasto mínimo' : 'Ingreso mínimo'} value={money(report.min)} tone="neutral" />
-            <StatCard size="report" informationTopic="Cantidad del reporte" label={kind === 'EXPENSE' ? 'Número de gastos' : 'Número de ingresos'} value={String(count)} tone="neutral" />
+            <StatCard icon={kind === 'INCOME' ? 'trending_up' : undefined} iconTone={kind === 'INCOME' ? 'positive' : undefined} size="report" informationTopic="Promedio del reporte" label={kind === 'EXPENSE' ? 'Gasto promedio por transacción' : 'Ingreso promedio'} value={money(report.average)} tone="neutral" />
+            <StatCard icon={kind === 'INCOME' ? 'trending_up' : undefined} iconTone={kind === 'INCOME' ? 'positive' : undefined} size="report" informationTopic="Máximo del reporte" label={kind === 'EXPENSE' ? 'Gasto máximo' : 'Ingreso máximo'} value={money(report.max)} tone="neutral" />
+            <StatCard icon={kind === 'INCOME' ? 'trending_up' : undefined} iconTone={kind === 'INCOME' ? 'positive' : undefined} size="report" informationTopic="Mínimo del reporte" label={kind === 'EXPENSE' ? 'Gasto mínimo' : 'Ingreso mínimo'} value={money(report.min)} tone="neutral" />
+            <StatCard icon={kind === 'INCOME' ? 'trending_up' : undefined} iconTone={kind === 'INCOME' ? 'positive' : undefined} size="report" informationTopic="Cantidad del reporte" label={kind === 'EXPENSE' ? 'Número de gastos' : 'Número de ingresos'} value={String(count)} tone="neutral" />
           </div>
           <Card title="Evolución mensual" className="mb-4 lg:mb-6">
             <p className="mb-4 text-caption text-content-muted">Suma de {kind === 'EXPENSE' ? 'gastos' : 'ingresos'} por mes.</p>

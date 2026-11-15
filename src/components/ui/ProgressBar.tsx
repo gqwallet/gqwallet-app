@@ -37,7 +37,7 @@ export interface ProgressBarProps {
   /** Layout utilities. */
   className?: string;
   /** Intrinsic bar dimensions; compact is used inside numeric table cells. */
-  size?: 'default' | 'thin' | 'compact';
+  size?: 'default' | 'thin' | 'compact' | 'thick';
 }
 
 /**
@@ -51,7 +51,7 @@ export interface ProgressBarProps {
 export function ProgressBar({ value, tone = 'primary', label, className, size = 'default' }: ProgressBarProps) {
   const width = Math.max(0, Math.min(100, value));
   return (
-    <div role="progressbar" aria-label={label} aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(width)} className={cn('shrink-0 overflow-hidden rounded-full bg-surface-high', size === 'compact' ? 'h-1.5 w-11' : size === 'thin' ? 'h-1.5 w-full' : 'h-2 w-full', className)}>
+    <div role="progressbar" aria-label={label} aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(width)} className={cn('shrink-0 overflow-hidden rounded-full bg-surface-high', size === 'compact' ? 'h-1.5 w-11' : size === 'thin' ? 'h-1.5 w-full' : size === 'thick' ? 'h-2.5 w-full' : 'h-2 w-full', className)}>
       {/* Runtime width: the only inline style allowed. */}
       <div className={cn('h-full rounded-full', FILL[tone])} style={{ width: `${width}%` }} />
     </div>

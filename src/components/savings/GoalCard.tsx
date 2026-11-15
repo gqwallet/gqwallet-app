@@ -4,7 +4,7 @@
  * @author G0nz4loQu3dena
  * @packageDocumentation
  */
-import { Badge, Button, Card, ProgressBar } from '@/components/ui';
+import { Badge, Button, Card, IconTile, ProgressBar } from '@/components/ui';
 import type { SavingsGoal } from '@/types/savings';
 import { formatMoney, formatPercent, formatShortDate } from '@/utils/format';
 
@@ -36,20 +36,20 @@ export function GoalCard({ goal, coverageMonths, minimum, onOpen, onContribute }
   const isFund = goal.emergencyFund && minimum !== undefined && minimum > 0;
   const fundProgress = isFund ? (goal.contributed / minimum) * 100 : 0;
   return (
-    <Card informationTopic="Resumen de meta" title={goal.name} className="[&>header]:min-h-11 [&>header]:items-start">
+    <Card informationTopic="Resumen de meta" surface={goal.emergencyFund ? 'accent' : 'default'} title={<span className="flex items-center gap-3"><IconTile icon={goal.emergencyFund ? 'shield' : 'flag'} tone={goal.emergencyFund ? 'teal' : 'violet'} /><span className="min-w-0">{goal.name}</span></span>} className="[&>header]:min-h-11">
       <p className="mb-4 text-body-s text-content-secondary">
         {goal.currency} · {goal.emergencyFund ? 'marcada como fondo de emergencia' : goal.targetDate ? `objetivo al ${formatShortDate(goal.targetDate, true)}` : 'sin fecha objetivo'}
       </p>
       <div className="mb-1.5 flex flex-wrap items-center justify-between gap-2">
-        <span className="flex items-center gap-2 text-subtitle">
-          {isFund ? `${formatPercent(fundProgress)} del mínimo` : isAchieved ? '100 %' : formatPercent(goal.progress)}
+        <span className="flex items-center gap-2 text-amount">
+          {isFund ? <>{formatPercent(fundProgress)} <span className="text-body-s">del mínimo</span></> : isAchieved ? '100 %' : formatPercent(goal.progress)}
           {isAchieved && <Badge label="Cumplida" tone="success" />}
         </span>
         <span className="text-body-s text-content-secondary">
           {money(goal.contributed)} de {money(isFund && minimum !== undefined ? minimum : goal.target)}
         </span>
       </div>
-      <ProgressBar value={isFund ? fundProgress : goal.progress} tone={isFund ? 'tertiary' : isAchieved ? 'success' : 'primary'} label={`Progreso de ${goal.name}`} className="mb-1.5" />
+      <ProgressBar value={isFund ? fundProgress : goal.progress} tone={isFund ? 'tertiary' : isAchieved ? 'success' : 'primary'} label={`Progreso de ${goal.name}`} className="mb-1.5" size="thick" />
       <p className="mb-4 text-caption text-content-muted">
         {isFund && coverageMonths !== undefined && coverageMonths !== null
           ? `Cubre ${coverageMonths.toFixed(1)} meses de pagos fijos`

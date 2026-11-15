@@ -34,7 +34,8 @@ test('the redesigned budget uses the real percentage and keeps compact bars insi
     await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBe(0);
     const bar = page.getByRole('progressbar', { name: 'Uso de Supermercado' });
     const bounds = await bar.boundingBox();
-    expect(bounds?.width).toBe(44);
+    // Device-scale subpixel layout can report 43.9999 px; round to 0.01 px without accepting another width.
+    expect(Math.round((bounds?.width ?? 0) * 100) / 100).toBe(44);
     await expect(bar).toHaveAttribute('aria-valuenow', '100');
   }
   await page.getByRole('button', { name: 'Información sobre Presupuesto', exact: true }).filter({ visible: true }).click();

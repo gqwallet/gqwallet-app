@@ -54,10 +54,10 @@ export function ConsolidatedPage() {
       {position && (
         <div className="mb-4 grid gap-3 lg:mb-6 lg:grid-cols-3 lg:gap-3 lg:pr-0.5">
           {position.penAvailable !== null && (
-            <StatCard informationTopic="Posición por moneda" label="Disponible en soles" value={formatMoney(position.penAvailable, 'PEN')} detail={target === 'PEN' || rate === null ? 'Valor original' : `Valor original · equivale a ${formatMoney(position.penAvailable / rate, 'USD')}`} tone="neutral" />
+            <StatCard icon="account_balance" iconTone="teal" informationTopic="Posición por moneda" label="Disponible en soles" value={formatMoney(position.penAvailable, 'PEN')} detail={target === 'PEN' || rate === null ? 'Valor original' : `Valor original · equivale a ${formatMoney(position.penAvailable / rate, 'USD')}`} tone="neutral" />
           )}
           {position.usdAvailable !== null && (
-            <StatCard informationTopic="Posición por moneda" label="Disponible en dólares" value={formatMoney(position.usdAvailable, 'USD')} detail={target === 'USD' || rate === null ? 'Valor original' : `Valor original · equivale a ${formatMoney(position.usdAvailable * rate, 'PEN')}`} tone="neutral" />
+            <StatCard icon="account_balance" iconTone="teal" informationTopic="Posición por moneda" label="Disponible en dólares" value={formatMoney(position.usdAvailable, 'USD')} detail={target === 'USD' || rate === null ? 'Valor original' : `Valor original · equivale a ${formatMoney(position.usdAvailable * rate, 'PEN')}`} tone="neutral" />
           )}
           {hasRate && position.consolidated !== null && (
             <StatCard informationTopic="Total referencial"

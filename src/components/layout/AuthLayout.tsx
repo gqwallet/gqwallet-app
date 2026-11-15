@@ -1,12 +1,11 @@
 /**
- * Public layout: dark value-proposition panel on large screens and a centered form column.
+ * Public layout with a light brand stage and an elevated desktop form.
  *
  * @author G0nz4loQu3dena
  * @packageDocumentation
  */
 import type { ReactNode } from 'react';
-import moneyMark from '@/assets/auth/desktop-imgMoneyMark1.svg';
-import { Icon } from '@/components/ui';
+import { Bonny, Icon } from '@/components/ui';
 import { Brand } from '@/components/layout/Brand';
 import { MoneyPattern } from '@/components/layout/MoneyPattern';
 
@@ -24,6 +23,10 @@ export interface AuthLayoutProps {
   children: ReactNode;
   /** Shows the value proposition on the mobile welcome screen. */
   showMobileHeadline?: boolean;
+  /** Access screens show the mascot; initial setup retains its compact form. */
+  showMascot?: boolean;
+  /** Access pose matching the current form. */
+  pose?: 'regia' | 'celebra';
 }
 
 /**
@@ -34,29 +37,28 @@ export interface AuthLayoutProps {
  * <AuthLayout><SignInForm /></AuthLayout>
  * ```
  */
-export function AuthLayout({ children, showMobileHeadline = false }: AuthLayoutProps) {
+export function AuthLayout({ children, showMobileHeadline = false, showMascot = true, pose = 'regia' }: AuthLayoutProps) {
   return (
-    <div className="relative isolate min-h-screen lg:grid lg:grid-cols-[640px_1fr]">
+    <div className="relative isolate min-h-screen lg:grid lg:grid-cols-[minmax(0,640px)_minmax(0,1fr)]">
       <MoneyPattern />
-      <aside className="relative hidden flex-col justify-center gap-6 overflow-hidden bg-surface-inverse px-16 text-content-on-primary lg:flex">
-        <Brand isInverse size="large" />
-        <p className="text-display">{HEADLINE}</p>
-        <ul className="flex flex-col gap-6">
+      <aside className="relative flex flex-col gap-5 overflow-hidden px-4 pt-8 lg:m-6 lg:mr-0 lg:min-h-[852px] lg:justify-center lg:gap-6 lg:rounded-brand lg:border lg:border-line-subtle lg:bg-linear-[118deg] lg:from-primary-container lg:to-chart-4-container lg:px-16 lg:py-14">
+        <div className="lg:hidden"><Brand /></div>
+        <div className="hidden lg:block"><Brand size="large" /></div>
+        {showMascot && <div className="relative h-[148px] overflow-hidden rounded-2xl bg-linear-to-r from-accent-container to-chart-4-container lg:absolute lg:right-10 lg:bottom-0 lg:h-[294px] lg:w-[300px] lg:rounded-none lg:bg-none">
+          <Bonny pose={pose} stage="access" />
+        </div>}
+        <p className={showMobileHeadline ? 'text-headline lg:text-display' : 'hidden text-display lg:block'}>{HEADLINE}</p>
+        <ul className="hidden flex-col gap-6 lg:flex">
           {BENEFITS.map((benefit) => (
-            <li key={benefit} className="flex items-center gap-3 text-body">
-              <Icon name="check_circle" />
+            <li key={benefit} className="flex items-start gap-3 text-body text-content-secondary">
+              <Icon name="check_circle" className="text-primary" />
               {benefit}
             </li>
           ))}
         </ul>
-        <span aria-hidden="true" className="absolute top-[600px] left-[332.1px] flex h-[255.986px] w-[304.059px] items-center justify-center"><img src={moneyMark} alt="" className="block max-w-none shrink-0 rotate-14" /></span>
       </aside>
-      <main className="flex min-h-screen flex-col px-4 pt-8 pb-10 lg:items-center lg:justify-center lg:px-10">
-        <div className="mb-5 flex flex-col gap-5 lg:hidden">
-          <Brand />
-          {showMobileHeadline && <p className="text-headline">{HEADLINE}</p>}
-        </div>
-        <div className="w-full lg:max-w-[400px] lg:translate-y-1.5">{children}</div>
+      <main className="flex flex-col px-4 pt-5 pb-10 lg:min-h-screen lg:items-center lg:justify-center lg:px-10 lg:pt-10 lg:pl-16">
+        <div className="w-full lg:max-w-[480px] lg:rounded-2xl lg:border lg:border-line-subtle lg:bg-surface-card lg:p-10 lg:shadow-card">{children}</div>
       </main>
     </div>
   );

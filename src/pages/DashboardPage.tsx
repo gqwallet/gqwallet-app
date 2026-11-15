@@ -54,10 +54,10 @@ export function DashboardPage() {
   const stats = (
     <div className="mb-4 grid grid-cols-2 items-stretch gap-3 lg:mb-6 lg:grid-cols-3 lg:pr-0.5">
       <StatCard informationTopic="Saldo en cuentas" label="Saldo en cuentas" value={formatMoney(dashboard.accountsBalance, currency)} detail={data.accountCount === undefined ? undefined : plural(data.accountCount, 'cuenta activa', 'cuentas activas')} tone="neutral" />
-      <StatCard informationTopic="Deuda de tarjetas" label="Deuda de tarjetas" value={formatMoney(dashboard.cardsDebt, currency)} detail={data.cardCount === undefined ? undefined : plural(data.cardCount, 'tarjeta', 'tarjetas')} tone="neutral" />
-      <StatCard informationTopic="Posición neta" label="Posición neta" value={formatMoney(dashboard.netPosition, currency)} actionLabel="Ver desglose" onClick={() => navigate(`${PATHS.netPosition}?moneda=${currency}`)} />
+      <StatCard icon="credit_card" iconTone="sky" informationTopic="Deuda de tarjetas" label="Deuda de tarjetas" value={formatMoney(dashboard.cardsDebt, currency)} detail={data.cardCount === undefined ? undefined : plural(data.cardCount, 'tarjeta', 'tarjetas')} tone="neutral" />
+      <StatCard tone="featured" informationTopic="Posición neta" label="Posición neta" value={formatMoney(dashboard.netPosition, currency)} actionLabel="Ver desglose" onClick={() => navigate(`${PATHS.netPosition}?moneda=${currency}`)} />
       <StatCard informationTopic="Ingresos" label="Ingresos del mes" value={formatMoney(dashboard.monthIncomes, currency)} detail={plural(dashboard.monthIncomesCount, 'ingreso', 'ingresos')} tone="success" />
-      <StatCard informationTopic="Salidas" label="Salidas del mes" value={formatMoney(dashboard.monthOutflows.total, currency)} tone="neutral" />
+      <StatCard icon="payments" iconTone="violet" informationTopic="Salidas" label="Salidas del mes" value={formatMoney(dashboard.monthOutflows.total, currency)} tone="neutral" />
       <StatCard informationTopic="Compromisos" label="Compromisos" value={formatMoney(dashboard.pendingCommitments.total, currency)} detail={`${dashboard.pendingCommitments.count} por vencer`} tone="warning" />
     </div>
   );
@@ -103,7 +103,7 @@ export function DashboardPage() {
   const hasDues = Object.values(dues).some((list) => list.length > 0);
   return (
     <>
-      <PageHeader informationTopic="Dashboard"
+      <PageHeader isHero informationTopic="Dashboard"
         title={name}
         subtitle={`Así van tus finanzas en ${currencyWord} al ${formatWeekdayDate(today).toLowerCase()} ${today.slice(0, 4)}.`}
         actions={[<Button key="transfer" label="Nueva transferencia" icon="swap_horiz" variant="secondary" onClick={() => navigate(PATHS.newTransfer)} />, newMovement]}

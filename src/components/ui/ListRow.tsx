@@ -7,6 +7,7 @@
 import type { ReactNode } from 'react';
 import { cn } from '@/utils/cn';
 import { Icon } from '@/components/ui/Icon';
+import { IconTile, type IconTileTone } from '@/components/ui/IconTile';
 
 /** Color of the row amount. */
 export type AmountTone = 'neutral' | 'income' | 'expense' | 'muted';
@@ -26,6 +27,8 @@ export interface ListRowProps {
   detail?: ReactNode;
   /** Leading icon ligature. */
   icon?: string;
+  /** Decorative leading color independent of the amount, e.g. income categories. */
+  iconTone?: IconTileTone;
   /** Custom leading element, replaces the icon box. */
   leading?: ReactNode;
   /** Badge or other element before the amount. */
@@ -56,13 +59,11 @@ export interface ListRowProps {
  * <ListRow icon="wifi" title="Internet" detail={detail} amount="S/ 99.00" meta="PEN" onClick={open} />
  * ```
  */
-export function ListRow({ title, detail, icon, leading, badge, showMobileBadge = true, amount, meta, amountTone = 'neutral', onClick, className }: ListRowProps) {
+export function ListRow({ title, detail, icon, iconTone, leading, badge, showMobileBadge = true, amount, meta, amountTone = 'neutral', onClick, className }: ListRowProps) {
   const content = (
     <>
       {leading ?? (icon && (
-        <span className="flex size-10 shrink-0 items-center justify-center rounded-md bg-surface-background text-content-secondary">
-          <Icon name={icon} />
-        </span>
+        <IconTile icon={icon} tone={iconTone ?? (amountTone === 'income' ? 'positive' : undefined)} />
       ))}
       <span data-list-copy className="col-start-2 row-start-1 flex min-w-0 flex-col gap-1 sm:flex-1 sm:gap-0.5">
         <span className="text-subtitle text-content-primary [overflow-wrap:anywhere]">{title}</span>
@@ -78,7 +79,7 @@ export function ListRow({ title, detail, icon, leading, badge, showMobileBadge =
       {onClick && <Icon name="chevron_right" className="col-start-3 row-start-1 shrink-0 text-content-muted" />}
     </>
   );
-  const classes = cn('grid w-full min-w-0 grid-cols-[2.5rem_minmax(0,1fr)_1.5rem] items-center gap-x-3 gap-y-1 py-3 text-left sm:flex sm:gap-3', className);
+  const classes = cn('grid w-full min-w-0 grid-cols-[2.25rem_minmax(0,1fr)_1.5rem] items-center gap-x-3 gap-y-1 py-3 text-left sm:flex sm:gap-3', className);
   return onClick ? (
     <button data-list-row type="button" onClick={onClick} className={cn(classes, 'rounded-md px-1 transition-colors hover:bg-surface-container focus-visible:outline-2 focus-visible:outline-primary lg:px-4')}>
       {content}

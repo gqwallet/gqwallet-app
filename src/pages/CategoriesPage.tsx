@@ -64,6 +64,7 @@ export function CategoriesPage() {
           <ListRow
             key={category.id}
             icon={categoryIcon(category.name)}
+            iconTone={nature === 'INCOME' ? 'positive' : undefined}
             title={category.name}
             detail={isSeed(category) ? undefined : 'Categoría propia'}
             badge={isSeed(category) ? undefined : <Badge label="Propia" tone="primary" />}
@@ -75,6 +76,7 @@ export function CategoriesPage() {
           <ListRow
             key={category.id}
             icon={categoryIcon(category.name)}
+            iconTone={nature === 'INCOME' ? 'positive' : undefined}
             title={category.name}
             detail={`No se ofrece en nuevos registros · conserva ${counts[category.id] ?? 0} movimientos`}
             badge={<Badge label="Desactivada" tone="neutral" />}

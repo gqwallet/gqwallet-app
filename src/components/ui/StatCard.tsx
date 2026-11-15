@@ -7,10 +7,11 @@
 import type { ReactNode } from 'react';
 import { InformationButton } from '@/components/ui/InformationButton';
 import { Icon } from '@/components/ui/Icon';
+import { IconTile, type IconTileTone } from '@/components/ui/IconTile';
 import { cn } from '@/utils/cn';
 
 /** Tone of a stat card. */
-export type StatTone = 'neutral' | 'primary' | 'success' | 'warning' | 'danger';
+export type StatTone = 'neutral' | 'primary' | 'success' | 'warning' | 'danger' | 'featured';
 
 const SURFACE: Record<StatTone, string> = {
   neutral: 'bg-surface-card',
@@ -18,6 +19,7 @@ const SURFACE: Record<StatTone, string> = {
   success: 'bg-surface-card',
   warning: 'bg-surface-card',
   danger: 'bg-surface-card',
+  featured: 'bg-linear-[132deg] from-primary to-chart-5',
 };
 
 const VALUE: Record<StatTone, string> = {
@@ -26,12 +28,20 @@ const VALUE: Record<StatTone, string> = {
   success: 'text-secondary',
   warning: 'text-tertiary',
   danger: 'text-danger',
+  featured: 'text-white',
 };
+
+const TILE_TONE: Record<StatTone, IconTileTone> = { neutral: 'indigo', primary: 'indigo', success: 'positive', warning: 'amber', danger: 'negative', featured: 'featured' };
+const TILE_ICON: Record<StatTone, string> = { neutral: 'account_balance_wallet', primary: 'account_balance_wallet', success: 'trending_up', warning: 'event', danger: 'trending_down', featured: 'balance' };
 
 /** Props of {@link StatCard}. */
 export interface StatCardProps {
   /** Label above the value. */
   label: string;
+  /** Decorative category identity above the label. */
+  icon?: string;
+  /** Optional category color independent of the amount tone. */
+  iconTone?: IconTileTone;
   /** Optional contextual explanation, independent of the card action. */
   informationTopic?: string;
   /** Main figure. */
@@ -43,12 +53,12 @@ export interface StatCardProps {
   /**
    * Color tone.
    *
-   * @defaultValue `primary`
+   * @defaultValue `featured`
    */
   tone?: StatTone;
   /** Reference dimensions for standard, report and cash-flow figures. */
   size?: 'default' | 'report' | 'flow';
-  /** Responsive value typography used by the mobile summary variants. */
+  /** Compatibility hint; refreshed tiles use the same 22 px amount at every viewport. */
   valueSize?: 'default' | 'compact' | 'large';
   /** Makes the whole card a button. */
   onClick?: () => void;
@@ -64,18 +74,21 @@ export interface StatCardProps {
  * <StatCard label="Ingresos de junio" value="S/ 7,500.00" detail="1 ingreso" tone="success" />
  * ```
  */
-export function StatCard({ label, value, detail, actionLabel, tone = 'primary', onClick, className, informationTopic, size = 'default', valueSize = 'default' }: StatCardProps) {
+export function StatCard({ label, value, detail, actionLabel, tone = 'featured', onClick, className, informationTopic, icon, iconTone, size = 'default' }: StatCardProps) {
+  const isFeatured = tone === 'featured';
+  const amount = /^(.*)(\.\d+)([^\d]*)$/.exec(value);
   const body = (
     <>
-      <span className={cn("min-h-10 text-body-s [overflow-wrap:anywhere] text-content-secondary", informationTopic && "pr-9")}>{label}</span>
-      <span data-stat-value className={cn('[overflow-wrap:anywhere]', valueSize === 'compact' ? 'text-title lg:text-amount' : valueSize === 'large' ? 'text-amount' : 'text-amount-s lg:text-amount', VALUE[tone])}>{value}</span>
-      <span className="block min-h-4 text-caption text-content-muted">
+      <IconTile icon={icon ?? TILE_ICON[tone]} tone={iconTone ?? TILE_TONE[tone]} className="mb-2.5" />
+      <span className={cn('text-body-s [overflow-wrap:anywhere]', size === 'report' ? 'min-h-8' : size === 'flow' ? 'min-h-8 lg:min-h-4' : 'min-h-4', isFeatured ? 'text-white/85' : 'text-content-secondary')}>{label}</span>
+      <span data-stat-value className={cn('text-amount tabular-nums [overflow-wrap:anywhere]', VALUE[tone])}>{amount ? <>{amount[1]}<span className="text-[16px]">{amount[2]}</span>{amount[3]}</> : value}</span>
+      <span className={cn('mt-auto block min-h-4 text-caption', isFeatured ? 'text-white' : 'text-content-muted')}>
         {detail}
-        {actionLabel && <span className="flex items-center text-label text-primary underline">{actionLabel}<Icon name="chevron_right" size={16} /></span>}
+        {actionLabel && <span className={cn('flex items-center underline', isFeatured ? 'text-white' : 'text-primary')}>{actionLabel}<Icon name="chevron_right" size={16} /></span>}
       </span>
     </>
   );
-  const classes = cn('group flex h-full w-full min-w-0 flex-col gap-1 rounded-information border px-4 pt-4 pb-3 text-left shadow-stat', size === 'report' ? 'min-h-stat-report' : size === 'flow' ? 'min-h-stat-compact lg:min-h-stat-flow' : valueSize === 'compact' ? 'min-h-stat-compact lg:min-h-stat' : 'min-h-stat-mobile lg:min-h-stat', tone === 'primary' ? 'border-primary-pale' : 'border-line-subtle', SURFACE[tone], !informationTopic && className);
+  const classes = cn('group flex h-full min-h-kpi w-full min-w-0 flex-col gap-1 rounded-xl border p-4 text-left shadow-stat', isFeatured ? 'border-transparent' : 'border-line-subtle', SURFACE[tone], !informationTopic && className);
   const card = onClick ? (
     <button data-stat-card type="button" onClick={onClick} className={cn(classes, 'transition-shadow hover:shadow-card focus-visible:outline-2 focus-visible:outline-primary')}>
       {body}
@@ -83,5 +96,5 @@ export function StatCard({ label, value, detail, actionLabel, tone = 'primary', 
   ) : (
     <div data-stat-card className={classes}>{body}</div>
   );
-  return informationTopic ? <div className={cn("relative min-w-0", className)}>{card}<InformationButton topic={informationTopic} className="absolute top-0.5 right-0.5" /></div> : card;
+  return informationTopic ? <div className={cn('relative min-w-0', className)}>{card}<InformationButton topic={informationTopic} className={cn('absolute top-3 right-1', isFeatured && '[&>.material-symbols-rounded]:text-white hover:bg-white/20')} /></div> : card;
 }
