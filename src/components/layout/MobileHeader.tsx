@@ -32,7 +32,7 @@ export function MobileHeader({ title, onOpenMenu, informationTopic }: MobileHead
       <IconButton icon="menu" label="Abrir menú" onClick={onOpenMenu} />
       <h1 className="min-w-0 flex-1 truncate text-title">{title}</h1>
       {informationTopic && <InformationButton topic={informationTopic} />}
-      <Brand isMarkOnly className="[&>span]:size-8" />
+      <Brand isMarkOnly className="[&>span]:h-8 [&>span]:w-10" />
     </header>
   );
 }
