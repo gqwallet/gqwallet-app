@@ -3,9 +3,9 @@
  * @author G0nz4loQu3dena
  * @packageDocumentation
  */
-import regia from '@/assets/bonny/regia.png';
-import celebra from '@/assets/bonny/celebra.png';
-import descansa from '@/assets/bonny/descansa.png';
+import regia from '@/assets/bonny/regia-indigo.png';
+import celebra from '@/assets/bonny/celebra-indigo.png';
+import descansa from '@/assets/bonny/descansa-indigo.png';
 import { cn } from '@/utils/cn';
 
 const POSES = { regia, celebra, descansa };
