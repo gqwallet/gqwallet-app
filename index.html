@@ -13,8 +13,7 @@
     <title>GQWallet</title>
     <script>
       try {
-        var t = localStorage.getItem('gqwallet-theme');
-        if (t === 'dark' || (t === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)) document.documentElement.dataset.theme = 'dark';
+        if (localStorage.getItem('gqwallet-theme') === 'dark') document.documentElement.dataset.theme = 'dark';
       } catch (e) {}
     </script>
   </head>

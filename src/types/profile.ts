@@ -7,8 +7,13 @@
 import type { Currency } from '@/types/api';
 import type { Role } from '@/types/auth';
 
+/** Account appearance flag stored by the API: `0` light, `1` dark. */
+export type DarkModeFlag = 0 | 1;
+
 /** Personal data and financial preferences of the signed-in user. */
 export interface Profile {
+  /** Appearance saved in the account; light (`0`) by default. */
+  darkMode: DarkModeFlag;
   /** ISO alpha two country code. */
   countryCode: string;
   /** Profile identifier. */
@@ -49,6 +54,12 @@ export interface UpdateProfileInput {
   monthlyIncome: number | null;
   /** Life cushion; must not exceed the monthly income. */
   lifeCushion: number | null;
+}
+
+/** Appearance change sent to the API. */
+export interface UpdateAppearanceInput {
+  /** `1` for dark, `0` for light. */
+  darkMode: DarkModeFlag;
 }
 
 /** Referential PEN/USD rate registered by the user (FR-047). */

@@ -34,3 +34,8 @@ it('sends names, nullable birth date and threshold in the profile PUT', async ()
   await profilesService.updateMine(input);
   expect(apiClient.put).toHaveBeenCalledWith('/profiles/me', input);
 });
+
+it('sends the appearance flag in its own PUT', async () => {
+  await profilesService.updateAppearance({ darkMode: 1 });
+  expect(apiClient.put).toHaveBeenCalledWith('/profiles/me/appearance', { darkMode: 1 });
+});

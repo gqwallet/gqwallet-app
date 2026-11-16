@@ -17,7 +17,7 @@ vi.mock('@/services/profiles.service', () => ({ profilesService: { updateMine: v
 
 beforeEach(() => {
   vi.resetAllMocks();
-  session.profile = { id: 'p1', firstName: 'Ana', lastName: 'Torres', preferredCurrency: 'PEN', monthlyIncome: 100, lifeCushion: 10, birthDate: '1995-03-14', debtLoadThreshold: 12.5, countryCode: 'PE', roles: [] };
+  session.profile = { id: 'p1', firstName: 'Ana', lastName: 'Torres', preferredCurrency: 'PEN', monthlyIncome: 100, lifeCushion: 10, birthDate: '1995-03-14', debtLoadThreshold: 12.5, countryCode: 'PE', darkMode: 0, roles: [] };
   session.setProfile.mockImplementation((profile) => { session.profile = profile; });
 });
 

@@ -7,16 +7,15 @@
 import { PageHeader } from '@/components/layout';
 import { Button, Callout, Card, ChipGroup, TextField, SelectField } from '@/components/ui';
 import { useProfileEditor } from '@/hooks/useProfileEditor';
-import { useTheme } from '@/hooks/useTheme';
+import { useAppearance } from '@/hooks/useAppearance';
 import { currencySymbol, todayIso } from '@/utils/format';
 import { COUNTRY_OPTIONS } from '@/utils/countries';
 import { CURRENCY_OPTIONS } from '@/utils/options';
-import type { ThemePreference } from '@/utils/theme';
+import type { Theme } from '@/utils/theme';
 
-const THEME_OPTIONS: Array<{ value: ThemePreference; label: string }> = [
+const THEME_OPTIONS: Array<{ value: Theme; label: string }> = [
   { value: 'light', label: 'Claro' },
   { value: 'dark', label: 'Oscuro' },
-  { value: 'system', label: 'Según el sistema' },
 ];
 
 /**
@@ -33,7 +32,7 @@ export function ProfilePage() {
     currency, setCurrency, income, setIncome, cushion, setCushion, debt, setDebt,
     errors, hasErrors, isSaving, handlePersonal, handleParameters,
   } = useProfileEditor();
-  const { preference, setPreference } = useTheme();
+  const { theme, setTheme } = useAppearance();
   return (
     <>
       <PageHeader title="Perfil"  />
@@ -68,8 +67,8 @@ export function ProfilePage() {
         <Card title="Apariencia" className="lg:col-span-2">
           <div className="flex flex-col gap-1.5">
             <span className="text-label text-content-secondary">Tema de la aplicación</span>
-            <ChipGroup label="Tema de la aplicación" options={THEME_OPTIONS} value={preference} onChange={setPreference} />
-            <p className="text-caption text-content-muted">Se guarda solo en este dispositivo.</p>
+            <ChipGroup label="Tema de la aplicación" options={THEME_OPTIONS} value={theme} onChange={setTheme} />
+            <p className="text-caption text-content-muted">Se guarda en tu cuenta y se aplica en todos tus dispositivos.</p>
           </div>
         </Card>
       </div>

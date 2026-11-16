@@ -22,7 +22,7 @@ const input = { firstName: ' Ana María ', lastName: ' Torres Pérez ', preferre
 
 describe('useProfileForm', () => {
   it('sends separate trimmed names, birth date and threshold and refreshes the profile', async () => {
-    vi.mocked(profilesService.updateMine).mockResolvedValue({ id: 'p1', ...input, countryCode: 'PE', roles: [] });
+    vi.mocked(profilesService.updateMine).mockResolvedValue({ id: 'p1', ...input, countryCode: 'PE', darkMode: 0, roles: [] });
     const { result } = renderHook(() => useProfileForm());
     await act(async () => expect(await result.current.save(input)).toBe(true));
     expect(profilesService.updateMine).toHaveBeenCalledWith({ ...input, firstName: 'Ana María', lastName: 'Torres Pérez' });
