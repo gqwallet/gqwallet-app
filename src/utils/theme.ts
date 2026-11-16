@@ -1,59 +1,48 @@
 /**
- * Appearance preference (light, dark or system) stored on this device and applied to the document root.
+ * Appearance of the signed-in account (light or dark), painted on the document root and cached on this
+ * device only to avoid a flash before the profile loads.
  *
  * @author G0nz4loQu3dena
  * @packageDocumentation
  */
+import type { DarkModeFlag } from '@/types/profile';
 
-/** Appearance chosen by the person. */
-export type ThemePreference = 'light' | 'dark' | 'system';
+/** Theme painted on the document root. */
+export type Theme = 'light' | 'dark';
 
-/** Storage key of the appearance preference; also read by the inline script in `index.html`. */
+/** Cache key of the last painted theme; also read by the inline script in `index.html`. */
 export const THEME_STORAGE_KEY = 'gqwallet-theme';
 
 /**
- * Reads the stored preference; light is the default and storage failures fall back to it.
+ * Converts the stored account flag to a theme; anything but `1` is light.
  *
- * @returns The stored preference, or `light`.
- */
-export function readThemePreference(): ThemePreference {
-  try {
-    const value = window.localStorage.getItem(THEME_STORAGE_KEY);
-    return value === 'dark' || value === 'system' ? value : 'light';
-  } catch {
-    return 'light';
-  }
-}
-
-/**
- * Stores the preference on this device; storage failures are ignored.
- *
- * @param preference - Appearance to keep.
- */
-export function storeThemePreference(preference: ThemePreference): void {
-  try {
-    window.localStorage.setItem(THEME_STORAGE_KEY, preference);
-  } catch {
-    // Private browsing or blocked storage: the choice still applies to this session.
-  }
-}
-
-/**
- * Resolves a preference to the theme actually painted.
- *
- * @param preference - Stored appearance.
- * @param prefersDark - Whether the operating system asks for a dark appearance.
+ * @param darkMode - Account flag from the profile.
  * @returns `dark` or `light`.
  */
-export function resolveTheme(preference: ThemePreference, prefersDark: boolean): 'light' | 'dark' {
-  return preference === 'dark' || (preference === 'system' && prefersDark) ? 'dark' : 'light';
+export function themeFromFlag(darkMode: DarkModeFlag | undefined): Theme {
+  return darkMode === 1 ? 'dark' : 'light';
 }
 
 /**
- * Paints the resolved theme on the document root.
+ * Converts a theme to the account flag persisted by the API.
+ *
+ * @param theme - Theme chosen by the person.
+ * @returns `1` for dark, `0` for light.
+ */
+export function flagFromTheme(theme: Theme): DarkModeFlag {
+  return theme === 'dark' ? 1 : 0;
+}
+
+/**
+ * Paints the theme on the document root and caches it for the next load; storage failures are ignored.
  *
  * @param theme - Theme to paint.
  */
-export function applyTheme(theme: 'light' | 'dark'): void {
+export function applyTheme(theme: Theme): void {
   document.documentElement.dataset.theme = theme;
+  try {
+    window.localStorage.setItem(THEME_STORAGE_KEY, theme);
+  } catch {
+    // Private browsing or blocked storage: the account value still applies after the profile loads.
+  }
 }

@@ -5,7 +5,7 @@
  * @packageDocumentation
  */
 import { apiClient } from '@/services/api-client';
-import type { ExchangeRate, Profile, RegisterExchangeRateInput, UpdateProfileInput } from '@/types/profile';
+import type { ExchangeRate, Profile, RegisterExchangeRateInput, UpdateAppearanceInput, UpdateProfileInput } from '@/types/profile';
 
 /** Profile of the signed-in user and referential exchange rates. */
 export const profilesService = {
@@ -25,6 +25,14 @@ export const profilesService = {
    * @throws {@link ApiError} When the request fails.
    */
   updateMine: (input: UpdateProfileInput) => apiClient.put<Profile>('/profiles/me', input),
+  /**
+   * Saves the appearance in the account so every device uses it.
+   *
+   * @param input - Dark mode flag.
+   * @returns The updated profile.
+   * @throws {@link ApiError} When the request fails.
+   */
+  updateAppearance: (input: UpdateAppearanceInput) => apiClient.put<Profile>('/profiles/me/appearance', input),
   /**
    * Lists the registered PEN/USD rates.
    *
