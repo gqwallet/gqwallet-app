@@ -14,7 +14,7 @@ import type { Profile } from '@/types/profile';
 
 vi.mock('@/services/auth.service', () => ({ authService: { signOut: vi.fn() } }));
 vi.mock('@/services/profiles.service', () => ({ profilesService: { getMine: vi.fn() } }));
-const profile: Profile = { id: 'p1', firstName: 'Ana', lastName: 'Torres', preferredCurrency: 'PEN', monthlyIncome: null, lifeCushion: null, birthDate: null, debtLoadThreshold: 7, countryCode: 'PE', roles: ['REGISTERED_USER'] };
+const profile: Profile = { id: 'p1', firstName: 'Ana', lastName: 'Torres', preferredCurrency: 'PEN', monthlyIncome: null, lifeCushion: null, birthDate: null, debtLoadThreshold: 7, countryCode: 'PE', darkMode: 0, roles: ['REGISTERED_USER'] };
 const user = { id: 'p1', email: 'ana@correo.pe', roles: ['REGISTERED_USER'] } as const;
 function wrapper({ children }: { children: ReactNode }) { return <AuthProvider>{children}</AuthProvider>; }
 beforeEach(() => {
@@ -110,4 +110,17 @@ it('clears the profile and identity when an existing request expires the session
   await act(async () => result.current.startSession({ ...user, roles: ['REGISTERED_USER'] }));
   expect(result.current.status).toBe('authenticated');
   expect(result.current.sessionExpired).toBe(false);
+});
+
+it('paints the account appearance once signed in and light on public screens', async () => {
+  vi.mocked(profilesService.getMine).mockResolvedValue({ ...profile, darkMode: 1 });
+  const { result } = renderHook(useAuth, { wrapper });
+  await waitFor(() => expect(document.documentElement.dataset.theme).toBe('dark'));
+  expect(localStorage.getItem('gqwallet-theme')).toBe('dark');
+  act(() => result.current.setProfile({ ...profile, darkMode: 0 }));
+  expect(document.documentElement.dataset.theme).toBe('light');
+  act(() => result.current.setProfile({ ...profile, darkMode: 1 }));
+  await act(async () => { await result.current.signOut(); });
+  expect(document.documentElement.dataset.theme).toBe('light');
+  expect(localStorage.getItem('gqwallet-theme')).toBe('light');
 });

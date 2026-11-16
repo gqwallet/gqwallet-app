@@ -9,6 +9,7 @@ import { sessionEvents } from '@/services/session-events';
 import { authService } from '@/services/auth.service';
 import { profilesService } from '@/services/profiles.service';
 import type { Profile } from '@/types/profile';
+import { applyTheme, themeFromFlag } from '@/utils/theme';
 import type { AuthenticatedUser } from '@/types/auth';
 
 /** Session status while the cookie is being probed. */
@@ -78,6 +79,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [user, setUser] = useState<AuthenticatedUser | null>(null);
   const [isNewUser, setIsNewUser] = useState(false);
+
+  const darkMode = profile?.darkMode;
+  useEffect(() => {
+    // The account appearance applies once signed in; public screens are always light.
+    if (status === 'authenticated' && darkMode !== undefined) applyTheme(themeFromFlag(darkMode));
+    if (status === 'anonymous') applyTheme('light');
+  }, [status, darkMode]);
 
   useEffect(() => sessionEvents.subscribe(() => {
     rememberEmail(null);
