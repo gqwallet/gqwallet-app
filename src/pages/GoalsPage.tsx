@@ -47,7 +47,7 @@ export function GoalsPage() {
         </Card>
       )}
       {data && data.goals.length > 0 && (
-        <section aria-label="Tus metas de ahorro" className="relative mb-4 flex min-h-[124px] items-center overflow-hidden rounded-xl bg-linear-[143deg] from-accent-container to-chart-4-container py-5 pr-[150px] pl-5 shadow-card lg:mb-6 lg:min-h-[140px] lg:px-7 lg:pr-[210px]">
+        <section aria-label="Tus metas de ahorro" className="relative mb-4 flex min-h-goals-hero-mobile items-center overflow-hidden rounded-xl bg-linear-[143deg] from-accent-container to-chart-4-container py-5 pr-goals-mascot-mobile pl-5 shadow-card lg:mb-6 lg:min-h-goals-hero lg:px-7 lg:pr-goals-mascot">
           <div className="flex min-w-0 flex-col items-start gap-1">
             <h2 className="text-title lg:text-headline">Tus metas de ahorro</h2>
             <p className="text-body-s text-content-secondary">{data.goals.length} {data.goals.length === 1 ? 'meta' : 'metas'} · {data.goals.filter(goal => goal.status === 'ACHIEVED').length} {data.goals.filter(goal => goal.status === 'ACHIEVED').length === 1 ? 'cumplida' : 'cumplidas'}</p>
