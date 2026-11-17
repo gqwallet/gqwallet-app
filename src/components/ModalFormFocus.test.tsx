@@ -1,6 +1,7 @@
 /**
  * Regression checks for typing and parent updates across modal forms.
  *
+ * @author G0nz4loQu3dena
  * @packageDocumentation
  */
 import type { ReactElement } from 'react';
