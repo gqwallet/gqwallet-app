@@ -68,7 +68,7 @@ export function CashFlowChart({ rows, currency, year }: CashFlowChartProps) {
   return <Card className="mb-4 lg:mb-6">
     <h2 className="mb-4 text-title">Ingresos y salidas por mes<span className="hidden lg:inline"> · {currency} {year}</span></h2>
     <div className="mb-4 flex flex-wrap gap-2 text-caption text-content-secondary">
-      {([['bg-chart-positive', 'Ingresos'], ['bg-chart-1', 'Salidas efectivas'], ['bg-chart-projection', 'Salidas proyectadas*']] as const).map(([color, label]) => <span key={label} className="inline-flex items-center gap-1 rounded-full bg-surface-container px-2 py-1"><span className={cn('size-2.5 rounded-[3px]', color)} />{label}</span>)}
+      {([['bg-chart-positive', 'Ingresos'], ['bg-chart-1', 'Salidas efectivas'], ['bg-chart-projection', 'Salidas proyectadas*']] as const).map(([color, label]) => <span key={label} className="inline-flex items-center gap-1 rounded-full bg-surface-container px-2 py-1"><span className={cn('size-2.5 rounded-legend', color)} />{label}</span>)}
     </div>
     <figure aria-label="Ingresos y salidas por mes">
       <div className="flex flex-col gap-1 lg:hidden">
@@ -88,8 +88,8 @@ export function CashFlowChart({ rows, currency, year }: CashFlowChartProps) {
       </div>
       <div className="hidden lg:block">
         <div className="grid grid-cols-[56px_minmax(0,1fr)] pt-5">
-          <div className="relative h-[220px] text-caption text-content-muted">{columnTicks.map(tick => <span key={tick} className="absolute left-0 -translate-y-1/2" style={{ top: `${(1 - tick / ceiling) * 100}%` }}>{compactMoney(tick, currency)}</span>)}</div>
-          <div className="relative flex h-[220px] items-end">
+          <div className="relative h-cash-flow-columns text-caption text-content-muted">{columnTicks.map(tick => <span key={tick} className="absolute left-0 -translate-y-1/2" style={{ top: `${(1 - tick / ceiling) * 100}%` }}>{compactMoney(tick, currency)}</span>)}</div>
+          <div className="relative flex h-cash-flow-columns items-end">
             <svg aria-hidden="true" className="absolute inset-0 size-full">{columnTicks.map(tick => <line key={tick} x1="0" x2="100%" y1={`${(1 - tick / ceiling) * 100}%`} y2={`${(1 - tick / ceiling) * 100}%`} className="stroke-chart-grid" />)}</svg>
             {rows.map((row, index) => <div key={row.month} data-cash-month={row.month} tabIndex={0} role="img" aria-label={`${MONTHS_LONG[Number(row.month.slice(5, 7)) - 1]}: ingresos ${formatMoney(row.incomes, currency)}, salidas ${formatMoney(row.outflows, currency)}${row.projection ? ' · proyección*' : ''}`} onPointerEnter={() => setColumnMonth(row.month)} onFocus={() => setColumnMonth(row.month)} className={cn('relative flex h-full min-w-0 flex-1 items-end justify-center gap-1.5 rounded-t-md focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2', index === currentIndex && 'bg-accent-container')}>
               <span data-cash-income className={cn('w-5 rounded-t-sm bg-chart-positive', row.projection && 'opacity-35')} style={{ height: `${Math.max(0, row.incomes / ceiling * 100)}%` }} />
@@ -108,8 +108,8 @@ export function CashFlowChart({ rows, currency, year }: CashFlowChartProps) {
         <span className="inline-flex items-center gap-1 rounded-full bg-surface-container px-2 py-1"><span className="w-4 border-t-2 border-dashed border-primary" />Proyección*</span>
       </div>
       <div className="grid grid-cols-[48px_minmax(0,1fr)] lg:grid-cols-[56px_minmax(0,1fr)]">
-        <div className="relative h-[140px] text-caption text-content-muted lg:h-[190px]">{balanceTicks.map(tick => <span key={tick} className="absolute left-0 -translate-y-1/2" style={{ top: `${10 + (high - tick) / range * 80}%` }}>{compactMoney(tick, currency)}</span>)}</div>
-        <div role="slider" tabIndex={rows.length ? 0 : -1} aria-label="Explorar saldo mensual" aria-valuemin={1} aria-valuemax={Math.max(1, rows.length)} aria-valuenow={selectedIndex + 1} aria-valuetext={selectionText} aria-orientation="horizontal" className="relative h-[140px] min-w-0 touch-pan-y rounded-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary lg:h-[190px]" onPointerDown={event => { scrub(event); event.currentTarget.setPointerCapture?.(event.pointerId); }} onPointerMove={scrub} onKeyDown={event => {
+        <div className="relative h-cash-flow-balance-mobile text-caption text-content-muted lg:h-cash-flow-balance">{balanceTicks.map(tick => <span key={tick} className="absolute left-0 -translate-y-1/2" style={{ top: `${10 + (high - tick) / range * 80}%` }}>{compactMoney(tick, currency)}</span>)}</div>
+        <div role="slider" tabIndex={rows.length ? 0 : -1} aria-label="Explorar saldo mensual" aria-valuemin={1} aria-valuemax={Math.max(1, rows.length)} aria-valuenow={selectedIndex + 1} aria-valuetext={selectionText} aria-orientation="horizontal" className="relative h-cash-flow-balance-mobile min-w-0 touch-pan-y rounded-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary lg:h-cash-flow-balance" onPointerDown={event => { scrub(event); event.currentTarget.setPointerCapture?.(event.pointerId); }} onPointerMove={scrub} onKeyDown={event => {
           if (!rows.length || !['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
           event.preventDefault();
           const next = event.key === 'Home' ? 0 : event.key === 'End' ? rows.length - 1 : Math.max(0, Math.min(rows.length - 1, selectedIndex + (event.key === 'ArrowRight' ? 1 : -1)));
